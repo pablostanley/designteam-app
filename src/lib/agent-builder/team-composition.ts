@@ -34,7 +34,7 @@ const SYNERGY_PAIRS: [AgentRole, AgentRole, string][] = [
   ['researcher', 'ux-designer', 'Evidence-based UX decisions'],
   ['copywriter', 'ux-writer', 'Unified voice across marketing and product'],
   ['graphic-designer', 'editorial-designer', 'Cohesive visual language'],
-  ['ux-designer', 'ux-writer', 'Seamless interaction copy'],
+  ['ux-designer', 'ux-writer', 'Polished interaction copy'],
   ['social-media-designer', 'graphic-designer', 'Platform-optimized visuals'],
   ['creative-director', 'graphic-designer', 'Directed visual execution'],
   ['creative-director', 'copywriter', 'Directed messaging execution'],
