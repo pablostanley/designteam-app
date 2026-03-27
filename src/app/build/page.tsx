@@ -8,6 +8,7 @@ import { PartyLineup } from "@/components/party-lineup"
 import { PersonalityEditor } from "@/components/personality-editor"
 import { RecruitmentView } from "@/components/recruitment-view"
 import { PresetPicker } from "@/components/preset-picker"
+import { AITeamBuilder } from "@/components/ai-team-builder"
 import { TeamExport } from "@/components/team-export"
 import type { Agent, AgentRole, Team } from "@/lib/agent-builder"
 import {
@@ -17,12 +18,13 @@ import {
   MAX_TEAM_SIZE,
 } from "@/lib/agent-builder"
 
-type NavView = "party" | "recruit" | "presets" | "export"
+type NavView = "party" | "recruit" | "presets" | "ai-build" | "export"
 
 const NAV_ITEMS: { id: NavView; label: string; icon: React.ReactNode }[] = [
   { id: "party", label: "Party", icon: <Users className="h-4 w-4" /> },
   { id: "recruit", label: "Recruit", icon: <UserPlus className="h-4 w-4" /> },
   { id: "presets", label: "Presets", icon: <Sparkles className="h-4 w-4" /> },
+  { id: "ai-build", label: "AI Build", icon: <Wand2 className="h-4 w-4" /> },
   { id: "export", label: "Export", icon: <Download className="h-4 w-4" /> },
 ]
 
@@ -227,6 +229,16 @@ export default function BuildPage() {
               onStartFromScratch={() => {
                 setTeam(createDefaultTeam("My Team"))
                 setView("party")
+              }}
+            />
+          )}
+
+          {view === "ai-build" && (
+            <AITeamBuilder
+              onTeamGenerated={(aiTeam) => {
+                setTeam(aiTeam)
+                setView("party")
+                setSelectedAgentId(null)
               }}
             />
           )}

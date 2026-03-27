@@ -103,6 +103,86 @@ export const AGENT_ROLE_DEFINITIONS: Record<AgentRole, AgentRoleMeta> = {
     baseSkillKeys: ['creative-director'],
     color: '#ef4444',
   },
+  'design-engineer': {
+    role: 'design-engineer',
+    displayName: 'Design Engineer',
+    description:
+      'Bridges design and code — builds responsive components, implements design systems, and ensures pixel-perfect execution.',
+    avatarKey: 'skater2',
+    defaultPersonality: personality(1, 1, -1, 2, 1),
+    baseSkillKeys: ['design-engineer'],
+    color: '#0ea5e9',
+  },
+  'brand-strategist': {
+    role: 'brand-strategist',
+    displayName: 'Brand Strategist',
+    description:
+      'Defines brand identity, visual systems, tone of voice, and ensures consistency across every touchpoint.',
+    avatarKey: 'chef',
+    defaultPersonality: personality(-2, 1, -1, 1, -1),
+    baseSkillKeys: ['brand-strategist'],
+    color: '#a855f7',
+  },
+  'marketing-strategist': {
+    role: 'marketing-strategist',
+    displayName: 'Marketing Strategist',
+    description:
+      'Plans campaigns, targets audiences, optimizes funnels, and drives measurable growth through strategic marketing.',
+    avatarKey: 'surfer',
+    defaultPersonality: personality(-2, 0, 0, 1, 1),
+    baseSkillKeys: ['marketing-strategist'],
+    color: '#f43f5e',
+  },
+  'print-designer': {
+    role: 'print-designer',
+    displayName: 'Print Designer',
+    description:
+      'Creates production-ready designs for physical media — packaging, signage, brochures, and large-format print.',
+    avatarKey: 'umbrella',
+    defaultPersonality: personality(-1, 1, 1, 1, 0),
+    baseSkillKeys: ['print-designer'],
+    color: '#84cc16',
+  },
+  'motion-designer': {
+    role: 'motion-designer',
+    displayName: 'Motion Designer',
+    description:
+      'Brings designs to life with animation, transitions, micro-interactions, and motion graphics.',
+    avatarKey: 'musician',
+    defaultPersonality: personality(-3, -2, -3, 0, -1),
+    baseSkillKeys: ['motion-designer'],
+    color: '#06b6d4',
+  },
+  'accessibility-specialist': {
+    role: 'accessibility-specialist',
+    displayName: 'Accessibility Specialist',
+    description:
+      'Ensures designs are inclusive and usable by everyone — WCAG compliance, assistive technology, and universal design.',
+    avatarKey: 'doctor',
+    defaultPersonality: personality(2, 1, 1, 2, -1),
+    baseSkillKeys: ['accessibility-specialist'],
+    color: '#14b8a6',
+  },
+  'content-strategist': {
+    role: 'content-strategist',
+    displayName: 'Content Strategist',
+    description:
+      'Plans content architecture, editorial calendars, taxonomy, and ensures content serves both users and business goals.',
+    avatarKey: 'detective',
+    defaultPersonality: personality(1, 0, 0, 1, -1),
+    baseSkillKeys: ['content-strategist'],
+    color: '#d946ef',
+  },
+  'seo-specialist': {
+    role: 'seo-specialist',
+    displayName: 'SEO Specialist',
+    description:
+      'Optimizes content and structure for search visibility — keywords, meta tags, technical SEO, and structured data.',
+    avatarKey: 'ducky',
+    defaultPersonality: personality(2, 1, 1, 2, 2),
+    baseSkillKeys: ['seo-specialist'],
+    color: '#f97316',
+  },
 }
 
 export const AGENT_ROLE_LIST: AgentRoleMeta[] = Object.values(

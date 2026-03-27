@@ -19,6 +19,14 @@ export type AgentRole =
   | 'editorial-designer'
   | 'social-media-designer'
   | 'creative-director'
+  | 'design-engineer'
+  | 'brand-strategist'
+  | 'marketing-strategist'
+  | 'print-designer'
+  | 'motion-designer'
+  | 'accessibility-specialist'
+  | 'content-strategist'
+  | 'seo-specialist'
 
 export const AGENT_ROLES: AgentRole[] = [
   'researcher',
@@ -29,6 +37,14 @@ export const AGENT_ROLES: AgentRole[] = [
   'editorial-designer',
   'social-media-designer',
   'creative-director',
+  'design-engineer',
+  'brand-strategist',
+  'marketing-strategist',
+  'print-designer',
+  'motion-designer',
+  'accessibility-specialist',
+  'content-strategist',
+  'seo-specialist',
 ]
 
 // ---------------------------------------------------------------------------
@@ -78,7 +94,7 @@ export type PersonalityTrait = typeof PERSONALITY_TRAITS[number]
 // Constants
 // ---------------------------------------------------------------------------
 
-export const MAX_TEAM_SIZE = 8
+export const MAX_TEAM_SIZE = 16
 export const MAX_TEAMS = 20
 export const MAX_POINTS_PER_AGENT = 15
 
@@ -168,6 +184,14 @@ const AGENT_NAMES: Record<AgentRole, string> = {
   'editorial-designer': 'Reed',
   'social-media-designer': 'Buzz',
   'creative-director': 'Nova',
+  'design-engineer': 'Kit',
+  'brand-strategist': 'Sage',
+  'marketing-strategist': 'Maven',
+  'print-designer': 'Ink',
+  'motion-designer': 'Flux',
+  'accessibility-specialist': 'Atlas',
+  'content-strategist': 'Story',
+  'seo-specialist': 'Signal',
 }
 
 export function createDefaultAgent(role: AgentRole, meta?: AgentRoleMeta): Agent {

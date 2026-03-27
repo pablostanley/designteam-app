@@ -59,6 +59,20 @@ export const TEAM_PRESETS: TeamPreset[] = [
     emoji: '\u{1F527}',
     roles: ['ux-designer', 'ux-writer', 'graphic-designer', 'researcher'],
   },
+  {
+    id: 'full-stack-design',
+    name: 'Full Stack Design',
+    description: 'End-to-end from brand strategy to production code',
+    emoji: '\u{1F9E9}',
+    roles: ['design-engineer', 'ux-designer', 'graphic-designer', 'brand-strategist', 'content-strategist'],
+  },
+  {
+    id: 'marketing-blitz',
+    name: 'Marketing Blitz',
+    description: 'Launch campaigns that convert across every channel',
+    emoji: '\u{26A1}',
+    roles: ['marketing-strategist', 'copywriter', 'social-media-designer', 'seo-specialist', 'graphic-designer'],
+  },
 ]
 
 // ---------------------------------------------------------------------------

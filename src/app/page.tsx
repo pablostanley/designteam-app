@@ -23,9 +23,17 @@ export default function Home() {
         <Link href="/" className="text-lg font-semibold tracking-tight">
           Design Team
         </Link>
-        <Link href="/build" className={buttonVariants({ size: "sm" })}>
-          Get Started
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/docs"
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            Docs
+          </Link>
+          <Link href="/build" className={buttonVariants({ size: "sm" })}>
+            Get Started
+          </Link>
+        </div>
       </header>
 
       {/* Hero */}
