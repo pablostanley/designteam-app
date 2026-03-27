@@ -23,10 +23,34 @@ npx skills add pablostanley/designteam-app
 - seo-specialist — On-page SEO, meta tags, structured data, keyword strategy
 - design-team — Full orchestrator: classifies projects, activates specialists in sequence
 
+## Personality System
+Each agent has 5 personality axes, each a bipolar slider from -5 to +5:
+- bold-subtle — Communication intensity
+- playful-serious — Tone register
+- experimental-conventional — Approach to novelty
+- verbose-concise — Output length preference
+- warm-corporate — Interpersonal style
+A value of 0 is neutral. Slider values are converted to natural language in prompts (e.g. -4 bold-subtle becomes "a very bold tone").
+
+## Trait Categories (32 total)
+- Temperament (8): sassy, chill, intense, nurturing, provocative, deadpan, enthusiastic, stoic
+- Work Style (8): perfectionist, fast-shipper, big-picture, detail-obsessed, methodical, chaotic-creative, iterative, one-shot
+- Social (8): extrovert, introvert, leader, collaborator, independent, mentor, challenger, supporter
+- Mindset (8): thinking, feeling, judging, perceiving, optimist, realist, risk-taker, cautious
+
+## Team Presets (7)
+Pre-configured teams for common workflows: startup, agency, solo, and more.
+
+## Export Formats
+- Markdown — Includes personality descriptions, role info, and a `<details>` section per agent with the generated skill file
+- JSON — Full team structure with IDs, slider values, traits, custom prompts
+
 ## API
 - POST /api/teams — create a team
 - GET /api/teams — list public teams
 - GET /api/teams/:id — get team by short_id
+- PUT /api/teams/:id — update a team
+- DELETE /api/teams/:id — delete a team
 - POST /api/teams/:id/fork — fork a public team
 - POST /api/ai/build-team — AI generates a team from project description
 

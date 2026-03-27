@@ -33,28 +33,31 @@ When you design a landing page, the Creative Director:
 - Activates the right skills in sequence (researcher → copywriter → visual designer → design engineer)
 - Each skill draws from its expertise AND the context patterns
 
-### 13 Skills (roles)
+### 16 Skills (roles)
 
 **Research & Strategy:**
-1. **Researcher** (Scout) — competitive analysis, audience profiling, positioning gaps
-2. **Strategist** (Sage) — brand positioning, content model, campaign strategy
+1. **researcher** (Scout) — competitive analysis, audience profiling, positioning gaps
+2. **brand-strategist** (Sage) — brand identity, visual systems, voice/tone, guidelines
+3. **content-strategist** (Story) — content architecture, editorial calendars, taxonomy
+4. **marketing-strategist** (Maven) — campaign planning, channel strategy, audience targeting
+5. **seo-specialist** (Signal) — on-page SEO, meta tags, structured data, keyword strategy
 
 **Creative:**
-3. **Creative Director** (Nova) — orchestration, brief-setting, quality gates
-4. **Copywriter** (Aria) — headlines, messaging, CTAs, voice
+6. **creative-director** (Nova) — orchestration, brief-setting, quality gates
+7. **copywriter** (Aria) — headlines, messaging, CTAs, voice
 
 **Design:**
-5. **Visual Designer** (Pixel) — color, typography, composition, imagery, visual systems
-6. **UX Designer** (Flow) — user flows, information architecture, interaction patterns
-7. **Layout Designer** (Reed) — grid systems, spacing, reading rhythm, hierarchy
-8. **Motion Designer** (Flux) — animation, transitions, micro-interactions
-9. **Print Designer** (Ink) — physical media, CMYK, packaging
-10. **Social Designer** (Buzz) — platform-specific content, formats, trends
-11. **Microcopy Specialist** (Quill) — button labels, errors, empty states, tooltips
+8. **graphic-designer** (Pixel) — color, typography, composition, imagery, visual systems
+9. **ux-designer** (Flow) — user flows, information architecture, interaction patterns
+10. **editorial-designer** (Reed) — grid systems, spacing, reading rhythm, hierarchy
+11. **motion-designer** (Flux) — animation, transitions, micro-interactions
+12. **print-designer** (Ink) — physical media, CMYK, packaging
+13. **social-media-designer** (Buzz) — platform-specific content, formats, trends
+14. **ux-writer** (Quill) — button labels, errors, empty states, tooltips
 
 **Ship:**
-12. **Design Engineer** (Kit) — components, responsive, tokens, CSS/React
-13. **QA Lead** (Atlas) — accessibility audit, code-matches-design, production check
+15. **design-engineer** (Kit) — components, responsive, tokens, CSS/React
+16. **accessibility-specialist** (Atlas) — WCAG audits, assistive tech, universal design
 
 ### 17 Design Contexts (domains)
 
@@ -69,14 +72,14 @@ User: "Design a landing page for my SaaS"
   → Creative Director identifies: LANDING PAGE context
   → Loads: landing-page patterns (hero, social proof, features, CTA)
   → Runs workflow:
-     1. Researcher → competitive analysis
-     2. Strategist → positioning + messaging framework
-     3. Copywriter → headlines using PAS framework + landing page rules
-     4. Visual Designer → color palette, hero section
-     5. Layout Designer → grid, spacing, responsive
-     6. Microcopy Specialist → button labels, form text
-     7. Design Engineer → React components, Tailwind
-     8. QA Lead → WCAG check, responsive test, production verify
+     1. researcher → competitive analysis
+     2. brand-strategist → positioning + messaging framework
+     3. copywriter → headlines using PAS framework + landing page rules
+     4. graphic-designer → color palette, hero section
+     5. editorial-designer → grid, spacing, responsive
+     6. ux-writer → button labels, form text
+     7. design-engineer → React components, Tailwind
+     8. accessibility-specialist → WCAG check, responsive test, production verify
 ```
 
 ## Design vs Ship Mode
@@ -143,13 +146,17 @@ From gstack learnings — the Design Team speaks naturally:
 - [x] Full-page team builder (/build)
 - [x] 16 agent roles with personality sliders
 - [x] Bipolar sliders (-5 to +5, center = neutral)
-- [x] 16 selectable personality traits
+- [x] 32 personality traits across 4 categories (temperament, work style, social, mindset)
 - [x] Custom prompt per agent
 - [x] 7 team presets
 - [x] AI team generation
-- [x] Export as Markdown / JSON
+- [x] Export as Markdown (with generated skill files) / JSON
+- [x] AI team builder with Claude streaming
+- [x] Personality v2 (32 categorized traits, team tension dynamics)
+- [x] gstack learnings (writing rules, slop detection)
+- [x] llms.txt
 - [x] Documentation (/docs)
-- [x] 52 unit tests
+- [x] 63 unit tests
 
 ### CLI Skills (skills.sh)
 - [x] 17 installable skills (16 role-based + 1 orchestrator)
@@ -181,8 +188,8 @@ From gstack learnings — the Design Team speaks naturally:
 - [ ] More robot avatars (16 roles sharing 9 images)
 
 ### Phase 2: Efecto Deep Integration
-- [ ] postMessage bridge: designteam.app iframe → Efecto parent
-- [ ] Team config flows from designteam.app → Efecto AI pipeline
+- [x] postMessage bridge: designteam.app iframe → Efecto parent
+- [x] Team config flows from designteam.app → Efecto AI pipeline
 - [ ] Design mode uses Efecto MCP tools automatically
 - [ ] Ship mode outputs code directly
 

@@ -1,6 +1,6 @@
 # Design Team
 
-**Design Team** is an AI design crew that ships. Not just pretty pictures -- research, strategy, copy, design, code, review, deploy. 16 specialized agents, 17 design contexts, 17 installable skills, one workflow.
+**Design Team** is an AI design crew that ships. Not just pretty pictures -- research, strategy, copy, design, code, review, deploy. 16 agent roles, 6 Claude Code agents, 17 installable skills, one workflow.
 
 - Website: https://designteam.app
 - Install: `npx skills add pablostanley/designteam-app`
@@ -32,6 +32,11 @@ designteam/
 │   │   └── ai-slop-detection.md
 │   └── settings.json
 ├── skills/                # Public skills (for npx skills add)
+├── src/
+│   └── lib/
+│       └── agent-builder/
+│           ├── skills/          # Role-based skill markdown files
+│           └── design-skills/   # Design context skill files
 ├── CLAUDE.md              # This file
 └── README.md
 ```
