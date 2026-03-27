@@ -112,7 +112,7 @@ export const PERSONALITY_TRAITS: readonly string[] = Object.values(TRAIT_CATEGOR
 // Constants
 // ---------------------------------------------------------------------------
 
-export const MAX_TEAM_SIZE = 17
+export const MAX_TEAM_SIZE = 16
 export const MAX_TEAMS = 20
 
 // ---------------------------------------------------------------------------

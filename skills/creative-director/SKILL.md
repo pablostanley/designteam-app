@@ -50,17 +50,17 @@ Every project starts with a brief. Before activating any specialist, answer:
 - **What**: What are we making? (landing page, brand system, social campaign)
 - **Who**: Who is this for? (target audience, their pain, their goal)
 - **Why**: What should this achieve? (signups, awareness, sales, trust)
-- **How**: Design mode (Efecto) or ship mode (code)? Or both?
+- **How**: Design mode (visual design tool) or ship mode (code)? Or both?
 - **Constraints**: Timeline, brand guidelines, platform requirements, must-haves
 
 ## Design Mode vs Ship Mode
 
-**Design mode**: Exploration, iteration, visual ideation. Use Efecto MCP tools to create artboards, try options, explore directions. Visual designers, layout designers, and you work here.
+**Design mode**: Exploration, iteration, visual ideation. Use your design tool's MCP tools to create artboards, try options, explore directions. Visual designers, layout designers, and you work here.
 
 **Ship mode**: Implementation, production code. Write React components, Tailwind CSS, semantic HTML. Design engineer, QA lead, and microcopy specialist work here.
 
 You decide the mode based on user intent:
-- "Design a landing page" = design mode (Efecto)
+- "Design a landing page" = design mode (visual design tool)
 - "Build a landing page" = ship mode (code)
 - "Ship this design" = transition from design to ship mode
 

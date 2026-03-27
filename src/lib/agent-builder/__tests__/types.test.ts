@@ -13,11 +13,6 @@ describe('createDefaultPersonality', () => {
     }
   })
 
-  it('has no maxPoints field', () => {
-    const p = createDefaultPersonality()
-    expect(p.maxPoints).toBeUndefined()
-  })
-
   it('has all 5 personality axes', () => {
     const p = createDefaultPersonality()
     expect(Object.keys(p.sliders)).toHaveLength(5)

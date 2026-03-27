@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { getAvatarSrc } from "@/components/agent-avatars"
@@ -126,10 +127,12 @@ export default function TeamPage() {
               AGENT_ROLE_DEFINITIONS[agent.role as AgentRole] ?? null
             return (
               <div key={agent.id} className="space-y-2 rounded-lg border p-4">
-                <img
+                <Image
                   src={getAvatarSrc(role?.avatarKey ?? "ducky")}
                   alt={agent.name}
-                  className="mx-auto h-20 w-20 object-contain"
+                  width={80}
+                  height={80}
+                  className="mx-auto object-contain"
                 />
                 <h3 className="text-center font-semibold">{agent.name}</h3>
                 <div className="flex justify-center">
@@ -187,10 +190,10 @@ export default function TeamPage() {
 
         <div className="mt-8 rounded-lg bg-muted p-4">
           <p className="mb-2 text-sm font-medium">
-            Install this team&apos;s skills:
+            Install Design Team skills:
           </p>
           <code className="rounded bg-background px-2 py-1 text-sm">
-            npx skills add pablostanley/designteam-app --team {id}
+            npx skills add pablostanley/designteam-app
           </code>
         </div>
       </main>

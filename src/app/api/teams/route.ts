@@ -44,21 +44,28 @@ export async function POST(request: NextRequest) {
   const body = await request.json()
   const { name, team_data } = body
 
-  if (!team_data || !name) {
-    return NextResponse.json({ error: 'name and team_data required' }, { status: 400 })
+  if (!team_data || typeof team_data !== 'object') {
+    return NextResponse.json({ error: 'Invalid team_data' }, { status: 400 })
   }
+
+  const agents = Array.isArray(team_data.agents) ? team_data.agents : []
+  if (agents.length > 16) {
+    return NextResponse.json({ error: 'Too many agents (max 16)' }, { status: 400 })
+  }
+
+  const teamName = typeof name === 'string' ? name.slice(0, 100) : 'My Team'
 
   // Get user if authenticated (optional)
   const { data: { user } } = await supabase.auth.getUser()
 
   const shortId = nanoid(8)
-  const agentCount = Array.isArray(team_data.agents) ? team_data.agents.length : 0
+  const agentCount = agents.length
 
   const { data, error } = await supabase
     .from('teams')
     .insert({
       short_id: shortId,
-      name,
+      name: teamName,
       team_data,
       agent_count: agentCount,
       user_id: user?.id ?? null,

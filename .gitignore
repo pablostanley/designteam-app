@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.env*.local
+
+# stale reports
+AGENTS.md
+AUDIT-REPORT.md
+TEST-REPORT.md
+TEST-REPORT-FULL.md
+COPY-AUDIT.md

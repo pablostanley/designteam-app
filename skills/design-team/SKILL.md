@@ -128,12 +128,12 @@ Every project starts here. Before activating any specialist, define:
 - **What**: What are we making?
 - **Who**: Who is this for? Their pain, their goal.
 - **Why**: What should this achieve? (signups, awareness, sales)
-- **How**: Design mode (Efecto) or ship mode (code)?
+- **How**: Design mode (visual design tool) or ship mode (code)?
 - **Constraints**: Timeline, brand guidelines, platform, must-haves.
 
 ## Design Mode vs Ship Mode
 
-**Design mode**: Visual exploration in Efecto. Create artboards, iterate, try directions. Graphic Designer, Editorial Designer, and Creative Director work here.
+**Design mode**: Visual exploration in your design tool. Create artboards, iterate, try directions. Graphic Designer, Editorial Designer, and Creative Director work here.
 
 **Ship mode**: Production code. React components, Tailwind CSS, semantic HTML. Design Engineer, Accessibility Specialist, and UX Writer work here.
 
