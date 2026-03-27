@@ -1,5 +1,5 @@
 ---
-name: qa-lead
+name: accessibility-specialist
 description: Activate for accessibility audits, design-to-code accuracy checks, responsive testing, and production readiness reviews.
 license: MIT
 metadata:

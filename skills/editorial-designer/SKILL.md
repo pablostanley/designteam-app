@@ -1,5 +1,5 @@
 ---
-name: layout-designer
+name: editorial-designer
 description: Activate for grid systems, spacing, reading rhythm, responsive layouts, and editorial design structure.
 license: MIT
 metadata:

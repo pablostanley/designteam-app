@@ -33,7 +33,7 @@ describe('parseAITeamResponse', () => {
             'warm-corporate': -1,
           },
         },
-        traits: ['analytical', 'detail-oriented'],
+        traits: ['methodical', 'detail-obsessed'],
         customPrompt: 'Focus on competitor analysis',
       },
     ],
@@ -97,14 +97,14 @@ describe('parseAITeamResponse', () => {
           name: 'Test',
           role: 'researcher',
           personality: { sliders: {} },
-          traits: ['creative', 'not-a-real-trait', 'analytical'],
+          traits: ['chill', 'not-a-real-trait', 'perfectionist'],
           customPrompt: '',
         },
       ],
     })
     const team = parseAITeamResponse(withBadTraits)
     expect(team).not.toBeNull()
-    expect(team!.agents[0].traits).toEqual(['creative', 'analytical'])
+    expect(team!.agents[0].traits).toEqual(['chill', 'perfectionist'])
   })
 
   it('filters out agents with invalid roles', () => {

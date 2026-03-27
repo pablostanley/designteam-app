@@ -41,11 +41,12 @@ describe('teamToMarkdown', () => {
   it('includes traits and custom prompt when present', () => {
     const team = createDefaultTeam('Custom')
     const agent = createDefaultAgent('ux-designer')
-    agent.traits = ['empathetic', 'methodical']
+    agent.traits = ['chill', 'methodical']
     agent.customPrompt = 'Focus on mobile flows'
     team.agents = [agent]
     const md = teamToMarkdown(team)
-    expect(md).toContain('empathetic, methodical')
+    expect(md).toContain('easygoing')
+    expect(md).toContain('process')
     expect(md).toContain('Focus on mobile flows')
   })
 

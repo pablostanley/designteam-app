@@ -1,3 +1,25 @@
+import { CopyBlock } from "@/components/copy-block"
+
+const SKILLS = [
+  { name: "researcher", description: "Competitive analysis, audience profiling, positioning gaps" },
+  { name: "copywriter", description: "Headlines, body copy, CTAs, voice, messaging hierarchy" },
+  { name: "graphic-designer", description: "Color, typography, composition, imagery, visual systems" },
+  { name: "ux-designer", description: "User flows, IA, interaction patterns, wireframes" },
+  { name: "ux-writer", description: "Button labels, error messages, empty states, tooltips, microcopy" },
+  { name: "editorial-designer", description: "Grid systems, spacing, reading rhythm, responsive layouts" },
+  { name: "social-media-designer", description: "Platform-specific content, carousels, stories, thumbnails" },
+  { name: "creative-director", description: "Orchestration, brief-setting, quality gates" },
+  { name: "design-engineer", description: "Components, responsive code, tokens, CSS/React" },
+  { name: "brand-strategist", description: "Brand identity, visual systems, voice/tone, guidelines" },
+  { name: "marketing-strategist", description: "Campaign planning, channel strategy, audience targeting" },
+  { name: "print-designer", description: "Business cards, flyers, packaging, large-format print" },
+  { name: "motion-designer", description: "Animation, transitions, micro-interactions" },
+  { name: "accessibility-specialist", description: "WCAG audits, assistive tech, universal design" },
+  { name: "content-strategist", description: "Content architecture, editorial calendars, taxonomy" },
+  { name: "seo-specialist", description: "On-page SEO, meta tags, structured data, keyword strategy" },
+  { name: "design-team", description: "Full orchestrator: classifies projects, activates specialists in sequence" },
+]
+
 export default function CliPage() {
   return (
     <div className="space-y-8">
@@ -12,15 +34,43 @@ export default function CliPage() {
       <section className="space-y-3">
         <h2 className="text-xl font-semibold">Installation</h2>
         <p className="text-muted-foreground">
-          Install the Design Team skills with a single command:
+          Install all 17 skills with a single command:
         </p>
-        <pre className="overflow-x-auto rounded-lg border bg-muted px-4 py-3 text-sm">
-          <code>npx skills add pablostanley/designteam-app</code>
-        </pre>
+        <CopyBlock code="npx skills add pablostanley/designteam-app" />
         <p className="text-sm text-muted-foreground">
           This downloads the skill files and registers them with your AI tool.
           No build step required.
         </p>
+      </section>
+
+      {/* Available Skills */}
+      <section className="space-y-3">
+        <h2 className="text-xl font-semibold">Available Skills (17)</h2>
+        <p className="text-muted-foreground">
+          Each skill is a standalone Markdown file with domain expertise and
+          personality injection. Install all at once or reference individual
+          skills by name.
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b text-left">
+                <th className="pb-2 pr-4 font-medium">Skill</th>
+                <th className="pb-2 font-medium">What it does</th>
+              </tr>
+            </thead>
+            <tbody className="text-muted-foreground">
+              {SKILLS.map((skill) => (
+                <tr key={skill.name} className="border-b">
+                  <td className="py-2 pr-4 font-mono text-xs text-foreground">
+                    {skill.name}
+                  </td>
+                  <td className="py-2">{skill.description}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       {/* Claude Code */}
@@ -30,13 +80,7 @@ export default function CliPage() {
           After installing, Claude Code automatically picks up the skills. You
           can reference agents by name in your prompts:
         </p>
-        <pre className="overflow-x-auto rounded-lg border bg-muted px-4 py-3 text-sm">
-          <code>{`# In your Claude Code session
-> /graphic-designer Create a hero section for our landing page
-
-# Or reference the full team
-> /creative-director Review the homepage design and suggest improvements`}</code>
-        </pre>
+        <CopyBlock code={`# In your Claude Code session\n> /graphic-designer Create a hero section for our landing page\n\n# Or reference the full team\n> /creative-director Review the homepage design and suggest improvements`} />
         <p className="text-sm text-muted-foreground">
           Each agent&apos;s personality and expertise is baked into the skill
           file, so the AI responds with the right tone and knowledge
@@ -51,17 +95,7 @@ export default function CliPage() {
           Cursor loads skill files from your project directory. After
           installation, open Cursor and the skills appear in your agent list:
         </p>
-        <pre className="overflow-x-auto rounded-lg border bg-muted px-4 py-3 text-sm">
-          <code>{`# The skill files are saved to your project
-.skills/
-  graphic-designer/SKILL.md
-  ux-designer/SKILL.md
-  copywriter/SKILL.md
-  ...
-
-# Reference them in Cursor's AI chat
-@graphic-designer Design a card component with hover states`}</code>
-        </pre>
+        <CopyBlock code={`# The skill files are saved to your project\n.skills/\n  graphic-designer/SKILL.md\n  ux-designer/SKILL.md\n  copywriter/SKILL.md\n  ...\n\n# Reference them in Cursor's AI chat\n@graphic-designer Design a card component with hover states`} />
       </section>
 
       {/* Codex */}
@@ -72,16 +106,7 @@ export default function CliPage() {
           skill file into the system prompt. The personality and role
           instructions carry over to any model that accepts system prompts.
         </p>
-        <pre className="overflow-x-auto rounded-lg border bg-muted px-4 py-3 text-sm">
-          <code>{`# Export your team as Markdown from the UI
-# Then paste the agent's section into your Codex system prompt
-
-# Example system prompt:
-You are Pixel, a Graphic Designer agent.
-You communicate with a very bold tone, a very playful manner,
-and very experimental approaches.
-Key traits: creative, risk-taking.`}</code>
-        </pre>
+        <CopyBlock code={`# Export your team as Markdown from the UI\n# Then paste the agent's section into your Codex system prompt\n\n# Example system prompt:\nYou are Pixel, a Graphic Designer agent.\nYou communicate with a very bold tone, a very playful manner,\nand very experimental approaches.\nKey traits: creative, risk-taking.`} />
       </section>
 
       {/* How skill files work */}

@@ -1,5 +1,5 @@
 ---
-name: microcopy-specialist
+name: ux-writer
 description: Activate for button labels, error messages, empty states, tooltips, onboarding text, and confirmation dialogs.
 license: MIT
 metadata:

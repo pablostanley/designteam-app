@@ -1,5 +1,5 @@
 ---
-name: visual-designer
+name: graphic-designer
 description: Activate for color systems, typography, composition, imagery direction, and visual identity work.
 license: MIT
 metadata:

@@ -11,12 +11,22 @@ const FEATURES = [
   {
     title: "16 Agents",
     description:
-      "Researcher, copywriter, graphic designer, UX designer, brand strategist, and more.",
+      "Researcher, copywriter, graphic designer, UX designer, brand strategist, and more. 32 personality traits across 4 categories with team tension dynamics.",
   },
   {
     title: "17 Skills",
     description:
       "One skill per agent role, plus an orchestrator. Install all or pick the ones you need.",
+  },
+  {
+    title: "AI Team Builder",
+    description:
+      "Describe your project, get a team in seconds. Or build manually with bipolar personality sliders and trait pills.",
+  },
+  {
+    title: "Share & Fork",
+    description:
+      "Share your team with a link. Fork public teams to use as a starting point.",
   },
   {
     title: "Works Everywhere",
@@ -74,7 +84,7 @@ export default function Home() {
         </p>
 
         {/* What you get */}
-        <div className="mt-20 grid w-full max-w-3xl gap-8 sm:grid-cols-3">
+        <div className="mt-20 grid w-full max-w-3xl gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((f) => (
             <div key={f.title} className="text-left">
               <h3 className="text-sm font-semibold">{f.title}</h3>

@@ -1,5 +1,5 @@
 ---
-name: social-designer
+name: social-media-designer
 description: Activate for platform-specific social media content, carousels, stories, thumbnails, and feed aesthetics.
 license: MIT
 metadata:

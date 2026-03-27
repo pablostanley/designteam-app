@@ -28,8 +28,9 @@ export default function GettingStartedPage() {
             <span className="font-medium text-foreground">
               Create a new team
             </span>{" "}
-            — Click &quot;Build Your Team&quot; on the homepage. Give your team a
-            name or use the default.
+            — Click &quot;Build Your Team&quot; on the homepage, or use the{" "}
+            <span className="font-medium text-foreground">AI Build</span> option
+            to describe your project and get a team generated automatically.
           </li>
           <li>
             <span className="font-medium text-foreground">Add agents</span> —
@@ -50,9 +51,8 @@ export default function GettingStartedPage() {
           </li>
           <li>
             <span className="font-medium text-foreground">Add traits</span> —
-            Select trait pills like &quot;creative&quot;, &quot;analytical&quot;,
-            or &quot;minimalist&quot; to further refine the agent&apos;s
-            behavior.
+            Select from 32 traits organized into 4 categories (see below). Max 2
+            traits per category.
           </li>
           <li>
             <span className="font-medium text-foreground">
@@ -60,6 +60,10 @@ export default function GettingStartedPage() {
             </span>{" "}
             — Optionally add free-form text to give the agent specific guidance
             for your project.
+          </li>
+          <li>
+            <span className="font-medium text-foreground">Share</span> — Share
+            your team with a link. Others can view and fork it.
           </li>
           <li>
             <span className="font-medium text-foreground">Export</span> — Download
@@ -129,41 +133,57 @@ export default function GettingStartedPage() {
 
       {/* Traits */}
       <section className="space-y-3">
-        <h2 className="text-xl font-semibold">Traits</h2>
+        <h2 className="text-xl font-semibold">Traits (32 total)</h2>
         <p className="text-muted-foreground">
-          Traits are single-word descriptors you can toggle on for each agent.
-          They appear in the generated skill file as &quot;Key traits&quot; and
-          help the AI model understand the agent&apos;s working style at a
-          glance.
+          Traits are organized into 4 categories. You can select up to 2 traits
+          per category for each agent. They appear in the generated skill file as
+          &quot;Key traits&quot; and shape the agent&apos;s working style.
         </p>
-        <p className="text-muted-foreground">Available traits:</p>
-        <div className="flex flex-wrap gap-2">
-          {[
-            "creative",
-            "analytical",
-            "detail-oriented",
-            "big-picture",
-            "fast-paced",
-            "methodical",
-            "minimalist",
-            "maximalist",
-            "data-driven",
-            "intuitive",
-            "collaborative",
-            "independent",
-            "risk-taking",
-            "cautious",
-            "empathetic",
-            "direct",
-          ].map((trait) => (
-            <span
-              key={trait}
-              className="rounded-full border px-2.5 py-0.5 text-xs text-muted-foreground"
-            >
-              {trait}
-            </span>
-          ))}
-        </div>
+
+        {[
+          {
+            label: "Temperament",
+            traits: ["sassy", "chill", "intense", "nurturing", "provocative", "deadpan", "enthusiastic", "stoic"],
+          },
+          {
+            label: "Work Style",
+            traits: ["perfectionist", "fast-shipper", "big-picture", "detail-obsessed", "methodical", "chaotic-creative", "iterative", "one-shot"],
+          },
+          {
+            label: "Social",
+            traits: ["extrovert", "introvert", "leader", "collaborator", "independent", "mentor", "challenger", "supporter"],
+          },
+          {
+            label: "Mindset",
+            traits: ["thinking", "feeling", "judging", "perceiving", "optimist", "realist", "risk-taker", "cautious"],
+          },
+        ].map((category) => (
+          <div key={category.label}>
+            <p className="text-sm font-medium text-foreground">{category.label}</p>
+            <div className="mt-1 flex flex-wrap gap-2">
+              {category.traits.map((trait) => (
+                <span
+                  key={trait}
+                  className="rounded-full border px-2.5 py-0.5 text-xs text-muted-foreground"
+                >
+                  {trait}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </section>
+
+      {/* Team Tension Dynamics */}
+      <section className="space-y-3">
+        <h2 className="text-xl font-semibold">Team Tension Dynamics</h2>
+        <p className="text-muted-foreground">
+          When agents with opposing traits work together, they create productive
+          tension. The Party Lineup view visualizes these dynamics. For example:
+          a &quot;perfectionist&quot; paired with a &quot;fast-shipper&quot;
+          creates healthy push-pull that improves output quality without slowing
+          the team down.
+        </p>
       </section>
 
       {/* Custom prompts */}

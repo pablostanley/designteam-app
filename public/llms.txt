@@ -1,0 +1,54 @@
+# Design Team
+> Your AI design crew that ships.
+
+## Install
+npx skills add pablostanley/designteam-app
+
+## Skills (17)
+- researcher — Competitive analysis, audience profiling, positioning gaps
+- copywriter — Headlines, body copy, CTAs, voice, messaging hierarchy
+- graphic-designer — Color, typography, composition, imagery, visual systems
+- ux-designer — User flows, IA, interaction patterns, wireframes
+- ux-writer — Button labels, error messages, empty states, tooltips, microcopy
+- editorial-designer — Grid systems, spacing, reading rhythm, responsive layouts
+- social-media-designer — Platform-specific content, carousels, stories, thumbnails
+- creative-director — Orchestration, brief-setting, quality gates
+- design-engineer — Components, responsive code, tokens, CSS/React
+- brand-strategist — Brand identity, visual systems, voice/tone, guidelines
+- marketing-strategist — Campaign planning, channel strategy, audience targeting
+- print-designer — Business cards, flyers, packaging, large-format print
+- motion-designer — Animation, transitions, micro-interactions
+- accessibility-specialist — WCAG audits, assistive tech, universal design
+- content-strategist — Content architecture, editorial calendars, taxonomy
+- seo-specialist — On-page SEO, meta tags, structured data, keyword strategy
+- design-team — Full orchestrator: classifies projects, activates specialists in sequence
+
+## API
+- POST /api/teams — create a team
+- GET /api/teams — list public teams
+- GET /api/teams/:id — get team by short_id
+- POST /api/teams/:id/fork — fork a public team
+- POST /api/ai/build-team — AI generates a team from project description
+
+## Agent Roles (16)
+- researcher — Investigates competitors, trends, and user insights
+- copywriter — Crafts headlines, body copy, and messaging
+- graphic-designer — Creates visual compositions and graphic elements
+- ux-designer — Designs interactions, user flows, and information architecture
+- ux-writer — Writes microcopy, labels, and interface text
+- editorial-designer — Arranges layout, typography, and visual hierarchy
+- social-media-designer — Creates scroll-stopping platform-specific content
+- creative-director — Orchestrates the team, sets creative direction
+- design-engineer — Bridges design and code, builds responsive components
+- brand-strategist — Defines brand identity, visual systems, tone of voice
+- marketing-strategist — Plans campaigns, targets audiences, optimizes funnels
+- print-designer — Creates production-ready designs for physical media
+- motion-designer — Brings designs to life with animation and transitions
+- accessibility-specialist — Ensures designs are inclusive and WCAG-compliant
+- content-strategist — Plans content architecture and editorial calendars
+- seo-specialist — Optimizes content for search visibility
+
+## Links
+- App: https://designteam.app
+- Docs: https://designteam.app/docs
+- Repo: https://github.com/pablostanley/designteam-app
