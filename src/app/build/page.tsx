@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
-import { Pencil, Users, UserPlus, Sparkles, Wand2, Download } from "lucide-react"
+import { Pencil, Users, UserPlus, Sparkles, Wand2, Download, Share2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PartyLineup } from "@/components/party-lineup"
 import { PersonalityEditor } from "@/components/personality-editor"
@@ -10,6 +10,7 @@ import { RecruitmentView } from "@/components/recruitment-view"
 import { PresetPicker } from "@/components/preset-picker"
 import { AITeamBuilder } from "@/components/ai-team-builder"
 import { TeamExport } from "@/components/team-export"
+import { ShareView } from "@/components/share-view"
 import type { Agent, AgentRole, Team } from "@/lib/agent-builder"
 import {
   createDefaultTeam,
@@ -18,7 +19,7 @@ import {
   MAX_TEAM_SIZE,
 } from "@/lib/agent-builder"
 
-type NavView = "party" | "recruit" | "presets" | "ai-build" | "export"
+type NavView = "party" | "recruit" | "presets" | "ai-build" | "export" | "share"
 
 const NAV_ITEMS: { id: NavView; label: string; icon: React.ReactNode }[] = [
   { id: "party", label: "Party", icon: <Users className="h-4 w-4" /> },
@@ -26,6 +27,7 @@ const NAV_ITEMS: { id: NavView; label: string; icon: React.ReactNode }[] = [
   { id: "presets", label: "Presets", icon: <Sparkles className="h-4 w-4" /> },
   { id: "ai-build", label: "AI Build", icon: <Wand2 className="h-4 w-4" /> },
   { id: "export", label: "Export", icon: <Download className="h-4 w-4" /> },
+  { id: "share", label: "Share", icon: <Share2 className="h-4 w-4" /> },
 ]
 
 function loadTeam(): Team {
@@ -249,6 +251,8 @@ export default function BuildPage() {
           )}
 
           {view === "export" && <TeamExport team={team} />}
+
+          {view === "share" && <ShareView team={team} />}
         </div>
       </main>
 
