@@ -1,6 +1,6 @@
 # Design Team
 
-**Design Team** is an AI design crew that ships. Not just pretty pictures -- research, strategy, copy, design, code, review, deploy. 13 specialized agents, 17 design contexts, one workflow.
+**Design Team** is an AI design crew that ships. Not just pretty pictures -- research, strategy, copy, design, code, review, deploy. 16 specialized agents, 17 design contexts, 17 installable skills, one workflow.
 
 - Website: https://designteam.app
 - Install: `npx skills add pablostanley/designteam-app`

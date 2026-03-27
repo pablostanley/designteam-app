@@ -152,52 +152,60 @@ From gstack learnings — the Design Team speaks naturally:
 - [x] 52 unit tests
 
 ### CLI Skills (skills.sh)
-- [x] 7 orchestration skill files (design-team, web-design, graphic-design, social-media, brand-strategy, copywriting, ux-writing)
-- [x] 4 Claude Code agents (design-lead, copywriter, design-reviewer, accessibility-checker)
-- [x] 4 slash commands (/design-audit, /brand-review, /copy-review, /a11y-check)
-- [x] 2 rule files (design-standards, accessibility)
+- [x] 17 installable skills (16 role-based + 1 orchestrator)
+- [x] 6 Claude Code agents (creative-director, copywriter, design-reviewer, qa-lead, design-engineer, researcher)
+- [x] 6 slash commands (/design-audit, /brand-review, /copy-review, /a11y-check, /ship, /design-slop-check)
+- [x] 4 rule files (design-standards, accessibility, writing-style, ai-slop-detection)
+
+### Supabase (team storage + sharing)
+- [x] Supabase project (Pro org, us-east-1)
+- [x] teams table (short_id, team_data JSONB, user_id, is_public, fork_count)
+- [x] profiles table (display_name, avatar_url)
+- [x] RLS policies (public read, owner write, anyone can create)
+- [x] API routes (GET/POST /api/teams, GET/PUT/DELETE /api/teams/[id], POST /api/teams/[id]/fork)
+- [x] Team sharing page (/team/[id])
+- [x] Share button in builder
+- [x] Vercel env vars configured
 
 ### Efecto Integration
 - [x] Team builder embeds designteam.app via iframe
 - [x] AI pipeline (server-side agent routing, personality-modulated prompts)
-- [x] Persistence (IndexedDB + Supabase sync)
 
 ## What's Next
 
-### Phase 1: Skill Restructure (current)
-- [ ] Expand 7 CLI skills → 13 (one per role)
-- [ ] Each skill has deep frameworks, not generic descriptions
-- [ ] Design contexts auto-referenced by relevant skills
-- [ ] Add ship-focused skills (design engineer, QA lead)
-- [ ] Writing rules baked into every skill (no slop)
+### Phase 1: Polish + Test (current)
+- [ ] Auth flow (GitHub OAuth, magic link)
+- [ ] "My Teams" dashboard for logged-in users
+- [ ] CLI `--team abc123` flag support
+- [ ] OpenAPI spec for /api/teams
+- [ ] More robot avatars (16 roles sharing 9 images)
 
-### Phase 2: Workflow Enforcement
-- [ ] Creative Director skill defines explicit phase gates
-- [ ] Each phase produces a specific artifact before the next starts
-- [ ] Design context auto-loaded based on project classification
-- [ ] Feedback loops: engineer → designer when implementation reveals issues
-
-### Phase 3: Efecto Deep Integration
+### Phase 2: Efecto Deep Integration
 - [ ] postMessage bridge: designteam.app iframe → Efecto parent
 - [ ] Team config flows from designteam.app → Efecto AI pipeline
 - [ ] Design mode uses Efecto MCP tools automatically
 - [ ] Ship mode outputs code directly
 
-### Phase 4: API & Ecosystem
-- [ ] OpenAPI spec for team management
-- [ ] Webhook: team config changes → triggers in connected tools
+### Phase 3: Ecosystem
 - [ ] npm package (@designteam/core) for programmatic access
 - [ ] Plugin for Cursor, Windsurf, Codex
+- [ ] Webhook: team config changes → triggers in connected tools
 
 ## Tech Stack
 - Next.js 16, React 19, Tailwind CSS 4, shadcn/ui
+- Supabase (auth, database, RLS) — Pro org
 - Geist fonts, oklch neutral color system
-- localStorage (no database for now)
 - Vercel deployment
 - skills.sh compatible
+
+## Infrastructure
+- **Supabase project:** vunmdnoervxpcvgiaamz (org: dwokmbqfzmfevmjhfexd)
+- **Supabase URL:** https://vunmdnoervxpcvgiaamz.supabase.co
+- **Vercel project:** designteam (connected to designteam.app)
 
 ## Links
 - **App:** https://designteam.app
 - **Repo:** https://github.com/pablostanley/designteam-app
 - **Install:** `npx skills add pablostanley/designteam-app`
+- **Supabase:** https://supabase.com/dashboard/project/vunmdnoervxpcvgiaamz
 - **Efecto PR:** https://github.com/pablostanley/efecto-app/pull/495
