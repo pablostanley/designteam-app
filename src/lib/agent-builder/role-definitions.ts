@@ -57,7 +57,7 @@ export const AGENT_ROLE_DEFINITIONS: Record<AgentRole, AgentRoleMeta> = {
     role: 'ux-designer',
     displayName: 'UX Designer',
     description:
-      'Designs intuitive interactions, user flows, and information architecture for seamless experiences.',
+      'Designs intuitive interactions, user flows, and information architecture for smooth, usable experiences.',
     avatarKey: 'doctor',
     defaultPersonality: personality(1, 1, -1, 2, 0),
     baseSkillKeys: ['ux-designer'],
@@ -97,7 +97,7 @@ export const AGENT_ROLE_DEFINITIONS: Record<AgentRole, AgentRoleMeta> = {
     role: 'creative-director',
     displayName: 'Creative Director',
     description:
-      'Orchestrates the team vision, ensures brand coherence, and elevates the overall creative quality.',
+      'Orchestrates the team, sets creative direction, ensures brand coherence, and holds the quality bar.',
     avatarKey: 'chef',
     defaultPersonality: personality(-3, 0, -2, 1, -1),
     baseSkillKeys: ['creative-director'],

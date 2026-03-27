@@ -14,9 +14,9 @@ const FEATURES = [
       "Researcher, copywriter, graphic designer, UX designer, brand strategist, and more.",
   },
   {
-    title: "7 Skills",
+    title: "17 Skills",
     description:
-      "Web design, brand strategy, copywriting, social media, UX writing, graphic design, and a meta-skill that orchestrates them all.",
+      "One skill per agent role, plus an orchestrator. Install all or pick the ones you need.",
   },
   {
     title: "Works Everywhere",
