@@ -16,11 +16,12 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet"
 import { getAvatarSrc } from "@/components/agent-avatars"
-import type { Agent, PersonalityAxis } from "@/lib/agent-builder"
+import type { Agent, PersonalityAxis, TraitCategory } from "@/lib/agent-builder"
 import {
   AGENT_ROLE_DEFINITIONS,
   PERSONALITY_AXES,
-  PERSONALITY_TRAITS,
+  TRAIT_CATEGORIES,
+  MAX_TRAITS_PER_CATEGORY,
 } from "@/lib/agent-builder"
 
 interface PersonalityEditorProps {
@@ -59,12 +60,18 @@ export function PersonalityEditor({
     })
   }
 
-  function handleTraitToggle(trait: string) {
+  function handleTraitToggle(trait: string, category: TraitCategory) {
     if (!agent) return
-    const traits = agent.traits.includes(trait)
-      ? agent.traits.filter((t) => t !== trait)
-      : [...agent.traits, trait]
-    onUpdate({ ...agent, traits })
+    const isRemoving = agent.traits.includes(trait)
+    if (isRemoving) {
+      onUpdate({ ...agent, traits: agent.traits.filter((t) => t !== trait) })
+      return
+    }
+    // Enforce max per category
+    const categoryTraits = TRAIT_CATEGORIES[category].traits as readonly string[]
+    const currentInCategory = agent.traits.filter((t) => categoryTraits.includes(t))
+    if (currentInCategory.length >= MAX_TRAITS_PER_CATEGORY) return
+    onUpdate({ ...agent, traits: [...agent.traits, trait] })
   }
 
   function handleNameChange(name: string) {
@@ -149,28 +156,47 @@ export function PersonalityEditor({
               })}
             </div>
 
-            {/* Trait Pills */}
-            <div className="flex flex-col gap-3">
-              <h3 className="text-sm font-semibold">Traits</h3>
-              <div className="flex flex-wrap gap-2">
-                {PERSONALITY_TRAITS.map((trait) => {
-                  const isActive = agent.traits.includes(trait)
-                  return (
-                    <button
-                      key={trait}
-                      type="button"
-                      onClick={() => handleTraitToggle(trait)}
-                      className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                        isActive
-                          ? "border-foreground bg-foreground text-background"
-                          : "border-border bg-background text-muted-foreground hover:border-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      {trait}
-                    </button>
-                  )
-                })}
+            {/* Trait Pills — organized by category */}
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold">Traits</h3>
+                <span className="text-xs text-muted-foreground">max {MAX_TRAITS_PER_CATEGORY} per category</span>
               </div>
+              {(Object.entries(TRAIT_CATEGORIES) as [TraitCategory, typeof TRAIT_CATEGORIES[TraitCategory]][]).map(([key, category]) => {
+                const categoryTraits = category.traits as readonly string[]
+                const selectedInCategory = agent.traits.filter((t) => categoryTraits.includes(t))
+                const atLimit = selectedInCategory.length >= MAX_TRAITS_PER_CATEGORY
+                return (
+                  <div key={key} className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      {category.label}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {category.traits.map((trait) => {
+                        const isActive = agent.traits.includes(trait)
+                        const isDisabled = !isActive && atLimit
+                        return (
+                          <button
+                            key={trait}
+                            type="button"
+                            disabled={isDisabled}
+                            onClick={() => handleTraitToggle(trait, key)}
+                            className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                              isActive
+                                ? "border-foreground bg-foreground text-background"
+                                : isDisabled
+                                  ? "border-border bg-background text-muted-foreground/30 cursor-not-allowed"
+                                  : "border-border bg-background text-muted-foreground hover:border-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            {trait}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
 
             {/* Custom Prompt */}

@@ -77,17 +77,36 @@ export interface PersonalityConfig {
 }
 
 // ---------------------------------------------------------------------------
-// Traits
+// Traits (categorized)
 // ---------------------------------------------------------------------------
 
-export const PERSONALITY_TRAITS = [
-  'creative', 'analytical', 'detail-oriented', 'big-picture',
-  'fast-paced', 'methodical', 'minimalist', 'maximalist',
-  'data-driven', 'intuitive', 'collaborative', 'independent',
-  'risk-taking', 'cautious', 'empathetic', 'direct',
-] as const
+export const TRAIT_CATEGORIES = {
+  temperament: {
+    label: 'Temperament',
+    traits: ['sassy', 'chill', 'intense', 'nurturing', 'provocative', 'deadpan', 'enthusiastic', 'stoic'] as const,
+  },
+  workStyle: {
+    label: 'Work Style',
+    traits: ['perfectionist', 'fast-shipper', 'big-picture', 'detail-obsessed', 'methodical', 'chaotic-creative', 'iterative', 'one-shot'] as const,
+  },
+  social: {
+    label: 'Social',
+    traits: ['extrovert', 'introvert', 'leader', 'collaborator', 'independent', 'mentor', 'challenger', 'supporter'] as const,
+  },
+  mindset: {
+    label: 'Mindset',
+    traits: ['thinking', 'feeling', 'judging', 'perceiving', 'optimist', 'realist', 'risk-taker', 'cautious'] as const,
+  },
+} as const
 
-export type PersonalityTrait = typeof PERSONALITY_TRAITS[number]
+export type TraitCategory = keyof typeof TRAIT_CATEGORIES
+export type PersonalityTrait = typeof TRAIT_CATEGORIES[TraitCategory]['traits'][number]
+
+/** Max traits allowed per category */
+export const MAX_TRAITS_PER_CATEGORY = 2
+
+/** Flattened list — backward compatible with old PERSONALITY_TRAITS usage */
+export const PERSONALITY_TRAITS: readonly string[] = Object.values(TRAIT_CATEGORIES).flatMap(c => [...c.traits])
 
 // ---------------------------------------------------------------------------
 // Constants
