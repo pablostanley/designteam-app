@@ -72,18 +72,24 @@ export default function Home() {
           Install one skill. Get 16 specialized design agents.
         </p>
 
-        {/* Install command */}
-        <div className="mt-8 flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-4 py-3">
-          <code className="font-mono text-sm">{INSTALL_CMD}</code>
-          <CopyButton text={INSTALL_CMD} />
+        {/* Install commands */}
+        <div className="mt-8 space-y-3">
+          <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-4 py-3">
+            <code className="font-mono text-sm">{INSTALL_CMD}</code>
+            <CopyButton text={INSTALL_CMD} />
+          </div>
+          <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-4 py-3">
+            <code className="font-mono text-sm">npx designteam install &lt;team-id&gt;</code>
+            <CopyButton text="npx designteam install " />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Install the full skill set, or install a{" "}
+            <Link href="/build" className="underline hover:text-foreground">
+              custom team
+            </Link>{" "}
+            by ID.
+          </p>
         </div>
-
-        <p className="mt-4 text-sm text-muted-foreground">
-          or{" "}
-          <Link href="/build" className="underline hover:text-foreground">
-            build your team manually
-          </Link>
-        </p>
 
         {/* What you get */}
         <div className="mt-20 grid w-full max-w-3xl gap-8 sm:grid-cols-2 lg:grid-cols-3">

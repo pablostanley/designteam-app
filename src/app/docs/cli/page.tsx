@@ -43,6 +43,32 @@ export default function CliPage() {
         </p>
       </section>
 
+      {/* Custom Team Install */}
+      <section className="space-y-3">
+        <h2 className="text-xl font-semibold">Install a Custom Team</h2>
+        <p className="text-muted-foreground">
+          Build a team at{" "}
+          <a href="https://designteam.app/build" className="underline hover:text-foreground">
+            designteam.app/build
+          </a>
+          , share it, then install it into any project:
+        </p>
+        <CopyBlock code="npx designteam install abc123" />
+        <p className="text-sm text-muted-foreground">
+          This fetches your team config from designteam.app and saves it as a
+          skill file in <code className="rounded bg-muted px-1 py-0.5 text-xs font-mono text-foreground">.claude/skills/designteam-&lt;id&gt;/SKILL.md</code>.
+          Your AI agent picks it up automatically.
+        </p>
+        <p className="text-muted-foreground">
+          You can also install from a full URL:
+        </p>
+        <CopyBlock code="npx designteam install https://designteam.app/team/abc123" />
+        <p className="text-muted-foreground">
+          List public teams:
+        </p>
+        <CopyBlock code="npx designteam list" />
+      </section>
+
       {/* Available Skills */}
       <section className="space-y-3">
         <h2 className="text-xl font-semibold">Available Skills (17)</h2>

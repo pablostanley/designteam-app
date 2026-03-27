@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { getAvatarSrc } from "@/components/agent-avatars"
 import { AGENT_ROLE_DEFINITIONS } from "@/lib/agent-builder/role-definitions"
+import { CopyButton } from "@/components/copy-button"
 import { UserMenu } from "@/components/user-menu"
 import type { Team, AgentRole } from "@/lib/agent-builder/types"
 import { PERSONALITY_AXES } from "@/lib/agent-builder/types"
@@ -203,13 +204,29 @@ export default function TeamPage() {
           })}
         </div>
 
-        <div className="mt-8 rounded-lg bg-muted p-4">
-          <p className="mb-2 text-sm font-medium">
-            Install Design Team skills:
-          </p>
-          <code className="rounded bg-background px-2 py-1 text-sm">
-            npx skills add pablostanley/designteam-app
-          </code>
+        <div className="mt-8 space-y-3">
+          <div className="rounded-lg border bg-muted/50 p-4">
+            <p className="mb-2 text-sm font-medium">
+              Install this team:
+            </p>
+            <div className="flex items-center gap-2">
+              <code className="rounded bg-background px-3 py-1.5 text-sm font-mono">
+                npx designteam install {id}
+              </code>
+              <CopyButton text={`npx designteam install ${id}`} />
+            </div>
+          </div>
+          <div className="rounded-lg border bg-muted/50 p-4">
+            <p className="mb-2 text-sm font-medium">
+              Or install the full skill set:
+            </p>
+            <div className="flex items-center gap-2">
+              <code className="rounded bg-background px-3 py-1.5 text-sm font-mono">
+                npx skills add pablostanley/designteam-app
+              </code>
+              <CopyButton text="npx skills add pablostanley/designteam-app" />
+            </div>
+          </div>
         </div>
       </main>
     </div>

@@ -5,7 +5,11 @@ Your AI design crew that ships. Not just pretty pictures -- research, strategy, 
 ## Install
 
 ```bash
+# Install the full skill set
 npx skills add pablostanley/designteam-app
+
+# Or install a custom team by ID
+npx designteam install abc123
 ```
 
 ## What You Get
