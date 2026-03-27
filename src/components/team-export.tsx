@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Copy, Download, Check } from "lucide-react"
+import { Copy, Download, Check, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -10,10 +10,13 @@ import { teamToMarkdown } from "@/lib/agent-builder"
 
 interface TeamExportProps {
   team: Team
+  onImportTeam?: (team: Team) => void
 }
 
-export function TeamExport({ team }: TeamExportProps) {
+export function TeamExport({ team, onImportTeam }: TeamExportProps) {
   const [copied, setCopied] = useState(false)
+  const [importJson, setImportJson] = useState("")
+  const [importError, setImportError] = useState<string | null>(null)
 
   const markdown = teamToMarkdown(team)
   const json = JSON.stringify(team, null, 2)
@@ -34,27 +37,38 @@ export function TeamExport({ team }: TeamExportProps) {
     URL.revokeObjectURL(url)
   }
 
+  function handleImport() {
+    setImportError(null)
+    try {
+      const parsed = JSON.parse(importJson)
+      if (!parsed || typeof parsed !== "object" || !Array.isArray(parsed.agents) || typeof parsed.name !== "string") {
+        setImportError("Invalid team JSON: must have 'name' (string) and 'agents' (array).")
+        return
+      }
+      onImportTeam?.(parsed as Team)
+      setImportJson("")
+    } catch {
+      setImportError("Invalid JSON. Please check the format and try again.")
+    }
+  }
+
   const teamSlug = team.name.toLowerCase().replace(/\s+/g, "-")
 
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="text-lg font-semibold">Export Team</h2>
+        <h2 className="text-lg font-semibold">Export / Import Team</h2>
         <p className="text-sm text-muted-foreground">
-          Export your team configuration as markdown or JSON.
+          Export your team configuration or import from JSON.
         </p>
       </div>
 
-      {team.agents.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Add agents to your team before exporting.
-        </p>
-      ) : (
-        <Tabs defaultValue="markdown" onValueChange={() => setCopied(false)}>
+        <Tabs defaultValue="markdown" onValueChange={() => { setCopied(false); setImportError(null) }}>
           <div className="flex items-center justify-between">
             <TabsList>
               <TabsTrigger value="markdown">Markdown</TabsTrigger>
               <TabsTrigger value="json">JSON</TabsTrigger>
+              <TabsTrigger value="import">Import</TabsTrigger>
             </TabsList>
           </div>
 
@@ -113,8 +127,28 @@ export function TeamExport({ team }: TeamExportProps) {
               </Button>
             </div>
           </TabsContent>
+
+          <TabsContent value="import" className="mt-4">
+            <textarea
+              className="h-80 w-full rounded-lg border bg-muted/30 p-4 text-xs font-mono resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+              placeholder="Paste team JSON here..."
+              value={importJson}
+              onChange={(e) => setImportJson(e.target.value)}
+            />
+            {importError && (
+              <p className="mt-2 text-sm text-destructive">{importError}</p>
+            )}
+            <div className="mt-3">
+              <Button
+                onClick={handleImport}
+                disabled={!importJson.trim() || !onImportTeam}
+              >
+                <Upload className="mr-1.5 h-4 w-4" />
+                Load Team
+              </Button>
+            </div>
+          </TabsContent>
         </Tabs>
-      )}
     </div>
   )
 }

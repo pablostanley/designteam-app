@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { nanoid } from 'nanoid'
+import { rateLimit, getIP } from '@/lib/rate-limit'
 
 // GET /api/teams — list public teams (or user's own)
 // Query params: ?user=me (authenticated user's teams), default = recent public
@@ -38,6 +39,11 @@ export async function GET(request: NextRequest) {
 
 // POST /api/teams — create a new team
 export async function POST(request: NextRequest) {
+  const ip = getIP(request)
+  if (!rateLimit(`teams-create:${ip}`, 10, 60_000)) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   const { createClient } = await import('@/lib/supabase/server')
   const supabase = await createClient()
 

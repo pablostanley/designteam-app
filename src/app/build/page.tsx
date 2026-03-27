@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
-import { Pencil, Users, UserPlus, Sparkles, Wand2, Download, Share2 } from "lucide-react"
+import { Pencil, Users, UserPlus, Sparkles, Wand2, Download, Share2, Undo2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PartyLineup } from "@/components/party-lineup"
 import { PersonalityEditor } from "@/components/personality-editor"
@@ -11,6 +11,7 @@ import { PresetPicker } from "@/components/preset-picker"
 import { AITeamBuilder } from "@/components/ai-team-builder"
 import { TeamExport } from "@/components/team-export"
 import { ShareView } from "@/components/share-view"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { isInIframe, sendTeamToParent } from "@/lib/iframe-bridge"
 import type { Agent, AgentRole, Team } from "@/lib/agent-builder"
 import {
@@ -55,6 +56,8 @@ export default function BuildPage() {
   const [sheetOpen, setSheetOpen] = useState(false)
   const [editingTeamName, setEditingTeamName] = useState(false)
   const [inIframe, setInIframe] = useState(false)
+  const [lastDeleted, setLastDeleted] = useState<{ agent: Agent; index: number } | null>(null)
+  const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => { setInIframe(isInIframe()) }, [])
 
@@ -100,6 +103,8 @@ export default function BuildPage() {
   }
 
   function handleRemoveAgent(id: string) {
+    const removedIndex = team.agents.findIndex((a) => a.id === id)
+    const removedAgent = team.agents[removedIndex]
     setTeam((prev) => ({
       ...prev,
       agents: prev.agents.filter((a) => a.id !== id),
@@ -108,6 +113,23 @@ export default function BuildPage() {
     if (selectedAgentId === id) {
       setSelectedAgentId(null)
     }
+    if (removedAgent) {
+      if (undoTimer.current) clearTimeout(undoTimer.current)
+      setLastDeleted({ agent: removedAgent, index: removedIndex })
+      undoTimer.current = setTimeout(() => setLastDeleted(null), 5000)
+    }
+  }
+
+  function handleUndoDelete() {
+    if (!lastDeleted) return
+    if (undoTimer.current) clearTimeout(undoTimer.current)
+    const { agent, index } = lastDeleted
+    setTeam((prev) => {
+      const agents = [...prev.agents]
+      agents.splice(Math.min(index, agents.length), 0, agent)
+      return { ...prev, agents, updatedAt: new Date().toISOString() }
+    })
+    setLastDeleted(null)
   }
 
   function handleRecruit(role: AgentRole) {
@@ -196,6 +218,9 @@ export default function BuildPage() {
           <span className="text-sm text-muted-foreground">
             {team.agents.length}/{MAX_TEAM_SIZE} Agents
           </span>
+          <div className="ml-auto">
+            <ThemeToggle />
+          </div>
         </header>
 
         {/* View content */}
@@ -265,7 +290,16 @@ export default function BuildPage() {
             />
           )}
 
-          {view === "export" && <TeamExport team={team} />}
+          {view === "export" && (
+            <TeamExport
+              team={team}
+              onImportTeam={(imported) => {
+                setTeam(imported)
+                setView("party")
+                setSelectedAgentId(null)
+              }}
+            />
+          )}
 
           {view === "share" && <ShareView team={team} />}
         </div>
@@ -279,6 +313,19 @@ export default function BuildPage() {
         onUpdate={handleUpdateAgent}
         onRemove={handleRemoveAgent}
       />
+
+      {/* Undo delete banner */}
+      {lastDeleted && (
+        <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg border bg-background px-4 py-2 shadow-lg flex items-center gap-3">
+          <span className="text-sm">
+            <strong>{lastDeleted.agent.name}</strong> removed.
+          </span>
+          <Button variant="ghost" size="sm" onClick={handleUndoDelete}>
+            <Undo2 className="mr-1.5 h-3.5 w-3.5" />
+            Undo
+          </Button>
+        </div>
+      )}
 
       {/* Iframe: "Use This Team" bar */}
       {inIframe && team.agents.length > 0 && (

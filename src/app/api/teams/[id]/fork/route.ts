@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { nanoid } from 'nanoid'
+import { rateLimit, getIP } from '@/lib/rate-limit'
 
 // POST /api/teams/:id/fork — fork a public team
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const ip = getIP(request)
+  if (!rateLimit(`teams-fork:${ip}`, 10, 60_000)) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   const { createClient } = await import('@/lib/supabase/server')
   const supabase = await createClient()
   const { id } = await params
@@ -42,7 +48,7 @@ export async function POST(
   if (insertErr) return NextResponse.json({ error: insertErr.message }, { status: 500 })
 
   // Increment fork count on source (fire and forget)
-  try { await supabase.rpc('increment_fork_count', { team_id: source.id }) } catch {}
+  try { await supabase.rpc('increment_fork_count', { team_id: source.id }) } catch (e) { console.error('Failed to increment fork count:', e) }
 
   return NextResponse.json({ team: fork, url: `/team/${fork.short_id}` }, { status: 201 })
 }
