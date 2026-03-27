@@ -48,10 +48,16 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient()
 
   const body = await request.json()
-  const { name, team_data } = body
+  const { name, team_data, is_public } = body
 
   if (!team_data || typeof team_data !== 'object') {
     return NextResponse.json({ error: 'Invalid team_data' }, { status: 400 })
+  }
+
+  // Payload size limit
+  const bodyText = JSON.stringify(body)
+  if (bodyText.length > 100_000) {
+    return NextResponse.json({ error: 'Payload too large' }, { status: 413 })
   }
 
   const agents = Array.isArray(team_data.agents) ? team_data.agents : []
@@ -75,7 +81,7 @@ export async function POST(request: NextRequest) {
       team_data,
       agent_count: agentCount,
       user_id: user?.id ?? null,
-      is_public: true,
+      is_public: is_public !== false,
     })
     .select('id, short_id')
     .single()

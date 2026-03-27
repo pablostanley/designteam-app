@@ -1,5 +1,6 @@
 import { anthropic } from "@ai-sdk/anthropic"
 import { streamText } from "ai"
+import { rateLimit, getIP } from "@/lib/rate-limit"
 import { AGENT_ROLES } from "@/lib/agent-builder/types"
 import { AGENT_ROLE_DEFINITIONS } from "@/lib/agent-builder/role-definitions"
 import {
@@ -65,6 +66,14 @@ Respond with ONLY valid JSON (no markdown fences, no explanation):
 }`
 
 export async function POST(req: Request) {
+  const ip = getIP(req)
+  if (!rateLimit(`ai-build:${ip}`, 5, 60_000)) {
+    return new Response(
+      JSON.stringify({ error: 'Too many requests. Try again in a minute.' }),
+      { status: 429, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+
   if (!process.env.ANTHROPIC_API_KEY) {
     return new Response(
       JSON.stringify({ error: "ANTHROPIC_API_KEY not configured" }),

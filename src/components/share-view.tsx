@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Share2, Check, Copy, ExternalLink } from "lucide-react"
+import { Share2, Check, Copy, ExternalLink, Save } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
 import type { Team } from "@/lib/agent-builder/types"
 
 interface ShareViewProps {
@@ -14,6 +15,14 @@ export function ShareView({ team }: ShareViewProps) {
   const [shareUrl, setShareUrl] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data }) => setIsLoggedIn(!!data.user))
+  }, [])
 
   async function handleShare() {
     if (team.agents.length === 0) {
@@ -50,6 +59,37 @@ export function ShareView({ team }: ShareViewProps) {
     }
   }
 
+  async function handleSave() {
+    if (team.agents.length === 0) {
+      setError("Add at least one agent before saving.")
+      return
+    }
+    setSaving(true)
+    setError(null)
+    try {
+      const res = await fetch("/api/teams", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: team.name,
+          team_data: team,
+          is_public: false,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error ?? "Failed to save team")
+        return
+      }
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch {
+      setError("Network error. Please try again.")
+    } finally {
+      setSaving(false)
+    }
+  }
+
   async function handleCopy() {
     if (!shareUrl) return
     await navigator.clipboard.writeText(shareUrl)
@@ -67,6 +107,36 @@ export function ShareView({ team }: ShareViewProps) {
           configuration.
         </p>
       </div>
+
+      {isLoggedIn && (
+        <div className="flex flex-col items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={handleSave}
+            disabled={saving || saved}
+            size="lg"
+          >
+            {saved ? (
+              <>
+                <Check className="mr-2 h-4 w-4" />
+                Saved to account
+              </>
+            ) : saving ? (
+              "Saving..."
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                Save to account
+              </>
+            )}
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            Private save. Only you can see it.
+          </p>
+        </div>
+      )}
+
+      <div className="border-t pt-6" />
 
       {!shareUrl ? (
         <div className="flex flex-col items-center gap-3">

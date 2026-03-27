@@ -165,6 +165,20 @@ Flag and revise:
 - 8th grade reading level. Short sentences. Active voice.
 - Specific beats vague: "47% faster" not "much faster"
 
+## Included Files
+
+This skill includes additional files for Claude Code:
+- `agents/` — 6 specialized agent definitions (creative-director, copywriter, design-engineer, design-reviewer, qa-lead, researcher)
+- `commands/` — 6 slash commands (/design-audit, /brand-review, /copy-review, /a11y-check, /ship, /design-slop-check)
+- `rules/` — 4 always-on design rules (design-standards, accessibility, writing-style, ai-slop-detection)
+
+After installing, copy these to your project's `.claude/` directory:
+```
+cp -r .agents/skills/design-team/agents/ .claude/agents/
+cp -r .agents/skills/design-team/commands/ .claude/commands/
+cp -r .agents/skills/design-team/rules/ .claude/rules/
+```
+
 ## Quality Standards
 
 Rate every deliverable 0-10: information architecture, interaction states, user journey, AI slop risk, design system alignment, responsive/accessibility, unresolved decisions. Below 7 on any dimension = revise before shipping.

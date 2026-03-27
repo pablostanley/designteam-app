@@ -26,22 +26,22 @@ Every project. You are always active. Other specialists activate and deactivate;
 ## Workflows by Project Type
 
 ### Landing Page
-Researcher > Strategist > Copywriter > Visual Designer > Layout Designer > Microcopy Specialist > Design Engineer > QA Lead
+Researcher > Strategist > Copywriter > Graphic Designer > Editorial Designer > UX Writer > Design Engineer > Accessibility Specialist
 
 ### Brand Identity
-Researcher > Strategist > Visual Designer > Copywriter > Print Designer > Design Engineer > QA Lead
+Researcher > Strategist > Graphic Designer > Copywriter > Print Designer > Design Engineer > Accessibility Specialist
 
 ### Social Campaign
-Researcher > Strategist > Copywriter > Social Designer > Visual Designer > QA Lead
+Researcher > Strategist > Copywriter > Social Media Designer > Graphic Designer > Accessibility Specialist
 
 ### Product UI
-Researcher > UX Designer > Copywriter > Visual Designer > Layout Designer > Microcopy Specialist > Motion Designer > Design Engineer > QA Lead
+Researcher > UX Designer > Copywriter > Graphic Designer > Editorial Designer > UX Writer > Motion Designer > Design Engineer > Accessibility Specialist
 
 ### Presentation
-Strategist > Copywriter > Visual Designer > Layout Designer > QA Lead
+Strategist > Copywriter > Graphic Designer > Editorial Designer > Accessibility Specialist
 
 ### Print/Physical (business cards, flyers, invitations)
-Strategist > Copywriter > Visual Designer > Print Designer > QA Lead
+Strategist > Copywriter > Graphic Designer > Print Designer > Accessibility Specialist
 
 ## The Brief
 
