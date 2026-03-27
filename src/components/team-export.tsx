@@ -50,7 +50,7 @@ export function TeamExport({ team }: TeamExportProps) {
           Add agents to your team before exporting.
         </p>
       ) : (
-        <Tabs defaultValue="markdown">
+        <Tabs defaultValue="markdown" onValueChange={() => setCopied(false)}>
           <div className="flex items-center justify-between">
             <TabsList>
               <TabsTrigger value="markdown">Markdown</TabsTrigger>

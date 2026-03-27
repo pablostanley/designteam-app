@@ -32,9 +32,14 @@ function loadTeam(): Team {
   if (typeof window !== "undefined") {
     try {
       const saved = localStorage.getItem("designteam-current")
-      if (saved) return JSON.parse(saved)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (parsed && typeof parsed === "object" && Array.isArray(parsed.agents) && typeof parsed.name === "string") {
+          return parsed as Team
+        }
+      }
     } catch {
-      // ignore
+      // corrupted data, ignore
     }
   }
   return createDefaultTeam("My Team")

@@ -155,12 +155,12 @@ export interface AgentRoleMeta {
 // ---------------------------------------------------------------------------
 
 let _counter = 0
-function uid(): string {
-  return `agent-${Date.now()}-${++_counter}-${Math.random().toString(36).slice(2, 8)}`
+export function uid(prefix = 'agent'): string {
+  return `${prefix}-${Date.now()}-${++_counter}-${Math.random().toString(36).slice(2, 8)}`
 }
 
-function teamUid(): string {
-  return `team-${Date.now()}-${++_counter}-${Math.random().toString(36).slice(2, 8)}`
+export function teamUid(): string {
+  return uid('team')
 }
 
 export function createDefaultPersonality(): PersonalityConfig {

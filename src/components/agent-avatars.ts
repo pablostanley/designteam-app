@@ -7,6 +7,7 @@ export const AVATAR_MAP: Record<string, string> = {
   umbrella: '/images/robots/umbrella.png',
   surfer: '/images/robots/surfer.png',
   chef: '/images/robots/chef.png',
+  skater2: '/images/robots/skater2.png',
 }
 
 export function getAvatarSrc(key: string): string {

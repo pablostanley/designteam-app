@@ -32,10 +32,6 @@ export function teamToMarkdown(team: Team): string {
       lines.push('')
       lines.push(fragment)
       lines.push('')
-      if (agent.traits.length > 0) {
-        lines.push(`**Traits:** ${agent.traits.join(', ')}`)
-        lines.push('')
-      }
       if (agent.customPrompt.trim()) {
         lines.push(`**Custom Instructions:** ${agent.customPrompt.trim()}`)
         lines.push('')

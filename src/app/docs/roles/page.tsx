@@ -12,17 +12,7 @@ import {
   AGENT_ROLE_LIST,
 } from "@/lib/agent-builder/role-definitions"
 import { PERSONALITY_AXES } from "@/lib/agent-builder/types"
-
-const AVATAR_MAP: Record<string, string> = {
-  detective: "/images/robots/detective.png",
-  musician: "/images/robots/musician.png",
-  skater: "/images/robots/skater.png",
-  doctor: "/images/robots/doctor.png",
-  ducky: "/images/robots/ducky.png",
-  umbrella: "/images/robots/umbrella.png",
-  surfer: "/images/robots/surfer.png",
-  chef: "/images/robots/chef.png",
-}
+import { getAvatarSrc } from "@/components/agent-avatars"
 
 function formatSliderValue(value: number, leftLabel: string, rightLabel: string): string {
   if (value === 0) return "Neutral"
@@ -45,20 +35,18 @@ export default function RolesPage() {
 
       <div className="space-y-6">
         {AGENT_ROLE_LIST.map((role) => {
-          const avatarSrc = AVATAR_MAP[role.avatarKey]
+          const avatarSrc = getAvatarSrc(role.avatarKey)
           return (
             <Card key={role.role}>
               <CardHeader className="flex flex-row items-start gap-4">
-                {avatarSrc && (
-                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
-                    <Image
-                      src={avatarSrc}
-                      alt={role.displayName}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                )}
+                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
+                  <Image
+                    src={avatarSrc}
+                    alt={role.displayName}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center gap-2">
                     <CardTitle className="text-base">

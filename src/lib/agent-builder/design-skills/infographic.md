@@ -25,9 +25,9 @@ You're designing an infographic — a visual narrative that makes data compellin
 5. **Comparison** — Side-by-side or before/after. Shows contrast clearly.
 6. **Conclusion/CTA** — Key takeaway restated, source credits.
 
-## Data Visualization Patterns (Using Efecto Nodes)
+## Data Visualization Patterns
 
-Since Efecto doesn't have native chart components, represent data visually with layout:
+When native chart components are not available, represent data visually with layout:
 
 - **Bar chart**: Horizontal frames with width proportional to value. Label left, bar right.
   `<div className="h-8 bg-primary rounded-r-lg" style={{ width: "73%" }}>` for a 73% bar.

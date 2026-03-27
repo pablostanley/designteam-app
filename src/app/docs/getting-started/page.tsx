@@ -33,9 +33,13 @@ export default function GettingStartedPage() {
           </li>
           <li>
             <span className="font-medium text-foreground">Add agents</span> —
-            Pick from eight roles: Researcher, Copywriter, Graphic Designer, UX
-            Designer, UX Writer, Editorial Designer, Social Media Designer, and
-            Creative Director. Each role comes with a baseline skill set.
+            Pick from 16 specialized roles including Researcher, Copywriter,
+            Graphic Designer, UX Designer, Creative Director, Design Engineer,
+            Brand Strategist, and more. See the{" "}
+            <a href="/docs/roles" className="font-medium text-foreground underline">
+              Roles page
+            </a>{" "}
+            for the full list. Each role comes with a baseline skill set.
           </li>
           <li>
             <span className="font-medium text-foreground">

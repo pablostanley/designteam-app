@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useRef } from "react"
 import Image from "next/image"
 import { Pencil } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -17,6 +18,19 @@ interface AgentCardProps {
 export function AgentCard({ agent, isSelected, onSelect, onNameChange }: AgentCardProps) {
   const meta = AGENT_ROLE_DEFINITIONS[agent.role]
   const avatarSrc = getAvatarSrc(meta.avatarKey)
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(agent.name)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  function commitRename() {
+    const trimmed = draft.trim()
+    if (trimmed && trimmed !== agent.name) {
+      onNameChange(trimmed)
+    } else {
+      setDraft(agent.name)
+    }
+    setEditing(false)
+  }
 
   return (
     <button
@@ -40,8 +54,29 @@ export function AgentCard({ agent, isSelected, onSelect, onNameChange }: AgentCa
 
       {/* Name */}
       <div className="flex items-center gap-1">
-        <span className="text-sm font-semibold">{agent.name}</span>
-        <Pencil className="h-3 w-3 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+        {editing ? (
+          <input
+            ref={inputRef}
+            autoFocus
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={commitRename}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") commitRename()
+              if (e.key === "Escape") { setDraft(agent.name); setEditing(false) }
+            }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-24 border-b border-foreground bg-transparent text-center text-sm font-semibold outline-none"
+          />
+        ) : (
+          <>
+            <span className="text-sm font-semibold">{agent.name}</span>
+            <Pencil
+              className="h-3 w-3 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 cursor-pointer"
+              onClick={(e) => { e.stopPropagation(); setDraft(agent.name); setEditing(true) }}
+            />
+          </>
+        )}
       </div>
 
       {/* Role badge */}

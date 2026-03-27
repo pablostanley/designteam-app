@@ -11,6 +11,8 @@ import {
   createDefaultTeam,
   MAX_TEAM_SIZE,
   MAX_POINTS_PER_AGENT,
+  uid,
+  teamUid,
 } from './types'
 import { AGENT_ROLE_DEFINITIONS } from './role-definitions'
 
@@ -104,15 +106,6 @@ function clamp(value: number, min: number, max: number): number {
 const VALID_ROLES = new Set<string>(AGENT_ROLES)
 const VALID_AXES = new Set<string>(PERSONALITY_AXES.map((a) => a.key))
 const VALID_TRAITS = new Set<string>(PERSONALITY_TRAITS)
-
-let _parseCounter = 0
-function uid(): string {
-  return `ai-agent-${Date.now()}-${++_parseCounter}-${Math.random().toString(36).slice(2, 8)}`
-}
-
-function teamUid(): string {
-  return `ai-team-${Date.now()}-${++_parseCounter}-${Math.random().toString(36).slice(2, 8)}`
-}
 
 function parseAgent(raw: unknown): Agent | null {
   if (!raw || typeof raw !== 'object') return null

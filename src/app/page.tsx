@@ -3,17 +3,9 @@
 import Image from "next/image"
 import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
+import { AVATAR_MAP } from "@/components/agent-avatars"
 
-const AVATARS = [
-  { key: "detective", src: "/images/robots/detective.png" },
-  { key: "musician", src: "/images/robots/musician.png" },
-  { key: "skater", src: "/images/robots/skater.png" },
-  { key: "doctor", src: "/images/robots/doctor.png" },
-  { key: "ducky", src: "/images/robots/ducky.png" },
-  { key: "umbrella", src: "/images/robots/umbrella.png" },
-  { key: "surfer", src: "/images/robots/surfer.png" },
-  { key: "chef", src: "/images/robots/chef.png" },
-]
+const AVATARS = Object.entries(AVATAR_MAP).map(([key, src]) => ({ key, src }))
 
 export default function Home() {
   return (
