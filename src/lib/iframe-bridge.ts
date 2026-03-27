@@ -11,6 +11,7 @@ const KNOWN_ORIGINS = [
   'https://efecto.app',
   'https://www.efecto.app',
   'http://localhost:3000',
+  'http://localhost:3001',
 ]
 
 function getTargetOrigin(): string {

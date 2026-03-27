@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Check, Copy } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 
-export function CopyBlock({ code, language = "" }: { code: string; language?: string }) {
+export function CopyBlock({ code }: { code: string; language?: string }) {
   const [copied, setCopied] = useState(false)
   return (
     <div className="relative group">

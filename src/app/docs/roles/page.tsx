@@ -8,19 +8,10 @@ import {
   CardContent,
 } from "@/components/ui/card"
 import {
-  AGENT_ROLE_DEFINITIONS,
   AGENT_ROLE_LIST,
 } from "@/lib/agent-builder/role-definitions"
 import { PERSONALITY_AXES } from "@/lib/agent-builder/types"
 import { getAvatarSrc } from "@/components/agent-avatars"
-
-function formatSliderValue(value: number, leftLabel: string, rightLabel: string): string {
-  if (value === 0) return "Neutral"
-  const label = value < 0 ? leftLabel : rightLabel
-  const abs = Math.abs(value)
-  if (abs <= 2) return `Slightly ${label}`
-  return `Very ${label}`
-}
 
 export default function RolesPage() {
   return (

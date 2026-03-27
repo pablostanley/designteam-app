@@ -55,11 +55,9 @@ export default function BuildPage() {
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [editingTeamName, setEditingTeamName] = useState(false)
-  const [inIframe, setInIframe] = useState(false)
+  const [inIframe] = useState(() => isInIframe())
   const [lastDeleted, setLastDeleted] = useState<{ agent: Agent; index: number } | null>(null)
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => { setInIframe(isInIframe()) }, [])
 
   // Persist to localStorage
   useEffect(() => {

@@ -2,7 +2,6 @@
 
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { getAvatarSrc } from "@/components/agent-avatars"
 import type { AgentRole } from "@/lib/agent-builder"
 import { AGENT_ROLE_LIST } from "@/lib/agent-builder"

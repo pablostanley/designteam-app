@@ -9,7 +9,6 @@ import {
   createTeamFromPreset,
   AGENT_ROLE_DEFINITIONS,
 } from "@/lib/agent-builder"
-import type { TeamPreset } from "@/lib/agent-builder/team-presets"
 
 interface PresetPickerProps {
   onSelectPreset: (team: Team) => void

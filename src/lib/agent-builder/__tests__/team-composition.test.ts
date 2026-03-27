@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { validateTeam, analyzeTeamCoverage, getTeamSummary } from '../team-composition'
 import { createDefaultAgent, createDefaultTeam, MAX_TEAM_SIZE } from '../types'
-import type { Team } from '../types'
 
 describe('validateTeam', () => {
   it('fails for empty team', () => {

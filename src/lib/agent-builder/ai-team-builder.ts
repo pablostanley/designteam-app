@@ -3,12 +3,11 @@
  * and parses AI responses back into Team objects.
  */
 
-import type { Agent, AgentRole, PersonalityAxis, PersonalityTrait, Team } from './types'
+import type { Agent, AgentRole, PersonalityAxis, Team } from './types'
 import {
   AGENT_ROLES,
   PERSONALITY_AXES,
   PERSONALITY_TRAITS,
-  createDefaultTeam,
   MAX_TEAM_SIZE,
   uid,
   teamUid,

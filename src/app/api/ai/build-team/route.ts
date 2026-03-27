@@ -4,9 +4,7 @@ import { AGENT_ROLES } from "@/lib/agent-builder/types"
 import { AGENT_ROLE_DEFINITIONS } from "@/lib/agent-builder/role-definitions"
 import {
   PERSONALITY_AXES,
-  PERSONALITY_TRAITS,
   TRAIT_CATEGORIES,
-  MAX_TEAM_SIZE,
 } from "@/lib/agent-builder/types"
 
 const rolesBlock = AGENT_ROLES.map((role) => {

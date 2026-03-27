@@ -4,11 +4,9 @@ import { useState } from "react"
 import { Wand2, Sparkles, AlertCircle } from "lucide-react"
 import { useCompletion } from "@ai-sdk/react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import type { Team } from "@/lib/agent-builder"
 import { parseAITeamResponse } from "@/lib/agent-builder/ai-team-builder"
-import { AGENT_ROLE_DEFINITIONS } from "@/lib/agent-builder/role-definitions"
 
 const SUGGESTIONS = [
   "A SaaS landing page for a fintech startup",
@@ -87,7 +85,7 @@ export function AITeamBuilder({ onTeamGenerated }: AITeamBuilderProps) {
       <div className="text-center space-y-2">
         <h2 className="text-xl font-bold">Build Your Team with AI</h2>
         <p className="text-sm text-muted-foreground">
-          Describe your project and we'll assemble the right team with the right personalities.
+          Describe your project and we&apos;ll assemble the right team with the right personalities.
         </p>
       </div>
 
@@ -276,7 +274,7 @@ function FallbackBuilder({ onTeamGenerated }: { onTeamGenerated: (team: Team) =>
           <div className="flex gap-3">
             <Button onClick={() => setStep("paste")}>
               <ArrowRight className="mr-1.5 h-3.5 w-3.5" />
-              I've got the response
+              I&apos;ve got the response
             </Button>
             <Button variant="outline" onClick={() => setStep("describe")}>Start Over</Button>
           </div>

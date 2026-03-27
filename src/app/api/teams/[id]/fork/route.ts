@@ -48,7 +48,7 @@ export async function POST(
   if (insertErr) return NextResponse.json({ error: insertErr.message }, { status: 500 })
 
   // Increment fork count on source (fire and forget)
-  try { await supabase.rpc('increment_fork_count', { team_id: source.id }) } catch (e) { console.error('Failed to increment fork count:', e) }
+  try { await supabase.rpc('increment_fork_count', { team_id: source.id }) } catch (e) { console.error('increment_fork_count failed:', e) }
 
   return NextResponse.json({ team: fork, url: `/team/${fork.short_id}` }, { status: 201 })
 }

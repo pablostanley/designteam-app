@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { generateSkillFile } from '../skill-generator'
-import { createDefaultAgent, createDefaultPersonality } from '../types'
+import { createDefaultAgent } from '../types'
 
 describe('generateSkillFile', () => {
   it('replaces {{PERSONALITY}} placeholder in base content', () => {
