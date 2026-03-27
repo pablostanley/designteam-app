@@ -79,8 +79,21 @@ export default function TeamPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Loading team...</p>
+      <div className="min-h-screen bg-background">
+        <header className="border-b">
+          <div className="mx-auto max-w-4xl px-4 py-4">
+            <div className="h-5 w-24 bg-muted rounded animate-pulse" />
+          </div>
+        </header>
+        <main className="mx-auto max-w-4xl px-4 py-8">
+          <div className="h-8 w-64 bg-muted rounded animate-pulse mb-2" />
+          <div className="h-4 w-24 bg-muted rounded animate-pulse mb-8" />
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-48 bg-muted rounded-lg animate-pulse" />
+            ))}
+          </div>
+        </main>
       </div>
     )
   }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, type ReactNode } from "react"
 import Link from "next/link"
 import { Pencil, Users, UserPlus, Sparkles, Wand2, Download, Share2, Undo2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,7 @@ import { AITeamBuilder } from "@/components/ai-team-builder"
 import { TeamExport } from "@/components/team-export"
 import { ShareView } from "@/components/share-view"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { UserMenu } from "@/components/user-menu"
 import { isInIframe, sendTeamToParent } from "@/lib/iframe-bridge"
 import type { Agent, AgentRole, Team } from "@/lib/agent-builder"
 import {
@@ -23,7 +24,7 @@ import {
 
 type NavView = "party" | "recruit" | "presets" | "ai-build" | "export" | "share"
 
-const NAV_ITEMS: { id: NavView; label: string; icon: React.ReactNode }[] = [
+const NAV_ITEMS: { id: NavView; label: string; icon: ReactNode }[] = [
   { id: "party", label: "Party", icon: <Users className="h-4 w-4" /> },
   { id: "recruit", label: "Recruit", icon: <UserPlus className="h-4 w-4" /> },
   { id: "presets", label: "Presets", icon: <Sparkles className="h-4 w-4" /> },
@@ -31,6 +32,28 @@ const NAV_ITEMS: { id: NavView; label: string; icon: React.ReactNode }[] = [
   { id: "export", label: "Export", icon: <Download className="h-4 w-4" /> },
   { id: "share", label: "Share", icon: <Share2 className="h-4 w-4" /> },
 ]
+
+function BuildPageSkeleton() {
+  return (
+    <div className="flex h-dvh bg-background">
+      <div className="hidden md:block w-56 shrink-0 border-r bg-card p-4">
+        <div className="space-y-2">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="h-9 bg-muted rounded-md animate-pulse" />
+          ))}
+        </div>
+      </div>
+      <div className="flex-1 p-8">
+        <div className="h-8 w-48 bg-muted rounded animate-pulse mb-4" />
+        <div className="flex gap-4 flex-wrap">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="w-44 h-64 bg-muted rounded-lg animate-pulse" />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function loadTeam(): Team {
   if (typeof window !== "undefined") {
@@ -58,6 +81,9 @@ export default function BuildPage() {
   const [inIframe] = useState(() => isInIframe())
   const [lastDeleted, setLastDeleted] = useState<{ agent: Agent; index: number } | null>(null)
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => setMounted(true), [])
 
   // Persist to localStorage
   useEffect(() => {
@@ -130,6 +156,18 @@ export default function BuildPage() {
     setLastDeleted(null)
   }
 
+  function handleMoveAgent(id: string, direction: "up" | "down") {
+    setTeam((prev) => {
+      const agents = [...prev.agents]
+      const idx = agents.findIndex((a) => a.id === id)
+      if (idx === -1) return prev
+      const newIdx = direction === "up" ? idx - 1 : idx + 1
+      if (newIdx < 0 || newIdx >= agents.length) return prev
+      ;[agents[idx], agents[newIdx]] = [agents[newIdx], agents[idx]]
+      return { ...prev, agents, updatedAt: new Date().toISOString() }
+    })
+  }
+
   function handleRecruit(role: AgentRole) {
     if (team.agents.length >= MAX_TEAM_SIZE) return
     const meta = AGENT_ROLE_DEFINITIONS[role]
@@ -156,10 +194,14 @@ export default function BuildPage() {
     setEditingTeamName(false)
   }
 
+  if (!mounted) return <BuildPageSkeleton />
+
+  const filteredNavItems = NAV_ITEMS.filter((item) => !(inIframe && item.id === "share"))
+
   return (
-    <div className="flex h-dvh">
-      {/* Left sidebar */}
-      <aside className="flex w-56 shrink-0 flex-col border-r bg-card">
+    <div className="flex flex-col md:flex-row h-dvh">
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex w-56 shrink-0 flex-col border-r bg-card">
         {!inIframe && (
           <div className="flex items-center gap-2 border-b px-4 py-3">
             <Link
@@ -172,7 +214,7 @@ export default function BuildPage() {
         )}
 
         <nav className="flex flex-1 flex-col gap-1 p-3">
-          {NAV_ITEMS.filter((item) => !(inIframe && item.id === "share")).map((item) => (
+          {filteredNavItems.map((item) => (
             <Button
               key={item.id}
               variant={view === item.id ? "secondary" : "ghost"}
@@ -185,6 +227,22 @@ export default function BuildPage() {
           ))}
         </nav>
       </aside>
+
+      {/* Mobile top nav */}
+      <div className="flex md:hidden border-b overflow-x-auto px-2 gap-1 py-2">
+        {filteredNavItems.map((item) => (
+          <Button
+            key={item.id}
+            variant={view === item.id ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setView(item.id)}
+            className="shrink-0"
+          >
+            {item.icon}
+            <span className="ml-1.5">{item.label}</span>
+          </Button>
+        ))}
+      </div>
 
       {/* Center content */}
       <main className="flex flex-1 flex-col overflow-hidden">
@@ -216,7 +274,8 @@ export default function BuildPage() {
           <span className="text-sm text-muted-foreground">
             {team.agents.length}/{MAX_TEAM_SIZE} Agents
           </span>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-3">
+            <UserMenu />
             <ThemeToggle />
           </div>
         </header>
@@ -256,6 +315,7 @@ export default function BuildPage() {
                   onSelectAgent={handleSelectAgent}
                   onAgentNameChange={handleAgentNameChange}
                   onRecruit={() => setView("recruit")}
+                  onMoveAgent={handleMoveAgent}
                 />
               )}
             </div>

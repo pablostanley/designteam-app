@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
-import { Plus, Zap } from "lucide-react"
+import { Plus, Zap, ChevronUp, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AgentCard } from "@/components/agent-card"
 import type { Agent } from "@/lib/agent-builder"
@@ -13,6 +13,7 @@ interface PartyLineupProps {
   onSelectAgent: (id: string) => void
   onAgentNameChange: (id: string, name: string) => void
   onRecruit: () => void
+  onMoveAgent?: (id: string, direction: "up" | "down") => void
 }
 
 export function PartyLineup({
@@ -21,6 +22,7 @@ export function PartyLineup({
   onSelectAgent,
   onAgentNameChange,
   onRecruit,
+  onMoveAgent,
 }: PartyLineupProps) {
   const emptySlots = MAX_TEAM_SIZE - agents.length
   const tensions = useMemo(() => analyzeTeamTension(agents), [agents])
@@ -28,14 +30,43 @@ export function PartyLineup({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-center gap-4">
-        {agents.map((agent) => (
-          <AgentCard
-            key={agent.id}
-            agent={agent}
-            isSelected={selectedAgentId === agent.id}
-            onSelect={() => onSelectAgent(agent.id)}
-            onNameChange={(name) => onAgentNameChange(agent.id, name)}
-          />
+        {agents.map((agent, index) => (
+          <div key={agent.id} className="group relative">
+            <AgentCard
+              agent={agent}
+              isSelected={selectedAgentId === agent.id}
+              onSelect={() => onSelectAgent(agent.id)}
+              onNameChange={(name) => onAgentNameChange(agent.id, name)}
+            />
+            {onMoveAgent && agents.length > 1 && (
+              <div className="absolute -top-1 right-0 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onMoveAgent(agent.id, "up")
+                  }}
+                  disabled={index === 0}
+                >
+                  <ChevronUp className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onMoveAgent(agent.id, "down")
+                  }}
+                  disabled={index === agents.length - 1}
+                >
+                  <ChevronDown className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
+          </div>
         ))}
 
         {emptySlots > 0 &&
