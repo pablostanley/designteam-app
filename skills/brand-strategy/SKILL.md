@@ -1,6 +1,10 @@
 ---
 name: brand-strategy
 description: Build brand identities — visual systems, color palettes, typography, voice and tone, brand guidelines.
+license: MIT
+metadata:
+  author: pablostanley
+  version: "1.0.0"
 ---
 
 # Brand Strategy

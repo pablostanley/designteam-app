@@ -1,6 +1,10 @@
 ---
 name: ux-writing
 description: Write UI text — button labels, error messages, empty states, tooltips, onboarding copy, and confirmation dialogs.
+license: MIT
+metadata:
+  author: pablostanley
+  version: "1.0.0"
 ---
 
 # UX Writing

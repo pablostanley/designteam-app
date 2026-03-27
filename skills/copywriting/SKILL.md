@@ -1,6 +1,10 @@
 ---
 name: copywriting
 description: Write marketing copy — headlines, body copy, CTAs, value propositions, and messaging frameworks.
+license: MIT
+metadata:
+  author: pablostanley
+  version: "1.0.0"
 ---
 
 # Copywriting

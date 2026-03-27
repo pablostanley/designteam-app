@@ -1,6 +1,10 @@
 ---
 name: web-design
 description: Design web pages — landing pages, marketing sites, dashboards, ecommerce, portfolios, mobile apps.
+license: MIT
+metadata:
+  author: pablostanley
+  version: "1.0.0"
 ---
 
 # Web Design

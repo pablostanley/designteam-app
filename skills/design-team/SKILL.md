@@ -1,6 +1,10 @@
 ---
 name: design-team
 description: Turn your AI into a full design team — research, copy, design, and review in one workflow.
+license: MIT
+metadata:
+  author: pablostanley
+  version: "1.0.0"
 ---
 
 # Design Team

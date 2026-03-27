@@ -1,6 +1,10 @@
 ---
 name: graphic-design
 description: Visual design — typography systems, color palettes, composition, presentations, posters, and print-ready assets.
+license: MIT
+metadata:
+  author: pablostanley
+  version: "1.0.0"
 ---
 
 # Graphic Design

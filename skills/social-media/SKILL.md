@@ -1,6 +1,10 @@
 ---
 name: social-media
 description: Design social media content — Instagram, Twitter/X, LinkedIn, TikTok, YouTube, Facebook, Pinterest.
+license: MIT
+metadata:
+  author: pablostanley
+  version: "1.0.0"
 ---
 
 # Social Media Design
