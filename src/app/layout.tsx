@@ -13,8 +13,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Design Team — Assemble your AI design crew",
-  description: "Build a team of specialized AI agents, each with their own personality and expertise. Export as skill files for Claude Code, v0, or any AI tool.",
+  title: "Design Team — Assemble Your AI Design Crew",
+  description:
+    "Build a team of specialized AI agents for design work. Each agent has a role, personality, and expertise. Export as skill files for Claude Code, Cursor, or any AI tool.",
+  metadataBase: new URL("https://designteam.app"),
+  openGraph: {
+    title: "Design Team — Assemble Your AI Design Crew",
+    description:
+      "Build a team of specialized AI agents for design work.",
+    url: "https://designteam.app",
+    siteName: "Design Team",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Design Team — Assemble Your AI Design Crew",
+    description:
+      "Build a team of specialized AI agents for design work.",
+  },
 };
 
 export default function RootLayout({

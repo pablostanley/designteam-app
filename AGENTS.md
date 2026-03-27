@@ -1,5 +1,24 @@
-<!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
+# Design Team Agents
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
-<!-- END:nextjs-agent-rules -->
+This app helps users assemble a team of AI design agents. Each agent has a role, personality sliders, traits, and custom instructions that get exported as skill files.
+
+## Built-in Agent Definitions
+
+See `.claude/agents/` for the Claude Code agent configurations:
+
+- **Design Lead** (`.claude/agents/design-lead.md`) — Creative director who runs the design process
+- **Design Reviewer** (`.claude/agents/design-reviewer.md`) — Reviews designs for quality and consistency
+- **Copywriter** (`.claude/agents/copywriter.md`) — Writes marketing and UI copy
+- **Accessibility Checker** (`.claude/agents/accessibility-checker.md`) — Audits designs for accessibility
+
+## Exported Skills
+
+The `skills/` directory contains installable skill files for external AI tools:
+
+- `brand-strategy` — Brand identity systems
+- `copywriting` — Marketing and conversion copy
+- `design-team` — Full design workflow orchestration
+- `graphic-design` — Visual design and composition
+- `social-media` — Platform-optimized social content
+- `ux-writing` — UI microcopy and interface text
+- `web-design` — Web page layout and design
