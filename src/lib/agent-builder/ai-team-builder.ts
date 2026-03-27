@@ -10,7 +10,6 @@ import {
   PERSONALITY_TRAITS,
   createDefaultTeam,
   MAX_TEAM_SIZE,
-  MAX_POINTS_PER_AGENT,
   uid,
   teamUid,
 } from './types'
@@ -54,7 +53,7 @@ ${projectDescription}
 ${rolesBlock}
 
 ## Personality Sliders
-Each agent has 5 personality axes, each an integer from -5 to +5 (0 = neutral). The total absolute values across all sliders for one agent should not exceed ${MAX_POINTS_PER_AGENT}.
+Each agent has 5 personality axes, each an integer from -5 to +5 (0 = neutral). Each axis is independent — set each one to best fit the agent's role and project needs.
 
 ${axesBlock}
 

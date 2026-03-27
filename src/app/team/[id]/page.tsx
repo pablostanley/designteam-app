@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { getAvatarSrc } from "@/components/agent-avatars"
 import { AGENT_ROLE_DEFINITIONS } from "@/lib/agent-builder/role-definitions"
 import type { Team, AgentRole } from "@/lib/agent-builder/types"
+import { PERSONALITY_AXES } from "@/lib/agent-builder/types"
 
 interface TeamRow {
   team_data: Team
@@ -49,6 +50,24 @@ export default function TeamPage() {
     try {
       const res = await fetch(`/api/teams/${id}/fork`, { method: "POST" })
       const data = await res.json()
+      if (data.team) {
+        // Fetch the full forked team
+        const fullRes = await fetch(`/api/teams/${data.team.short_id}`)
+        const fullData = await fullRes.json()
+        if (fullData.team?.team_data) {
+          try {
+            localStorage.setItem(
+              "designteam-current",
+              JSON.stringify(fullData.team.team_data),
+            )
+          } catch {
+            // Storage full or unavailable
+          }
+          window.location.href = "/build"
+          return
+        }
+      }
+      // Fallback: redirect to URL if provided
       if (data.url) {
         window.location.href = data.url
       }
@@ -133,6 +152,33 @@ export default function TeamPage() {
                         {t}
                       </Badge>
                     ))}
+                  </div>
+                )}
+                {agent.personality?.sliders && (
+                  <div className="flex flex-wrap justify-center gap-x-2 gap-y-0.5 pt-1">
+                    {Object.entries(agent.personality.sliders).map(
+                      ([axis, value]) => {
+                        if (value === 0) return null
+                        const axisMeta = PERSONALITY_AXES.find(
+                          (a) => a.key === axis,
+                        )
+                        if (!axisMeta) return null
+                        const label =
+                          value < 0
+                            ? axisMeta.leftLabel
+                            : axisMeta.rightLabel
+                        const intensity =
+                          Math.abs(value) >= 3 ? "very" : "somewhat"
+                        return (
+                          <span
+                            key={axis}
+                            className="text-xs text-muted-foreground"
+                          >
+                            {intensity} {label.toLowerCase()}
+                          </span>
+                        )
+                      },
+                    )}
                   </div>
                 )}
               </div>

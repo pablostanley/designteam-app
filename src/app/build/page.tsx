@@ -60,7 +60,11 @@ export default function BuildPage() {
 
   // Persist to localStorage
   useEffect(() => {
-    localStorage.setItem("designteam-current", JSON.stringify(team))
+    try {
+      localStorage.setItem("designteam-current", JSON.stringify(team))
+    } catch {
+      // Storage full or unavailable — silently fail
+    }
   }, [team])
 
   // Auto-sync team to parent iframe (debounced)

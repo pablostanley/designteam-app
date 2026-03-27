@@ -74,7 +74,6 @@ export const PERSONALITY_AXES: PersonalityAxisMeta[] = [
 
 export interface PersonalityConfig {
   sliders: Record<PersonalityAxis, number>  // each -5 to +5 (0 = neutral)
-  maxPoints?: number
 }
 
 // ---------------------------------------------------------------------------
@@ -96,7 +95,6 @@ export type PersonalityTrait = typeof PERSONALITY_TRAITS[number]
 
 export const MAX_TEAM_SIZE = 17
 export const MAX_TEAMS = 20
-export const MAX_POINTS_PER_AGENT = 15
 
 // ---------------------------------------------------------------------------
 // Agent

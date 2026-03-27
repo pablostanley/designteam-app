@@ -5,6 +5,8 @@
 import type { Team } from './types'
 import { personalityToPromptFragment } from './personality-engine'
 import { AGENT_ROLE_DEFINITIONS } from './role-definitions'
+import { generateSkillFile } from './skill-generator'
+import { AGENT_SKILL_CONTENT } from './agent-skills-generated'
 
 export function teamToMarkdown(team: Team): string {
   const lines: string[] = []
@@ -38,6 +40,19 @@ export function teamToMarkdown(team: Team): string {
       }
       lines.push(`**Role:** ${meta.description}`)
       lines.push('')
+
+      // Generate and include full skill file
+      const skillFile = generateSkillFile(agent, AGENT_SKILL_CONTENT)
+      if (skillFile) {
+        lines.push('<details>')
+        lines.push(`<summary>Skill File for ${agent.name}</summary>`)
+        lines.push('')
+        lines.push(skillFile)
+        lines.push('')
+        lines.push('</details>')
+        lines.push('')
+      }
+
       lines.push('---')
     }
   }
