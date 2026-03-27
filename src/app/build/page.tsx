@@ -11,6 +11,7 @@ import { PresetPicker } from "@/components/preset-picker"
 import { AITeamBuilder } from "@/components/ai-team-builder"
 import { TeamExport } from "@/components/team-export"
 import { ShareView } from "@/components/share-view"
+import { isInIframe, sendTeamToParent } from "@/lib/iframe-bridge"
 import type { Agent, AgentRole, Team } from "@/lib/agent-builder"
 import {
   createDefaultTeam,
@@ -53,11 +54,23 @@ export default function BuildPage() {
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [editingTeamName, setEditingTeamName] = useState(false)
+  const [inIframe, setInIframe] = useState(false)
+
+  useEffect(() => { setInIframe(isInIframe()) }, [])
 
   // Persist to localStorage
   useEffect(() => {
     localStorage.setItem("designteam-current", JSON.stringify(team))
   }, [team])
+
+  // Auto-sync team to parent iframe (debounced)
+  useEffect(() => {
+    if (!inIframe || !team) return
+    const timer = setTimeout(() => {
+      sendTeamToParent(team)
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [inIframe, team])
 
   const selectedAgent = team.agents.find((a) => a.id === selectedAgentId) ?? null
 
@@ -123,17 +136,19 @@ export default function BuildPage() {
     <div className="flex h-dvh">
       {/* Left sidebar */}
       <aside className="flex w-56 shrink-0 flex-col border-r bg-card">
-        <div className="flex items-center gap-2 border-b px-4 py-3">
-          <Link
-            href="/"
-            className="text-sm font-semibold tracking-tight hover:text-muted-foreground"
-          >
-            Design Team
-          </Link>
-        </div>
+        {!inIframe && (
+          <div className="flex items-center gap-2 border-b px-4 py-3">
+            <Link
+              href="/"
+              className="text-sm font-semibold tracking-tight hover:text-muted-foreground"
+            >
+              Design Team
+            </Link>
+          </div>
+        )}
 
         <nav className="flex flex-1 flex-col gap-1 p-3">
-          {NAV_ITEMS.map((item) => (
+          {NAV_ITEMS.filter((item) => !(inIframe && item.id === "share")).map((item) => (
             <button
               key={item.id}
               type="button"
@@ -264,6 +279,18 @@ export default function BuildPage() {
         onUpdate={handleUpdateAgent}
         onRemove={handleRemoveAgent}
       />
+
+      {/* Iframe: "Use This Team" bar */}
+      {inIframe && team.agents.length > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background p-3 flex items-center justify-between px-8">
+          <span className="text-sm text-muted-foreground">
+            {team.agents.length} agent{team.agents.length !== 1 ? "s" : ""} configured
+          </span>
+          <Button onClick={() => sendTeamToParent(team)}>
+            Use This Team
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
