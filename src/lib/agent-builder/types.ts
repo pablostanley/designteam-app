@@ -94,7 +94,7 @@ export type PersonalityTrait = typeof PERSONALITY_TRAITS[number]
 // Constants
 // ---------------------------------------------------------------------------
 
-export const MAX_TEAM_SIZE = 16
+export const MAX_TEAM_SIZE = 17
 export const MAX_TEAMS = 20
 export const MAX_POINTS_PER_AGENT = 15
 
