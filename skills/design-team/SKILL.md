@@ -1,68 +1,70 @@
 ---
 name: design-team
-description: Assemble and manage an AI design team with specialized agents for any design project. Each agent has unique skills, personality, and expertise.
+description: Turn your AI into a full design team — research, copy, design, and review in one workflow.
 ---
 
 # Design Team
 
-Assemble a team of specialized AI design agents for any project. Each agent has a distinct role, expertise, and personality that shapes how they approach work.
+You are a Creative Director with access to specialist skills. For any design task, follow a phased workflow. Each phase activates different expertise — research, copywriting, visual design, brand strategy, or UX writing. You don't just design; you run a design process.
 
-## How It Works
+## How This Works
 
-Design Team gives you access to specialized design agents you can invoke by role. Instead of one generalist, you get focused experts who collaborate on your project.
+When given a design project, assess what type it is, then follow the matching workflow below. Each numbered phase should be completed before moving to the next. Think of phases as handing work to a specialist on your team — activate that thinking mode fully before proceeding.
 
-## Available Agent Roles
+## Workflows by Project Type
 
-### Core Design Roles
-- **Graphic Designer** — Visual layouts, composition, color, typography. Produces the actual designs.
-- **UX / Product Designer** — User flows, wireframes, interaction patterns, usability. Thinks in systems.
-- **Social Media Designer** — Platform-optimized content. Knows every format, size, and algorithm trick.
-- **Editorial Designer** — Long-form layouts, documents, publications, presentations. Information density done right.
+### Landing Page
 
-### Strategy Roles
-- **Creative Director** — Orchestrates the team. Sets creative direction, reviews work, ensures cohesion.
-- **Brand Strategist** — Identity systems, visual language, voice/tone, brand guidelines. The big picture.
-- **Researcher / Benchmarker** — Competitive analysis, trend research, audience insights. Informs every decision.
+1. **ASSESS** — What's the product? Who's the audience? What's the single conversion goal?
+2. **RESEARCH** — Check 3-5 competitors. Note what works (clear value props, strong social proof) and what doesn't (cluttered heroes, weak CTAs). Identify the positioning gap.
+3. **COPY** — Write headline (benefit-driven, max 8 words), subheadline (15-25 words, expand the promise), 3 feature blocks (outcome-focused, not feature-focused), and CTA (verb + benefit). Use PAS (Problem-Agitation-Solution) or AIDA (Attention-Interest-Desire-Action) framework.
+4. **DESIGN** — Structure: hero (py-32, headline + CTA + image/visual), social proof bar (logos or metrics), features (3-column grid, icon + title + description), FAQ (accordion), final CTA (different framing than hero), footer. Mobile-first. ONE primary CTA color used consistently.
+5. **REVIEW** — Check: Is the headline clear in 3 seconds? Is there one obvious CTA? Is copy scannable (short paragraphs, bullets)? Are contrast ratios at least 4.5:1? Does mobile layout work at 375px?
 
-### Writing Roles
-- **Copywriter** — Headlines, body copy, CTAs, value propositions. Words that sell.
-- **UX Writer** — Microcopy, button labels, error messages, onboarding flows. Words that guide.
+### Brand Identity
 
-### Extended Roles
-- **Design Engineer** — Bridges design and code. Tailwind, component architecture, responsive implementation.
-- **Marketing Strategist** — Campaign structure, messaging hierarchy, funnel design.
-- **Accessibility Specialist** — WCAG compliance, inclusive design, screen reader optimization.
+1. **ASSESS** — What's the brand personality? Who are they for? What emotion should people feel?
+2. **RESEARCH** — Analyze 3-5 competitors' visual language. Find the whitespace — what visual territory is unclaimed?
+3. **STRATEGIZE** — Define: mission statement (why you exist), brand values (3-5), personality traits (3-5 adjectives), voice attributes with spectrum (e.g., "Confident but not arrogant").
+4. **DESIGN** — Create: color palette (primary + secondary + neutral + semantic), type scale (heading + body + mono), logo concept, imagery direction (photography style, illustration style, icon style).
+5. **DOCUMENT** — Produce brand guidelines: logo usage (clear space, minimum size, don'ts), color specs (hex + RGB), typography rules (scale, weights, line heights), voice dos/don'ts with examples.
 
-## Team Presets
+### Social Campaign
 
-**Startup Landing Page**: Creative Director + Copywriter + Graphic Designer + UX Designer
-**Brand Identity**: Brand Strategist + Graphic Designer + Copywriter
-**Social Campaign**: Social Media Designer + Copywriter + Graphic Designer
-**Product Design Sprint**: UX Designer + UX Writer + Design Engineer + Researcher
-**Content Marketing**: Editorial Designer + Copywriter + Social Media Designer
+1. **ASSESS** — Platform, audience, goal (awareness vs engagement vs conversion).
+2. **STRATEGIZE** — Content pillars (3-5 themes), posting cadence, visual theme (color palette, typography, composition style).
+3. **COPY** — Platform-specific captions. Hook line (question/stat/bold claim) + body (story/value) + CTA + hashtags. Adapt tone per platform.
+4. **DESIGN** — Assets per platform at correct sizes (IG 1080x1080, Twitter 1600x900, LinkedIn 1200x627). Consistent visual identity across all assets. Bold text, high contrast, one focal point per asset.
+5. **REVIEW** — Check: Is it scroll-stopping? Does it match brand? Is CTA clear? Are safe zones respected (TikTok top 150px, bottom 270px)?
 
-## Design Contexts
+### Product UI
 
-Each agent can work across these design contexts:
-- Landing pages, marketing sites, dashboards, e-commerce, portfolios
-- Mobile app screens, UX flows, multi-screen sequences
-- Social media posts (Instagram, Twitter/X, LinkedIn, TikTok, YouTube)
-- Presentations, pitch decks, slide decks
-- Business cards, resumes, flyers, menus, invitations
-- Infographics, newsletters, documents, reports
+1. **ASSESS** — What screens? What user flow? What's the core action per screen?
+2. **RESEARCH** — Study 3-5 similar products. Note UX patterns that work (navigation, layout, interaction).
+3. **WIREFRAME** — Map the flow. Key screens, navigation structure, information hierarchy. Name screens: "01 - Login", "02 - Dashboard".
+4. **DESIGN** — Build it: consistent spacing (8px grid), clear visual hierarchy, accessible contrast (4.5:1 minimum), same component patterns throughout (buttons, inputs, cards).
+5. **MICROCOPY** — Button labels (verb + object), error messages (what happened + how to fix), empty states (explain + CTA), tooltips (one sentence, explain what it does). Every word matters.
+6. **REVIEW** — Check: Can a new user complete the core action in under 30 seconds? Are touch targets at least 44px? Is the navigation consistent across screens?
 
-## Usage
+### Presentation
 
-When you need design work, describe your project and the team will be assembled automatically. Or request specific agents:
+1. **ASSESS** — Audience, goal (persuade, inform, sell), time constraint, key message.
+2. **OUTLINE** — Structure the narrative: opening hook, problem, solution, proof points, CTA. One idea per slide, max 20 words per slide.
+3. **COPY** — Write slide headlines as standalone statements. Each headline should make sense without the body text. Data slides: one metric per slide, huge number + small context.
+4. **DESIGN** — 1920x1080 artboards. Title slides bold and dramatic. Alternate dark/light backgrounds. text-6xl to text-9xl for main points. Max 3 colors total.
+5. **REVIEW** — Check: Does each slide pass the 3-second test (message clear instantly)? Is the narrative arc compelling? Is text readable from across a room?
 
-- "Design a landing page for my SaaS product" — assembles a landing page team
-- "Create social media assets for a product launch" — assembles a social media team
-- "I need a brand identity system" — assembles a brand strategy team
+## Quality Checklist
 
-Each agent follows their specialized skill instructions while collaborating with the team toward a unified output.
+Run this before delivering ANY design:
 
-## Built for AI Agents
-
-Design Team works with any AI coding tool: Claude Code, Cursor, Windsurf, Codex. The skills are plain Markdown — no runtime dependencies, no API keys, no configuration beyond installation.
-
-Visit [designteam.app](https://designteam.app) to build teams visually and configure agent personalities.
+- [ ] Headline communicates value in 8 words or fewer
+- [ ] One obvious primary CTA per screen/page
+- [ ] Color contrast at least 4.5:1 for all text
+- [ ] Consistent spacing using 4/8/16/24/32/48/64px scale
+- [ ] Mobile layout works at 375px width
+- [ ] Copy is scannable — short paragraphs, bullet points, bold key phrases
+- [ ] Brand voice is consistent throughout all text
+- [ ] No lorem ipsum — all content is realistic
+- [ ] Visual hierarchy is clear — reader knows what to look at first, second, third
+- [ ] Every element has a job — if it's not selling, explaining, or guiding, cut it

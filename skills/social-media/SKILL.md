@@ -1,99 +1,76 @@
 ---
 name: social-media
-description: Design platform-optimized social media content for Instagram, Twitter/X, LinkedIn, TikTok, YouTube, and Facebook.
+description: Design social media content — Instagram, Twitter/X, LinkedIn, TikTok, YouTube, Facebook, Pinterest.
 ---
 
 # Social Media Design
 
-You are a social media design specialist. You create thumb-stopping content optimized for every major platform. Maximum visual impact at small scale.
+You create thumb-stopping social content optimized for every major platform. You have one second to stop the scroll.
 
-## Core Principles
-
-- **Impact in 1 second.** Social posts are seen while scrolling. You have ONE second to stop the thumb.
-- **Huge, bold text.** text-4xl to text-7xl minimum. Body text barely exists.
-- **Strong color contrast.** Muted palettes disappear in the feed. Go BOLD.
-- **Simple composition.** One focal point. One message. One visual.
-
-## Platform Sizes
+## Platform Specs
 
 | Platform | Format | Size | Aspect |
 |----------|--------|------|--------|
-| Instagram | Post | 1080x1080 | 1:1 |
+| Instagram | Feed post | 1080x1080 | 1:1 |
 | Instagram | Story/Reel | 1080x1920 | 9:16 |
 | Instagram | Carousel | 1080x1350 | 4:5 |
-| Twitter/X | Post | 1200x675 | 16:9 |
-| LinkedIn | Post | 1200x627 or 1200x1200 | ~2:1 or 1:1 |
-| Facebook | Post | 1200x630 | ~2:1 |
+| Twitter/X | Post image | 1600x900 | 16:9 |
+| LinkedIn | Article image | 1200x627 | ~2:1 |
+| LinkedIn | Post/Carousel | 1080x1080 | 1:1 |
 | TikTok | Video cover | 1080x1920 | 9:16 |
 | YouTube | Thumbnail | 1280x720 | 16:9 |
+| Facebook | Post | 1200x630 | ~2:1 |
+| Pinterest | Pin | 1000x1500 | 2:3 |
 
-## Design Patterns
+## Scroll-Stopping Techniques
 
-- **Bold statement**: Full-bleed color + huge white text centered. One line. Maximum impact.
-- **Photo + overlay**: Image background with semi-transparent overlay for text readability.
-- **Split composition**: Color block left + text right. Or top/bottom split.
-- **Carousel/series**: Multiple slides with consistent style but varied content. Number each slide.
-- **Quote post**: Large quotation marks (text-9xl text-muted-foreground) + quote text + attribution.
+Bold text overlay — 6 words or fewer, huge type (text-5xl to text-7xl), high contrast against background. Faces and eyes — human faces grab attention in any feed. Unexpected color — one saturated color against a muted or dark background. Pattern interrupt — break the visual rhythm of the feed with unusual composition, asymmetry, or negative space. Contrast is king — if it blends into the feed, it fails.
 
-## Typography
+## Content Formulas
 
-- Headlines: text-5xl to text-7xl, font-extrabold, tracking-tight
-- Supporting text: text-lg to text-xl, font-medium (max 10 words)
-- CTA: text-xl font-bold, clear contrast from background
-- Brand: Small logo or handle, text-sm, corner positioned
+**Hook** (first 0.5-2 seconds): Bold claim, surprising stat, provocative question, or striking visual. This determines if someone stops scrolling.
 
-## Platform-Specific Guidance
+**Value** (deliver the promise): The actual content — tip, insight, story, or product info. One idea, clearly communicated.
 
-### Instagram
-- Square (1:1) for feed permanence, 4:5 for more real estate, 9:16 for Stories/Reels
-- Carousel posts get 2x the engagement — design 3-10 slides with a hook on slide 1
-- Keep text minimal — Instagram is visual-first. The caption carries the message.
-- Use branded color palette consistently across posts for recognizable grid aesthetic
+**CTA** (what to do next): Save, share, comment, click link, follow. Be specific: "Save this for your next launch" not "Engage with this post."
 
-### Twitter/X
-- 16:9 landscape format. Text-heavy images perform well here.
-- Bold opinions and hot takes as typographic posts — large text on solid color
-- Thread visuals: consistent template across numbered slides
-- Dark backgrounds stand out in the feed (most content is light)
+## Carousel Design
 
-### LinkedIn
-- Professional but not boring. Clean layouts with clear value propositions.
-- Carousel PDFs (1200x1200 slides) are the highest-engagement format
-- Data and statistics presented visually perform well — charts, stat cards, comparisons
-- Personal branding: headshots, quotes, "day in the life" graphics
+Cover slide = the hook. Make it bold, clear, and curiosity-inducing. Interior slides = value delivery. One idea per slide. Consistent template: same background, fonts, and layout across all slides. Last slide = CTA. Tell them what to do: "Follow for more", "Save this", "Link in bio." Max 10 slides. Sweet spot is 5-7. Number slides if educational (1/7, 2/7).
 
-### TikTok
-- 9:16 vertical. Text must be readable on mobile — bigger than you think.
-- Thumbnail/cover image should hook instantly — bold text + face/emotion
-- Keep safe zones in mind: top 150px and bottom 270px get covered by UI elements
-- Trend-aware: use current visual styles (glassmorphism, bold outlines, neon text)
+## Caption Formulas
 
-### YouTube
-- Thumbnails: 1280x720, max 3-4 words of text, face with expression, bright colors
-- High contrast is essential — thumbnails are viewed at tiny sizes in sidebar/search
-- Avoid thin text and small details — they disappear at 120px wide
-- Use 2-3 colors max. Red, yellow, and white text on dark backgrounds perform well
+**Hook line**: Question ("Still doing X manually?"), stat ("73% of teams fail at this"), bold claim ("The best landing pages break this rule"), or story opener ("Last week I almost deleted our entire codebase").
 
-### Facebook
-- Similar to LinkedIn in format. 1200x630 for link shares.
-- Event graphics: bold date and event name, minimal details (those go in the event description)
-- Community-focused imagery performs better than polished corporate content
+**Body**: Deliver value, tell the story, or explain the insight. Short paragraphs. Line breaks between ideas.
+
+**CTA**: Specific action — "Double tap if you agree", "Tag someone who needs this", "Save for later."
+
+**Hashtags**: 3-5 targeted hashtags. Mix broad (#design) with niche (#saaslandingpages). Place after a line break or in first comment.
+
+## Platform Personality
+
+**Instagram**: Visual-first, aspirational. The image does the work; caption adds context. Grid aesthetic matters — posts should look cohesive side by side. Carousel posts get 2x engagement.
+
+**Twitter/X**: Text-heavy images perform well. Bold opinions as typographic posts — large text on solid color. Dark backgrounds stand out (most content is light). Thread visuals: consistent template, numbered.
+
+**LinkedIn**: Professional but not boring. Data and statistics presented visually get highest engagement. Carousel PDFs (1200x1200 slides) are the top format. Personal branding content outperforms corporate content.
+
+**TikTok**: Vertical 9:16 only. Text must be massive — readable on a 4-inch phone screen. Safe zones: top 150px and bottom 270px are covered by UI. Trend-aware visual styles. Authentic over polished.
+
+**YouTube**: Thumbnails are everything. 1280x720, max 3-4 words of text, expressive face, bright colors. High contrast — thumbnails display at 120px wide in sidebar. Red, yellow, white text on dark backgrounds perform best. Avoid thin text and small details.
+
+**Pinterest**: Vertical pins (1000x1500) dominate. Text overlay with clear value proposition. Bright, well-lit imagery. Actionable content ("10 ways to...", "How to...") drives saves. Link to destination is the primary conversion.
 
 ## Color Psychology
 
-- **Red** = urgency, passion, energy. Sales, announcements, breaking news.
-- **Blue** = trust, professionalism, calm. Corporate, tech, finance.
-- **Yellow/Orange** = energy, warmth, optimism. Food, lifestyle, creative.
-- **Green** = growth, health, sustainability. Wellness, environment, money.
-- **Purple** = luxury, creativity, wisdom. Premium, beauty, education.
-- **Black** = luxury, power, sophistication. Fashion, tech, premium products.
-- **White** = clarity, simplicity, purity. Minimalist brands, clean tech.
+Red = urgency, passion (sales, announcements). Blue = trust, professionalism (corporate, tech, finance). Yellow/Orange = energy, warmth (food, lifestyle). Green = growth, health (wellness, sustainability). Purple = luxury, creativity (premium, beauty). Black = power, sophistication (fashion, premium). White = clarity, simplicity (minimalist, clean tech).
 
 ## Rules
 
-- NO paragraphs. Max 2 lines of body text.
+- NO paragraphs on the image. Max 2 lines of body text on any visual.
 - NO small text. If you can't read it on a phone, it's too small.
 - NO busy compositions. One hero element, max 3 visual elements total.
-- ALWAYS include brand mark — logo or handle, small and consistent.
+- ALWAYS include brand mark — logo or handle, small and consistently positioned.
 - USE real-sounding copy. "Launch day: 40% off everything" not "Sale text here."
-- DESIGN for the scroll. The first 0.5 seconds determine if someone stops.
+- DESIGN for the scroll. The first 0.5 seconds determine everything.

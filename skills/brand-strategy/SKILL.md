@@ -1,87 +1,64 @@
 ---
 name: brand-strategy
-description: Build brand identity systems — visual language, color palettes, typography, voice/tone, and comprehensive brand guidelines.
+description: Build brand identities — visual systems, color palettes, typography, voice and tone, brand guidelines.
 ---
 
 # Brand Strategy
 
-You are a brand strategist. You build cohesive identity systems that make brands recognizable, consistent, and emotionally resonant across every touchpoint.
+You build brand identity systems — the visual language, voice, and rules that make a brand recognizable across every touchpoint.
 
-## What Brand Strategy Covers
+## Brand Identity Framework
 
-- **Visual identity**: Logo usage, color palette, typography, iconography, imagery style
-- **Voice and tone**: How the brand speaks — formal vs. casual, playful vs. serious, technical vs. accessible
-- **Design system**: Spacing, layout patterns, component styles that encode the brand
-- **Brand guidelines**: The documentation that keeps everything consistent across teams and channels
+**Mission**: Why you exist. One sentence. "We exist to [verb] [outcome] for [audience]." Not aspirational fluff — the actual reason.
 
-## Building a Brand Identity
+**Vision**: Where you're going. The future state you're building toward. Ambitious but specific.
 
-### 1. Define the Brand Essence
+**Values**: What you stand for. 3-5 values, each with a one-sentence explanation of what it means in practice. "Transparency" is vague. "We share our metrics, our mistakes, and our roadmap publicly" is a value.
 
-Before any visual work, answer these questions:
-- **Who is the audience?** Demographics, psychographics, what they care about.
-- **What's the positioning?** One sentence: "We are the [adjective] [category] for [audience]."
-- **What's the personality?** Pick 3-5 adjectives. Confident? Playful? Minimal? Warm? Technical?
-- **What's the emotion?** How should people FEEL when they encounter the brand?
+**Personality**: How you'd describe the brand as a person. Pick 3-5 adjectives. Then define the spectrum: "Confident but not arrogant", "Playful but not silly", "Direct but not cold." The "but not" half prevents misinterpretation.
 
-### 2. Color Palette
+## Visual Identity System
 
-Build a structured palette:
-- **Primary**: The brand's signature color. Used for CTAs, key UI elements, brand marks.
-- **Secondary**: Complement to primary. Used for accents, secondary actions.
-- **Neutrals**: 5-7 shades from near-white to near-black. The backbone of the design system.
-- **Semantic**: Success (green), warning (amber), error (red), info (blue). Functional, not brand.
+**Logo**: Create mark (icon), wordmark (text), and lockup (icon + text). Define clear space (minimum padding around logo, usually 1x the icon height). Set minimum size (below which the logo becomes unreadable). Show 3-5 misuse examples: don't stretch, don't recolor, don't add effects.
 
-**Color ratios**: 60% neutral, 30% primary, 10% accent. The primary should feel special, not overwhelming.
+**Color palette**: Primary (brand signature, used for CTAs and key elements), Secondary (complement to primary, used for accents), Neutrals (5-7 shades from near-white to near-black, the backbone), Semantic (green=success, amber=warning, red=error, blue=info — functional, not brand). Ratio: 60% neutral, 30% primary, 10% accent.
 
-### 3. Typography
+**Typography**: Heading font sets personality — geometric sans = modern, serif = traditional, rounded = friendly. Body font must be readable at text-sm — usually clean sans-serif. Optional mono for code/data. Define the full scale: text-xs through text-6xl with specific use cases per size.
 
-- **Heading font**: Sets personality. Geometric sans = modern. Serif = traditional. Rounded = friendly.
-- **Body font**: Must be readable at text-sm. Usually a clean sans-serif.
-- **Monospace** (optional): For code, data, technical content.
-- Define a scale: text-xs through text-6xl with specific use cases for each size.
+**Imagery**: Photography style (bright/natural? dark/moody? candid/staged?). Illustration style (flat? 3D? hand-drawn? geometric?). Icon style (outline/filled, rounded/sharp, consistent stroke weight). Include do/don't examples with explanations.
 
-### 4. Imagery and Iconography
+## Voice and Tone
 
-- **Photography style**: Bright and natural? Dark and moody? Candid or staged?
-- **Illustration style**: Flat? 3D? Hand-drawn? Abstract geometric?
-- **Icon style**: Outline or filled? Rounded or sharp? Consistent weight.
-- **Do/Don't examples**: Show what fits the brand and what doesn't.
+Voice is constant — it's who you are. Tone varies by context — it's how you say it right now.
 
-### 5. Voice and Tone
+**Voice attributes**: Define 4 attributes on a spectrum. Example: "Confident... not arrogant", "Friendly... not casual", "Clear... not dumbed down", "Witty... not try-hard." Each with 2-3 example sentences showing the right voice.
 
-Voice is constant (who you are). Tone varies by context (how you say it in this situation).
+**Tone spectrum**: Formal (legal pages, terms of service) -> Professional (documentation, help articles) -> Conversational (marketing, blog) -> Playful (social media, empty states, success messages). Map specific content types to their tone level.
 
-- **Voice attributes**: e.g., "Direct, confident, warm, never condescending"
-- **Tone spectrum**: Formal (legal pages) -> Neutral (docs) -> Casual (social) -> Playful (empty states)
-- **Word choices**: Preferred vocabulary. "Start" vs "Get started" vs "Let's go". "Team" vs "Organization".
-- **Things we never say**: Jargon to avoid, banned phrases, competitive references.
+**Word choices**: Preferred vocabulary. "Start" vs "Get started" vs "Let's go." "Team" vs "Organization" vs "Workspace." Create a short glossary of 10-15 brand-specific terms.
+
+**Things we never say**: Banned phrases, competitor mentions, jargon to avoid, superlatives without proof ("best in class", "world-leading").
 
 ## Brand Guidelines Document
 
-A brand guidelines document should include:
+Structure the deliverable as:
 
-1. **Brand story**: Mission, vision, values (1 page)
-2. **Logo**: Primary mark, variations, clear space, minimum size, misuse examples
-3. **Color**: Primary, secondary, neutrals with hex/RGB values. Usage examples.
-4. **Typography**: Font families, scale, hierarchy examples
-5. **Imagery**: Photography/illustration direction with examples
-6. **Voice**: Tone attributes, writing examples, dos and don'ts
-7. **Components**: Button styles, card patterns, form elements — how brand translates to UI
-8. **Templates**: Pre-built layouts for common use cases (social, email, presentation)
+1. **Brand story** (1 page): Mission, vision, values. Why the brand exists and who it serves.
+2. **Logo** (2-3 pages): Primary mark, variations (dark/light/mono), clear space rules, minimum size, misuse examples.
+3. **Color** (1-2 pages): Full palette with hex and RGB values. Primary, secondary, neutrals, semantic. Usage ratios. Dark mode variants.
+4. **Typography** (1-2 pages): Font families, complete scale with sizes and weights, hierarchy examples, pairing rules.
+5. **Imagery** (1 page): Photography direction, illustration style, icon guidelines. Do/don't examples.
+6. **Voice** (1-2 pages): Voice attributes with spectrum, tone by context, word choices, writing dos/don'ts with before/after examples.
+7. **Components** (1-2 pages): Button styles, card patterns, form elements — how brand translates to UI.
+8. **Templates** (1 page): Pre-built layouts for common uses (social post, email header, presentation slide).
 
-## Applying Brand to Design Work
+## Brand Audit Process
 
-When designing for a brand:
-- Extract the color palette and apply it consistently. Primary for CTAs, neutrals for structure.
-- Match the typography scale. Don't introduce new sizes or weights not in the system.
-- Follow the voice guidelines in ALL copy — headlines, body, microcopy, CTAs.
-- Maintain consistent spacing rhythm. If the brand uses 8px grid, everything snaps to 8px multiples.
-- Every design should feel like it belongs to the same family — recognizable without seeing the logo.
+When evaluating an existing brand: Collect all touchpoints (website, social, emails, product UI, docs). Check consistency — same colors, same fonts, same voice everywhere? Identify gaps — where does the brand break? Prioritize fixes by visibility: homepage > social > emails > internal docs.
 
 ## Rules
 
-- A brand is NOT just a logo and colors. It's how every touchpoint feels.
+- A brand is not just a logo and colors. It's how every touchpoint feels.
 - Consistency beats novelty. A mediocre system applied consistently outperforms brilliant one-offs.
 - Document everything. If it's not written down, it doesn't exist as a guideline.
 - Test across contexts: does the brand work on a billboard AND a mobile notification?

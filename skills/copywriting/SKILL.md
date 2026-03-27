@@ -1,100 +1,64 @@
 ---
 name: copywriting
-description: Write compelling headlines, body copy, CTAs, value propositions, and messaging hierarchies for design projects.
+description: Write marketing copy — headlines, body copy, CTAs, value propositions, and messaging frameworks.
 ---
 
 # Copywriting
 
-You are a copywriting specialist. You write headlines that stop scrollers, body copy that builds desire, CTAs that drive action, and messaging that converts visitors into users.
+You write words that convert. Headlines that stop scrollers, body copy that builds desire, CTAs that drive action, and messaging hierarchies that move visitors from curiosity to commitment.
 
-## Headlines
+## Headline Formulas
 
 Headlines do 80% of the work. If the headline doesn't hook, nothing else matters.
 
-**Formulas that work**:
-- Benefit-driven: "Ship 10x faster" (not "AI-powered deployment tool")
-- Outcome-focused: "Never miss a deadline again" (pain they recognize)
-- Specific + credible: "Join 12,000 teams who cut build times by 73%"
-- Question: "Still deploying on Fridays?" (implies the reader's pain)
-- Command: "Stop guessing. Start knowing." (direct, confident)
+- **Benefit-driven**: "Get X without Y" — "Ship 10x faster" (not "AI-powered deployment tool")
+- **Curiosity gap**: "The X that Y" — "The pricing page mistake killing your conversions"
+- **Social proof**: "Join N people who X" — "Join 12,000 teams who cut build times by 73%"
+- **Urgency**: "X before Y" — "Fix your onboarding before Q4"
+- **Question**: "Still doing X?" — "Still deploying on Fridays?"
 
-**Rules**:
-- Max 8 words for primary headlines. Shorter is almost always better.
-- No jargon in headlines. Your grandma should understand the gist.
-- Every headline should pass the "so what?" test. If a stranger wouldn't care, rewrite it.
-- Never lead with the product name. Lead with the outcome.
+Rules: Max 8 words for primary headlines. No jargon. Every headline passes the "so what?" test — if a stranger wouldn't care, rewrite it. Never lead with the product name. Lead with the outcome.
 
-## Subheadlines
+## Frameworks
 
-The subheadline explains what the headline promises. It earns the click or scroll.
+**PAS** (Problem - Agitation - Solution): Name the pain. Make it urgent. Present your product as relief. Best for audiences aware of their problem.
 
-- Expand on the headline's promise with specifics
-- 15-25 words. One or two sentences max.
-- Can include the "how" that the headline left out
-- Example: Headline: "Ship 10x faster" / Sub: "Automated CI/CD that deploys your code in seconds, not hours. Zero config required."
+**AIDA** (Attention - Interest - Desire - Action): Hook with a bold claim. Build interest with specifics. Create desire with outcomes/social proof. Close with CTA. Best for cold audiences.
 
-## Body Copy
+**BAB** (Before - After - Bridge): Paint the painful present. Show the better future. Your product is the bridge. Best for transformation narratives.
 
-Body copy builds the case. It turns interest into intent.
+## CTA Patterns
 
-**Structure**: Lead with the strongest benefit. Then support with proof. Then remove objections. Then call to action.
+Strong CTAs: "Start designing faster" (action + benefit), "Free trial, no credit card" (reduce friction), "Join 10,000 teams" (social proof built in), "See it in action" (curiosity, low commitment).
 
-- Short paragraphs (2-3 sentences max)
-- Use "you" and "your" — talk TO the reader, not about your product
-- Features -> Benefits: "Real-time collaboration" becomes "See your teammate's changes the moment they make them"
-- One idea per paragraph. If you're making two points, split them.
+Weak CTAs: "Submit" (generic), "Click here" (meaningless), "Learn more" (lazy — learn what?).
 
-## Calls to Action (CTAs)
+Rules: ONE primary CTA per view. Secondary actions are visually subordinate. The CTA button text completes the sentence "I want to..." Add a friction reducer near the CTA: "No credit card required", "Free forever", "2-minute setup", "Cancel anytime."
 
-The CTA is the moment of conversion. It must be clear, specific, and low-friction.
+## Value Proposition Canvas
 
-**Strong CTAs**:
-- "Start free trial" (specific, low risk)
-- "Get started — it's free" (removes friction)
-- "See it in action" (curiosity-driven)
-- "Join 10,000 teams" (social proof built in)
+Template: For [target audience] who [need/pain], [product] is a [category] that [key benefit]. Unlike [alternative], we [differentiator].
 
-**Weak CTAs**:
-- "Submit" (generic, says nothing)
-- "Click here" (meaningless)
-- "Learn more" (lazy — what will they learn?)
+Example: "For AI-native design teams who need to ship fast, Efecto is a design tool that lets humans and robots design together. Unlike traditional tools, we make AI a first-class collaborator, not an add-on."
 
-**Rules**:
-- ONE primary CTA per view. Secondary actions are visually subordinate.
-- The CTA button text should complete the sentence "I want to..."
-- Add a friction reducer near the CTA: "No credit card required", "Free forever", "2-minute setup"
-
-## Value Propositions
-
-The value proposition answers: "Why should I use this instead of anything else?"
-
-**Formula**: [What you do] + [for whom] + [unique differentiator] + [outcome]
-
-Example: "The design tool (what) for AI-native teams (who) that lets humans and robots design together (differentiator) so you ship beautiful products in hours, not weeks (outcome)."
-
-**One-liner test**: Can you explain what the product does and why it matters in one sentence under 20 words? If not, simplify.
+**One-liner test**: Can you explain what the product does and why it matters in one sentence under 20 words? If not, simplify until you can.
 
 ## Messaging Hierarchy
 
-Every page needs a clear hierarchy of messages:
+Every page needs exactly four levels:
 
-1. **Primary message**: The ONE thing the visitor should remember. Usually the hero headline.
-2. **Supporting messages**: 2-3 proof points that reinforce the primary. Feature sections, social proof.
-3. **Detail messages**: Specifics for visitors who want more. Comparison tables, FAQs, technical details.
-4. **Trust messages**: Evidence that reduces risk. Testimonials, logos, guarantees, security badges.
+1. **Primary message**: The ONE thing the visitor should remember. The hero headline. This is the promise.
+2. **Supporting messages**: 2-3 proof points that reinforce the primary. Feature sections, social proof, "how it works."
+3. **Detail messages**: Specifics for visitors who want more. Comparison tables, FAQs, technical details, integrations.
+4. **Trust messages**: Evidence that reduces risk. Testimonials, client logos, guarantees, security badges, case studies.
 
-## Writing for Different Contexts
+## Copy Rules
 
-- **Landing pages**: Benefit-first. Short sentences. Emotional hooks. Build desire fast.
-- **Dashboards**: Functional. Clear labels. No marketing speak. "3 tasks overdue" not "You have opportunities."
-- **Social media**: Punchy. Max 5-7 words per text element. The image does the heavy lifting.
-- **Email**: Subject line is everything. First line must earn the second. CTA above the fold.
-- **Error messages**: Human, not robotic. Say what happened, why, and how to fix it.
-
-## Rules
-
-- Write for scanning, not reading. Bold key phrases. Use whitespace.
+- Write at 8th grade reading level. One idea per sentence. Active voice always.
+- Specific beats vague: "47% faster" not "much faster." "4-second deploys" not "lightning fast."
+- Benefits beat features: "See teammate changes instantly" not "Real-time collaboration."
+- Write for scanning, not reading. Bold key phrases. Short paragraphs (2-3 sentences). Bullet points for lists.
 - Kill adjectives. "Fast" means nothing. "Deploys in 4 seconds" means everything.
-- Read it out loud. If it sounds unnatural, rewrite it.
 - Never use "we" in headlines. The reader cares about themselves, not you.
-- Every piece of copy should have a job. If it's not selling, explaining, or reducing friction, cut it.
+- Read it out loud. If it sounds unnatural, rewrite it.
+- Every piece of copy has a job. If it's not selling, explaining, or reducing friction, cut it.

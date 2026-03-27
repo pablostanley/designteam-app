@@ -1,108 +1,68 @@
 ---
 name: graphic-design
-description: Design print and digital graphics — presentations, flyers, business cards, resumes, menus, infographics, invitations, newsletters, and documents.
+description: Visual design — typography systems, color palettes, composition, presentations, posters, and print-ready assets.
 ---
 
 # Graphic Design
 
-You are a graphic design specialist. You create presentations, flyers, business cards, resumes, menus, infographics, invitations, newsletters, and professional documents.
+You create visual designs with precise hierarchy, intentional composition, and restrained color. Every design decision is deliberate.
 
-## Presentations
+## Visual Hierarchy
 
-Slides support the speaker, they don't replace them. ONE idea per slide, max 20 words.
+The eye follows a predictable path: large before small, bright before muted, isolated before grouped, top before bottom. Control attention by manipulating size, weight, color, contrast, and position. If everything is bold, nothing is bold. Establish exactly three levels of hierarchy: primary (what to see first), secondary (what to read next), tertiary (supporting details).
 
-**Slide types**: Title (product name + tagline, bold and dramatic), Statement (one sentence, huge type, centered), Data (one metric text-8xl + small context), Image (full-bleed with overlay text), List (3-4 items max), Section divider (accent color + title), CTA/closing.
+## Typography Systems
 
-**Setup**: 1920x1080 (16:9) artboards. Position side-by-side. Name: "01 — Title", "02 — Problem".
+**Type scale**: Use a consistent ratio. 1.25 (minor third) is recommended for most designs: 12, 15, 19, 24, 30, 37, 47, 59px. Pick sizes from the scale, never arbitrary values.
 
-**Typography**: text-6xl to text-9xl for main points. If it's not readable from across the room, it's too small. MAX 3 colors total. Dark backgrounds (zinc-950) make text pop. Alternate between dark bg + light text and accent bg + white text.
+**Font pairing**: Contrast principle — pair a serif with a sans-serif, or a geometric with a humanist. Never pair two fonts from the same category. One font for headings (personality), one for body (readability), optional mono for data/code.
 
-## Flyers
+**Weight hierarchy**: Display text = bold or extrabold. Body = regular. Captions and metadata = light or medium. Use max 3 weights from any single family.
 
-Single-page promotional pieces. Must grab attention from a distance.
+**Line height**: Headings 1.1-1.2, body text 1.5-1.7, captions 1.3-1.4. Tighter leading for large text, looser for small text.
 
-**Essential content (in order)**: Event name/headline (text-5xl to text-8xl), date + time (text-xl to text-2xl font-bold), location (text-lg to text-xl), description (one sentence max), CTA ("Get Tickets", "RSVP"), organizer branding (small, bottom).
+## Color Theory
 
-**Layouts**: Stacked bold (headline top, graphic middle, details bottom), Full-bleed image + overlay, Split composition, Diagonal energy, Centered stack, Typographic (pure type, no image).
+**60/30/10 rule**: 60% dominant (usually neutral), 30% secondary (brand color), 10% accent (CTA, highlights). This ratio prevents visual chaos.
 
-**Color by event type**: Concert = neon on black. Conference = dark blue on white. Community = warm tones. Sale = red + yellow. Art = monochromatic + one accent.
+**Palette construction**: Start with one primary hue. Add a complementary or analogous secondary. Build 5-7 neutral shades from near-white to near-black. Add semantic colors: red (danger/error), green (success), amber (warning), blue (info).
 
-## Business Cards
+**Dark mode**: Don't invert — redesign. Dark backgrounds use gray-900 to gray-950, not pure black. Reduce contrast slightly (gray-100 text, not white). Saturate colors slightly more on dark backgrounds.
 
-The most constrained format. Every pixel matters. ~30 cm2 to work with.
+**Accessibility**: Text contrast minimum 4.5:1 (AA). Large text (24px+) minimum 3:1. Test with a contrast checker, not your eyes.
 
-**Setup**: 336x192 (3.5" x 2"). Two artboards: "Front" and "Back". Front = name + title + brand. Back = contact details.
+## Composition
 
-**Front layouts**: Classic (logo top-left, name center), Bold (name text-3xl spanning card), Minimal (just the name, centered), Asymmetric (name left, color block right), Branded (full-bleed color, reversed text).
+**Rule of thirds**: Place focal points at intersection of third lines. More dynamic than centering everything.
 
-**Rules**: TWO colors max plus black/white. Never more than 2 font weights. No decorative borders. No paragraphs — just name, title, contact data.
+**Golden ratio**: 1:1.618. Use for proportions of content areas, image crops, spacing relationships.
 
-## Resumes
+**Proximity**: Related items close together, unrelated items separated. Grouping creates meaning without labels.
 
-Single-page professional documents. Scannable in 6 seconds.
+**Alignment**: Pick one alignment per composition — left, center, or right. Mixing alignments creates visual noise. Everything on the page should align to something.
 
-**Layouts**: Two-column (narrow sidebar w-1/3 + wide main w-2/3), Single-column (traditional, ATS-friendly), Top header + single column, Asymmetric sidebar with accent background.
+**Whitespace**: Whitespace is structure, not emptiness. More whitespace = more premium. Cramped layouts feel cheap. When in doubt, add more space.
 
-**Section hierarchy**: Name (text-2xl to text-3xl font-bold) -> Experience (company + role + dates + 2-3 bullets) -> Education -> Skills (grouped by category).
+## Format-Specific Guidance
 
-**Rules**: ONE page. No photos unless asked. No decorative elements — every pixel conveys information. One accent color for headers/sidebar. Real-sounding content always.
+**Presentations**: One idea per slide, 20 words maximum. text-6xl to text-9xl for main points. Dark backgrounds make text pop. Alternate between dark bg + light text and accent bg + white text. Max 3 colors. Slides support the speaker; they don't replace them.
 
-## Menus
+**Posters/Flyers**: Hierarchy: title (text-5xl to text-8xl) -> date/time (text-xl to text-2xl font-bold) -> location (text-lg) -> description (one sentence) -> CTA -> branding (small, bottom). Must grab attention from a distance. Bold, high-contrast, simple composition.
 
-Functional documents that must be beautiful, scannable, and make food sound irresistible.
+**Business cards**: 336x192 (3.5"x2"). Two sides: front = name + title + brand, back = contact details. Two colors max plus black/white. Never more than 2 font weights. No decorative borders.
 
-**Layouts**: Single column (< 20 items), Two column (larger menus), Centered elegant (fine dining), Grid cards (modern/casual), Asymmetric (feature + specials).
+**Infographics**: Tall artboards (800x2400 to 1080x3200). Flow: title banner -> key stat (huge, the hook) -> context (2-3 sentences) -> data sections (2-4, different visualization per section) -> conclusion + sources. No raw tables — translate every number into a visual.
 
-**Structure per item**: Category header (text-lg uppercase tracking-widest font-bold) -> Item name (text-sm font-semibold) + price (right-aligned) -> Description (text-xs text-muted-foreground).
+**Resumes**: One page, always. Two-column (sidebar w-1/3 + main w-2/3) or single-column. Name (text-2xl to text-3xl font-bold) -> experience -> education -> skills. One accent color. No photos unless asked. Every pixel conveys information.
 
-**Style by type**: Fine dining = minimal, serif-feeling, lots of whitespace. Casual = warm tones, rounded corners. Modern = dark theme, accent for specials. Cafe = light, airy. Bar = dark, moody, gold accents.
+## Grid Systems
 
-## Infographics
+12-column grid for web layouts. 8px baseline grid for UI (all spacing in multiples of 8). Margins and gutters proportional to content width: narrow content = smaller margins, wide content = larger margins. Consistent grid = professional feel; inconsistent spacing is the most common amateur mistake.
 
-Visual narratives that make data compelling and shareable. Story first, data second.
+## Rules
 
-**Setup**: Tall artboards (800x2400 to 1080x3200). Single continuous piece.
-
-**Flow**: Title banner -> Key stat (text-7xl to text-9xl, the hook) -> Context (2-3 sentences) -> Data sections (2-4, different visualization per section) -> Comparison -> Conclusion + sources.
-
-**Data visualization**: Bar charts (horizontal frames with proportional widths), Stat cards (large number + label in grid), Comparison columns (color-coded side-by-side), Timelines (vertical line with alternating content), Icon arrays (colored vs muted for proportions).
-
-**Rules**: Max 4 data sections. No raw tables — translate every number into a visual. Always cite sources. Gap-8 to gap-12 between blocks.
-
-## Invitations
-
-Personal pieces that set the tone for an event. Emotion first.
-
-**Setup**: 672x480 (7"x5") or portrait. Two artboards: "Front" and "Details".
-
-**Content hierarchy**: Host line (optional, text-xs) -> Event/name (THE centerpiece, text-3xl to text-5xl) -> Event type -> Date + time (text-lg font-semibold) -> Venue -> RSVP -> Additional info.
-
-**Style by event**: Wedding = elegant, soft colors, tracking-wide. Birthday (adult) = bold or elegant. Kids = bright, playful. Corporate = clean, professional. Holiday = themed colors.
-
-## Newsletters
-
-Content-rich, scannable, single-column layouts for inbox reading.
-
-**Setup**: 600-640px wide. Single tall artboard. Single column is mandatory.
-
-**Structure**: Header (logo + date) -> Hero (featured story with large image) -> Content cards (3-5, repeating pattern: thumbnail + headline + excerpt + link) -> CTA section -> Footer (unsubscribe, address, social).
-
-**Rules**: Max width 640px. One CTA per section. Every card needs a clear action link. Light backgrounds (dark breaks in email clients).
-
-## Documents
-
-Structured, authoritative, information-rich. Five distinct hierarchy levels.
-
-**Types**: Report/white paper (cover + TOC + sections + figures), Proposal (problem -> solution -> approach -> timeline -> pricing), Brochure (multi-column, images, feature boxes), One-pager (maximum density, single page).
-
-**Typography**: Title (text-3xl to text-4xl font-bold), Section headers (text-xl to text-2xl), Subsections (text-base to text-lg font-semibold), Body (text-sm leading-relaxed), Captions (text-xs text-muted-foreground italic).
-
-**Rules**: Body text must be text-sm with leading-relaxed. Max 2 columns. Conservative color: neutrals + ONE accent. Every visual element conveys information or improves navigation.
-
-## General Principles
-
-- Always use real-sounding content, never lorem ipsum
-- Maintain strict visual hierarchy — reader should know what to read first, second, third
-- Use Tailwind CSS utility classes for consistent spacing and typography
-- Color restraint: most formats need only 1-2 accent colors plus neutrals
-- Whitespace is a design tool, not empty space — use it deliberately
+- Real-sounding content always, never lorem ipsum
+- Strict visual hierarchy — reader knows what to read first, second, third
+- Color restraint: most formats need 1-2 accent colors plus neutrals
+- Whitespace is a design tool — use it deliberately and generously
+- If a design element doesn't serve the message, remove it

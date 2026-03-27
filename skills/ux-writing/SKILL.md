@@ -1,142 +1,76 @@
 ---
 name: ux-writing
-description: Write effective microcopy — button labels, error messages, empty states, onboarding text, tooltips, and interface language.
+description: Write UI text — button labels, error messages, empty states, tooltips, onboarding copy, and confirmation dialogs.
 ---
 
 # UX Writing
 
-You are a UX writing specialist. You craft the words inside the product — the microcopy that guides, reassures, and delights users at every interaction point.
-
-## Core Principles
-
-- **Clarity over cleverness.** Users are trying to complete tasks, not appreciate wordplay. Say exactly what you mean.
-- **Brevity is respect.** Every extra word is cognitive load. If you can say it in 3 words, don't use 7.
-- **Context-aware tone.** Match the moment. Celebratory on success, calm and helpful on errors, encouraging during onboarding.
-- **Action-oriented.** Tell users what they CAN do, not just what happened.
+You write the words inside the product. Every label, message, and tooltip guides users through tasks with clarity and confidence.
 
 ## Button Labels
 
-Buttons are decisions. The label should tell users exactly what will happen.
+Buttons are decisions. The label tells users exactly what happens next.
 
-**Good**: "Save changes", "Send invite", "Create project", "Delete account"
-**Bad**: "Submit", "OK", "Yes", "Continue", "Click here"
+Use verb + object: "Create project", "Send invite", "Export PDF." Specific verbs only — "Save changes" not "Submit." Destructive actions are explicit and name the object: "Delete project" not "Remove." Max 3 words for primary buttons. Secondary actions are softer: "Cancel", "Skip", "Maybe later."
 
-**Rules**:
-- Use verb + noun: "Add member", "Export PDF", "Start trial"
-- Primary action = specific verb. Secondary action = softer ("Cancel", "Skip", "Maybe later")
-- Destructive actions = explicit: "Delete project" not "Remove". Include the object.
-- Max 3 words for primary buttons. "Get started" not "Get started with your free account"
+Bad: "Submit", "OK", "Yes", "Continue", "Click here." These tell the user nothing.
 
 ## Error Messages
 
-Errors are anxiety moments. Your copy should reduce stress, not add to it.
+Errors are anxiety moments. Your copy reduces stress.
 
-**Structure**: What happened + Why + What to do next.
+Structure: What happened + why + how to fix it. Always include a next step.
 
-**Good**: "Couldn't save your changes. Check your connection and try again."
-**Bad**: "Error 500: Internal Server Error"
-**Bad**: "Something went wrong." (vague, unhelpful)
+Good: "Couldn't save your changes. Check your connection and try again." Good: "File must be under 10MB. Compress the image or choose a smaller file." Bad: "Error 500: Internal Server Error." Bad: "Something went wrong." (vague, no next step).
 
-**Rules**:
-- Never blame the user. "That password doesn't match" not "You entered the wrong password."
-- Be specific. "File must be under 10MB" not "File too large."
-- Always include a next step. "Try again", "Contact support", "Use a different email."
-- No technical jargon. "We couldn't reach the server" not "ECONNREFUSED."
+Never blame the user. "That password doesn't match" not "You entered the wrong password." Be specific: "File must be under 10MB" not "File too large." No technical jargon: "We couldn't reach the server" not "ECONNREFUSED."
 
 ## Empty States
 
 Empty states are onboarding opportunities. Turn "nothing here" into "here's how to start."
 
-**Structure**: Illustration/icon + Headline + Brief description + Primary action button
+Structure: Icon or illustration + headline + brief description + primary action button.
 
-**Good**: "No projects yet. Create your first project to start designing." [Create project]
-**Bad**: "No data available."
+Good: "No projects yet. Create your first project to start designing." + [Create project] button. Bad: "No data available." (dead end, no action).
 
-**Rules**:
-- Always include an action. Empty states without a CTA are dead ends.
-- Frame positively: "Your inbox is clear" not "No messages."
-- Use the headline to set expectations: "Projects you create will appear here."
+Frame positively: "Your inbox is all caught up" not "No messages." Set expectations: "Projects you create will appear here." Always include a CTA — empty states without an action are dead ends.
 
-## Onboarding Text
+## Tooltips
 
-First-time experiences that teach without lecturing.
+One sentence maximum. Explain what it does, not what it is. Show on hover, not on load. Use when the label alone isn't enough — don't tooltip obvious things.
 
-**Principles**:
-- Progressive disclosure: reveal features as users need them, not all at once
-- Show, don't tell: "Click the + button to add a layer" (points at the thing)
-- Celebrate small wins: "Nice! You just created your first artboard."
-- Let users skip: always provide "Skip" or "I'll explore on my own"
+Good: "Duplicate this artboard and all its layers." Bad: "The duplicate button." (restates the label).
 
-**Tooltip pattern**: Short title (bold, 4-6 words) + one sentence of context + optional "Learn more" link.
+## Onboarding
 
-**Step indicators**: "Step 2 of 4" — always tell users where they are and how much is left.
-
-## Success Messages
-
-Celebrate accomplishments. Make users feel good about completing actions.
-
-**Good**: "Project published! Share it with your team." [Copy link]
-**Good**: "Invite sent to alex@company.com"
-**Bad**: "Operation completed successfully." (robotic)
-
-**Rules**:
-- Confirm what happened specifically (not just "Success!")
-- Suggest a logical next step
-- Keep celebration proportional to the action — saving a draft =/= publishing a site
-
-## Placeholder Text
-
-Input placeholders guide users on what to type.
-
-**Good**: "e.g., My landing page" (shows format), "Search by name or email" (shows what's searchable)
-**Bad**: "Enter text here" (obvious), "Type something" (vague)
-
-**Rules**:
-- Use examples prefixed with "e.g.," for free-form inputs
-- For search: describe what's searchable
-- Never use placeholder as a substitute for a label — labels persist, placeholders disappear
+Progressive disclosure: show only what's needed right now. Don't explain features — show value. Point at the thing: "Click the + button to add a layer." Celebrate first success: "Nice, you created your first artboard." Always let users skip: "Skip" or "I'll explore on my own." Step indicators: "Step 2 of 4" — tell users where they are and how much is left.
 
 ## Confirmation Dialogs
 
-When users are about to do something significant or irreversible.
+For irreversible or high-impact actions only. Don't overuse.
 
-**Structure**: Clear statement of what will happen + consequences + two clear options
+Title = the action being confirmed: "Delete 'Marketing Site'?" Body = consequences: "This will permanently remove the project and all its artboards. This can't be undone." Primary button = the action verb, not "Yes": [Delete project]. Destructive button = red. Non-destructive option (Cancel) on the left, destructive on the right.
 
-**Good**: "Delete 'Marketing Site'? This will permanently remove the project and all its artboards. This can't be undone." [Cancel] [Delete project]
+## Tone by Context
 
-**Rules**:
-- State the consequence, not just the action
-- Destructive action button = red, uses the specific verb ("Delete project" not "Yes")
-- Non-destructive option first/left ("Cancel"), destructive option second/right
-- Don't overuse confirmations — only for irreversible or high-impact actions
+**Success**: Celebratory, brief. "Published. Your site is live." Proportional celebration — saving a draft is not the same as launching a site.
 
-## Loading and Progress
+**Error**: Empathetic, helpful. "We couldn't save. Try again in a moment." Never use "please" — it sounds like begging.
 
-Keep users informed during waits.
+**Loading**: Reassuring. Under 2 seconds: spinner only. 2-10 seconds: "Loading your project..." Over 10 seconds: progress bar + "This might take a minute."
 
-- Under 2 seconds: spinner, no text needed
-- 2-10 seconds: "Loading your project..." (specific about what's loading)
-- Over 10 seconds: progress bar + "This might take a minute. We're generating your export."
-- After completion: brief confirmation, then move forward automatically
+**Empty**: Encouraging. Explain what goes here + how to start.
 
-## Voice and Tone Scale
+**Destructive**: Serious, explicit. State consequences clearly. "This will permanently delete all data."
 
-Adapt your tone to the context:
-
-| Context | Tone | Example |
-|---------|------|---------|
-| Onboarding | Warm, encouraging | "Welcome! Let's build something great." |
-| Normal UI | Clear, neutral | "Save changes" |
-| Success | Celebratory, brief | "Published! Your site is live." |
-| Warning | Calm, informative | "You have unsaved changes." |
-| Error | Empathetic, helpful | "We couldn't save. Try again in a moment." |
-| Destructive | Serious, explicit | "This will permanently delete all data." |
+**Warning**: Calm, informative. "You have unsaved changes."
 
 ## Rules
 
-- Write in the active voice: "We saved your project" not "Your project has been saved"
-- Use contractions: "can't", "won't", "you'll" — they're warmer and shorter
-- Address the user as "you", refer to the product as "we" (sparingly)
-- Never use "please" in error messages — it sounds like you're begging
-- Test by reading aloud: if it sounds like a robot, rewrite it
-- When in doubt, write the shortest version that's still clear and kind
+- Max 2 sentences per UI surface. If you need more, the UI design needs work.
+- No exclamation marks except celebrations.
+- Sentence case everywhere ("Save changes" not "Save Changes"). No period on single sentences.
+- Use contractions: "can't", "won't", "you'll" — warmer and shorter.
+- Active voice: "We saved your project" not "Your project has been saved."
+- Address the user as "you." Refer to the product as "we" sparingly.
+- When in doubt, write the shortest version that's still clear and kind.
