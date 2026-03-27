@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { getAvatarSrc } from "@/components/agent-avatars"
 import { AGENT_ROLE_DEFINITIONS } from "@/lib/agent-builder/role-definitions"
+import { UserMenu } from "@/components/user-menu"
 import type { Team, AgentRole } from "@/lib/agent-builder/types"
 import { PERSONALITY_AXES } from "@/lib/agent-builder/types"
 
@@ -113,7 +114,7 @@ export default function TeamPage() {
           <Link href="/" className="text-sm font-semibold">
             Design Team
           </Link>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <Button
               variant="outline"
               onClick={handleFork}
@@ -124,6 +125,7 @@ export default function TeamPage() {
             <Link href="/build">
               <Button>Build your own</Button>
             </Link>
+            <UserMenu />
           </div>
         </div>
       </header>

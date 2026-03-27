@@ -2,6 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { AVATAR_MAP } from "@/components/agent-avatars"
 import { CopyButton } from "@/components/copy-button"
+import { UserMenu } from "@/components/user-menu"
 
 const INSTALL_CMD = "npx skills add pablostanley/designteam-app"
 
@@ -58,6 +59,7 @@ export default function Home() {
           >
             GitHub
           </a>
+          <UserMenu />
         </div>
       </header>
 
