@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { Wand2, Sparkles, AlertCircle, RotateCcw } from "lucide-react"
+import { Wand2, Sparkles, AlertCircle } from "lucide-react"
 import { useCompletion } from "@ai-sdk/react"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import type { Team } from "@/lib/agent-builder"
 import { parseAITeamResponse } from "@/lib/agent-builder/ai-team-builder"
@@ -109,15 +110,16 @@ export function AITeamBuilder({ onTeamGenerated }: AITeamBuilderProps) {
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-wrap gap-1.5 min-w-0">
             {SUGGESTIONS.slice(0, 3).map((s) => (
-              <button
+              <Button
                 key={s}
-                type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => handleSuggestion(s)}
                 disabled={isLoading}
-                className="text-xs px-2.5 py-1 rounded-full border border-border text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors disabled:opacity-50 truncate max-w-48"
+                className="rounded-full text-xs truncate max-w-48 h-auto px-2.5 py-1"
               >
                 {s}
-              </button>
+              </Button>
             ))}
           </div>
           <Button
@@ -238,14 +240,15 @@ function FallbackBuilder({ onTeamGenerated }: { onTeamGenerated: (team: Team) =>
           />
           <div className="flex flex-wrap gap-2">
             {AI_BUILD_SUGGESTIONS.map((s) => (
-              <button
+              <Button
                 key={s}
-                type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => setDescription(s)}
-                className="rounded-full border px-3 py-1 text-xs text-muted-foreground hover:border-foreground/40 hover:text-foreground transition-colors"
+                className="rounded-full text-xs h-auto px-3 py-1"
               >
                 {s}
-              </button>
+              </Button>
             ))}
           </div>
           <div>

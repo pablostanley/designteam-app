@@ -66,23 +66,21 @@ export function TeamExport({ team }: TeamExportProps) {
             </ScrollArea>
             <div className="mt-3 flex gap-2">
               <Button
-                size="sm"
                 variant="outline"
                 onClick={() => handleCopy(markdown)}
               >
                 {copied ? (
-                  <Check className="mr-1.5 h-3.5 w-3.5" />
+                  <Check className="mr-1.5 h-4 w-4" />
                 ) : (
-                  <Copy className="mr-1.5 h-3.5 w-3.5" />
+                  <Copy className="mr-1.5 h-4 w-4" />
                 )}
                 {copied ? "Copied" : "Copy"}
               </Button>
               <Button
-                size="sm"
                 variant="outline"
                 onClick={() => handleDownload(markdown, `${teamSlug}.md`)}
               >
-                <Download className="mr-1.5 h-3.5 w-3.5" />
+                <Download className="mr-1.5 h-4 w-4" />
                 Download
               </Button>
             </div>
@@ -96,23 +94,21 @@ export function TeamExport({ team }: TeamExportProps) {
             </ScrollArea>
             <div className="mt-3 flex gap-2">
               <Button
-                size="sm"
                 variant="outline"
                 onClick={() => handleCopy(json)}
               >
                 {copied ? (
-                  <Check className="mr-1.5 h-3.5 w-3.5" />
+                  <Check className="mr-1.5 h-4 w-4" />
                 ) : (
-                  <Copy className="mr-1.5 h-3.5 w-3.5" />
+                  <Copy className="mr-1.5 h-4 w-4" />
                 )}
                 {copied ? "Copied" : "Copy"}
               </Button>
               <Button
-                size="sm"
                 variant="outline"
                 onClick={() => handleDownload(json, `${teamSlug}.json`)}
               >
-                <Download className="mr-1.5 h-3.5 w-3.5" />
+                <Download className="mr-1.5 h-4 w-4" />
                 Download
               </Button>
             </div>

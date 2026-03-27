@@ -119,17 +119,21 @@ export function AgentCard({ agent, isSelected, onSelect, onNameChange }: AgentCa
       {agent.traits.length > 0 && (
         <div className="mt-2 flex flex-wrap justify-center gap-1">
           {agent.traits.slice(0, 3).map((trait) => (
-            <span
+            <Badge
               key={trait}
-              className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground"
+              variant="secondary"
+              className="text-[10px] px-1.5 py-0"
             >
               {trait}
-            </span>
+            </Badge>
           ))}
           {agent.traits.length > 3 && (
-            <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+            <Badge
+              variant="secondary"
+              className="text-[10px] px-1.5 py-0"
+            >
               +{agent.traits.length - 3}
-            </span>
+            </Badge>
           )}
         </div>
       )}

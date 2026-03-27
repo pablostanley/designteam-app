@@ -153,19 +153,15 @@ export default function BuildPage() {
 
         <nav className="flex flex-1 flex-col gap-1 p-3">
           {NAV_ITEMS.filter((item) => !(inIframe && item.id === "share")).map((item) => (
-            <button
+            <Button
               key={item.id}
-              type="button"
+              variant={view === item.id ? "secondary" : "ghost"}
               onClick={() => setView(item.id)}
-              className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                view === item.id
-                  ? "bg-accent text-accent-foreground"
-                  : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-              }`}
+              className="w-full justify-start gap-2.5"
             >
               {item.icon}
               {item.label}
-            </button>
+            </Button>
           ))}
         </nav>
       </aside>
@@ -216,17 +212,17 @@ export default function BuildPage() {
                     </p>
                   </div>
                   <div className="flex gap-3">
-                    <Button size="sm" onClick={() => setView("recruit")}>
-                      <UserPlus className="mr-1.5 h-3.5 w-3.5" />
-                      Recruit
+                    <Button size="lg" onClick={() => setView("recruit")}>
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      Recruit Agents
                     </Button>
                     <Button
-                      size="sm"
+                      size="lg"
                       variant="outline"
                       onClick={() => setView("presets")}
                     >
-                      <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-                      Presets
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Start from Preset
                     </Button>
                   </div>
                 </div>

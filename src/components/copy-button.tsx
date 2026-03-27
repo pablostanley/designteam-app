@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Check, Copy } from "@phosphor-icons/react"
+import { Button } from "@/components/ui/button"
 
 export function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false)
@@ -13,12 +14,14 @@ export function CopyButton({ text }: { text: string }) {
   }
 
   return (
-    <button
+    <Button
+      variant="outline"
+      size="sm"
       onClick={handleCopy}
-      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      className="h-8 w-8 p-0 shrink-0"
       aria-label="Copy to clipboard"
     >
       {copied ? <Check size={14} /> : <Copy size={14} />}
-    </button>
+    </Button>
   )
 }

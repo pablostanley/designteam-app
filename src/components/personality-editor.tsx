@@ -110,14 +110,14 @@ export function PersonalityEditor({
                     }}
                   />
                 ) : (
-                  <button
-                    type="button"
+                  <Button
+                    variant="ghost"
                     onClick={() => setEditingName(true)}
-                    className="flex items-center gap-1.5 hover:text-muted-foreground"
+                    className="flex items-center gap-1.5"
                   >
                     <SheetTitle className="text-lg">{agent.name}</SheetTitle>
                     <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-                  </button>
+                  </Button>
                 )}
               </div>
 
@@ -176,21 +176,16 @@ export function PersonalityEditor({
                         const isActive = agent.traits.includes(trait)
                         const isDisabled = !isActive && atLimit
                         return (
-                          <button
+                          <Button
                             key={trait}
-                            type="button"
+                            variant={isActive ? "default" : "outline"}
+                            size="sm"
                             disabled={isDisabled}
                             onClick={() => handleTraitToggle(trait, key)}
-                            className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
-                              isActive
-                                ? "border-foreground bg-foreground text-background"
-                                : isDisabled
-                                  ? "border-border bg-background text-muted-foreground/30 cursor-not-allowed"
-                                  : "border-border bg-background text-muted-foreground hover:border-muted-foreground hover:text-foreground"
-                            }`}
+                            className="rounded-full px-2.5 py-1 text-xs h-auto"
                           >
                             {trait}
-                          </button>
+                          </Button>
                         )
                       })}
                     </div>
@@ -215,7 +210,6 @@ export function PersonalityEditor({
             {/* Remove */}
             <Button
               variant="destructive"
-              size="sm"
               className="mt-2"
               onClick={() => {
                 onRemove(agent.id)

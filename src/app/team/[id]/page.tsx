@@ -102,14 +102,13 @@ export default function TeamPage() {
           <div className="flex gap-2">
             <Button
               variant="outline"
-              size="sm"
               onClick={handleFork}
               disabled={forking}
             >
               {forking ? "Forking..." : "Fork this team"}
             </Button>
             <Link href="/build">
-              <Button size="sm">Build your own</Button>
+              <Button>Build your own</Button>
             </Link>
           </div>
         </div>

@@ -30,11 +30,11 @@ export function PresetPicker({ onSelectPreset, onStartFromScratch }: PresetPicke
         {TEAM_PRESETS.map((preset) => {
           const roleMetas = preset.roles.map((r) => AGENT_ROLE_DEFINITIONS[r])
           return (
-            <button
+            <Button
               key={preset.id}
-              type="button"
+              variant="outline"
               onClick={() => onSelectPreset(createTeamFromPreset(preset))}
-              className="flex flex-col gap-3 rounded-xl border bg-card p-4 text-left transition-all hover:border-muted-foreground/40 hover:shadow-sm"
+              className="flex h-auto flex-col gap-3 rounded-xl bg-card p-4 text-left items-start"
             >
               <div className="flex items-center gap-2">
                 <span className="text-2xl">{preset.emoji}</span>
@@ -62,18 +62,18 @@ export function PresetPicker({ onSelectPreset, onStartFromScratch }: PresetPicke
                   </div>
                 ))}
               </div>
-            </button>
+            </Button>
           )
         })}
       </div>
 
-      <button
-        type="button"
+      <Button
+        variant="link"
         onClick={onStartFromScratch}
-        className="text-sm text-muted-foreground hover:text-foreground hover:underline"
+        className="text-muted-foreground hover:text-foreground"
       >
         Start from Scratch
-      </button>
+      </Button>
     </div>
   )
 }

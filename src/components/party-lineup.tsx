@@ -2,6 +2,7 @@
 
 import { useMemo } from "react"
 import { Plus, Zap } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { AgentCard } from "@/components/agent-card"
 import type { Agent } from "@/lib/agent-builder"
 import { MAX_TEAM_SIZE, analyzeTeamTension } from "@/lib/agent-builder"
@@ -39,15 +40,15 @@ export function PartyLineup({
 
         {emptySlots > 0 &&
           Array.from({ length: Math.min(emptySlots, 3) }).map((_, i) => (
-            <button
+            <Button
               key={`empty-${i}`}
-              type="button"
+              variant="outline"
               onClick={onRecruit}
-              className="flex h-56 w-44 flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-muted-foreground/20 text-muted-foreground transition-colors hover:border-muted-foreground/40 hover:text-foreground"
+              className="flex h-56 w-44 flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-muted-foreground/20 text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground"
             >
               <Plus className="h-6 w-6" />
               <span className="text-sm font-medium">Recruit</span>
-            </button>
+            </Button>
           ))}
       </div>
 
