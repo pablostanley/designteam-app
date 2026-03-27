@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Design Team
 
-## Getting Started
+Assemble AI agent teams for design work. Each agent has a unique role, personality, and expertise.
 
-First, run the development server:
+## Install
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npx skills add pablostanley/designteam-app
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This installs a set of design skills that any CLI AI agent can use — Claude Code, Cursor, Windsurf, Codex.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Available Skills
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Skill | Description |
+|-------|-------------|
+| **design-team** | Meta-skill — assemble and manage a full design team with specialized agents |
+| **web-design** | Landing pages, dashboards, marketing sites, e-commerce, portfolios, mobile apps, UX flows |
+| **graphic-design** | Presentations, flyers, business cards, resumes, menus, infographics, invitations, newsletters, documents |
+| **social-media** | Platform-optimized content for Instagram, Twitter/X, LinkedIn, TikTok, YouTube, Facebook |
+| **brand-strategy** | Brand identity systems, visual language, color palettes, typography, voice/tone, guidelines |
+| **copywriting** | Headlines, body copy, CTAs, value propositions, messaging hierarchies |
+| **ux-writing** | Microcopy, button labels, error messages, empty states, onboarding text, tooltips |
 
-## Learn More
+## Usage
 
-To learn more about Next.js, take a look at the following resources:
+### With Claude Code
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# Install the skills
+npx skills add pablostanley/designteam-app
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Then in Claude Code, the skills are available automatically
+# Ask for design work and the right agents activate:
+> "Design a landing page for my SaaS product"
+> "Create a brand identity for a coffee shop"
+> "Write the copy for our pricing page"
+```
 
-## Deploy on Vercel
+### With Cursor / Windsurf
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npx skills add pablostanley/designteam-app
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Skills are loaded as context when relevant to your prompt.
+
+### With Codex
+
+```bash
+npx skills add pablostanley/designteam-app
+```
+
+Reference the skills in your Codex instructions or let them activate based on context.
+
+## Agent Roles
+
+### Core Design
+- **Graphic Designer** — Visual layouts, composition, color, typography
+- **UX / Product Designer** — User flows, wireframes, interaction patterns
+- **Social Media Designer** — Platform-optimized content
+- **Editorial Designer** — Documents, publications, presentations
+
+### Strategy
+- **Creative Director** — Orchestrates the team, sets direction, ensures cohesion
+- **Brand Strategist** — Identity systems, visual language, brand guidelines
+- **Researcher** — Competitive analysis, trends, audience insights
+
+### Writing
+- **Copywriter** — Headlines, body copy, CTAs, value propositions
+- **UX Writer** — Microcopy, button labels, error messages, interface language
+
+### Extended
+- **Design Engineer** — Bridges design and code (Tailwind, components, responsive)
+- **Marketing Strategist** — Campaign structure, messaging hierarchy
+- **Accessibility Specialist** — WCAG compliance, inclusive design
+
+## Team Presets
+
+- **Startup Landing Page**: Creative Director + Copywriter + Graphic Designer + UX Designer
+- **Brand Identity**: Brand Strategist + Graphic Designer + Copywriter
+- **Social Campaign**: Social Media Designer + Copywriter + Graphic Designer
+- **Product Design Sprint**: UX Designer + UX Writer + Design Engineer + Researcher
+- **Content Marketing**: Editorial Designer + Copywriter + Social Media Designer
+
+## Visual Team Builder
+
+Visit [designteam.app](https://designteam.app) to build teams visually, configure agent personalities with sliders and traits, and export configurations.
+
+## How Skills Work
+
+Each skill is a Markdown file (`SKILL.md`) with structured design knowledge. When you install them via `npx skills add`, they become available as context for your AI agent. The agent reads the relevant skill based on your task and follows its specialized instructions.
+
+No API keys. No runtime dependencies. No configuration. Just Markdown.
