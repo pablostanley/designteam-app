@@ -144,7 +144,7 @@ export default function TeamPage() {
             return (
               <div key={agent.id} className="space-y-2 rounded-lg border p-4">
                 <Image
-                  src={getAvatarSrc(role?.avatarKey ?? "ducky")}
+                  src={getAvatarSrc(role?.avatarKey ?? "creative-director")}
                   alt={agent.name}
                   width={80}
                   height={80}

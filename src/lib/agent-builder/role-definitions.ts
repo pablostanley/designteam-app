@@ -28,7 +28,7 @@ export const AGENT_ROLE_DEFINITIONS: Record<AgentRole, AgentRoleMeta> = {
     displayName: 'Researcher',
     description:
       'Investigates competitors, trends, and user insights to ground the team in evidence-based decisions.',
-    avatarKey: 'detective',
+    avatarKey: 'researcher',
     defaultPersonality: personality(1, 0, -2, 2, 0),
     baseSkillKeys: ['researcher'],
     color: '#6366f1',
@@ -38,7 +38,7 @@ export const AGENT_ROLE_DEFINITIONS: Record<AgentRole, AgentRoleMeta> = {
     displayName: 'Copywriter',
     description:
       'Crafts compelling headlines, body copy, and messaging that connects with the target audience.',
-    avatarKey: 'musician',
+    avatarKey: 'copywriter',
     defaultPersonality: personality(-3, -2, 0, 0, -2),
     baseSkillKeys: ['copywriter'],
     color: '#ec4899',
@@ -48,7 +48,7 @@ export const AGENT_ROLE_DEFINITIONS: Record<AgentRole, AgentRoleMeta> = {
     displayName: 'Graphic Designer',
     description:
       'Creates visual compositions, illustrations, and graphic elements that bring concepts to life.',
-    avatarKey: 'skater',
+    avatarKey: 'graphic-designer',
     defaultPersonality: personality(-3, 0, -3, 0, -1),
     baseSkillKeys: ['graphic-designer'],
     color: '#f97316',
@@ -58,7 +58,7 @@ export const AGENT_ROLE_DEFINITIONS: Record<AgentRole, AgentRoleMeta> = {
     displayName: 'UX Designer',
     description:
       'Designs intuitive interactions, user flows, and information architecture for smooth, usable experiences.',
-    avatarKey: 'doctor',
+    avatarKey: 'ux-designer',
     defaultPersonality: personality(1, 1, -1, 2, 0),
     baseSkillKeys: ['ux-designer'],
     color: '#14b8a6',
@@ -68,7 +68,7 @@ export const AGENT_ROLE_DEFINITIONS: Record<AgentRole, AgentRoleMeta> = {
     displayName: 'UX Writer',
     description:
       'Writes clear microcopy, labels, and interface text that guides users through the product.',
-    avatarKey: 'ducky',
+    avatarKey: 'ux-writer',
     defaultPersonality: personality(1, -1, 1, 2, -1),
     baseSkillKeys: ['ux-writer'],
     color: '#eab308',
@@ -78,7 +78,7 @@ export const AGENT_ROLE_DEFINITIONS: Record<AgentRole, AgentRoleMeta> = {
     displayName: 'Editorial Designer',
     description:
       'Arranges layout, typography, and visual hierarchy to create polished, publication-ready designs.',
-    avatarKey: 'umbrella',
+    avatarKey: 'editorial-designer',
     defaultPersonality: personality(-2, 1, -2, 1, -2),
     baseSkillKeys: ['editorial-designer'],
     color: '#8b5cf6',
@@ -88,7 +88,7 @@ export const AGENT_ROLE_DEFINITIONS: Record<AgentRole, AgentRoleMeta> = {
     displayName: 'Social Media Designer',
     description:
       'Creates scroll-stopping content optimized for each social platform and its audience.',
-    avatarKey: 'surfer',
+    avatarKey: 'social-media-designer',
     defaultPersonality: personality(-3, -3, -1, 0, -2),
     baseSkillKeys: ['social-media-designer'],
     color: '#06b6d4',
@@ -98,7 +98,7 @@ export const AGENT_ROLE_DEFINITIONS: Record<AgentRole, AgentRoleMeta> = {
     displayName: 'Creative Director',
     description:
       'Orchestrates the team, sets creative direction, ensures brand coherence, and holds the quality bar.',
-    avatarKey: 'chef',
+    avatarKey: 'creative-director',
     defaultPersonality: personality(-3, 0, -2, 1, -1),
     baseSkillKeys: ['creative-director'],
     color: '#ef4444',
@@ -108,7 +108,7 @@ export const AGENT_ROLE_DEFINITIONS: Record<AgentRole, AgentRoleMeta> = {
     displayName: 'Design Engineer',
     description:
       'Bridges design and code — builds responsive components, implements design systems, and ensures pixel-perfect execution.',
-    avatarKey: 'skater2',
+    avatarKey: 'design-engineer',
     defaultPersonality: personality(1, 1, -1, 2, 1),
     baseSkillKeys: ['design-engineer'],
     color: '#0ea5e9',
@@ -118,7 +118,7 @@ export const AGENT_ROLE_DEFINITIONS: Record<AgentRole, AgentRoleMeta> = {
     displayName: 'Brand Strategist',
     description:
       'Defines brand identity, visual systems, tone of voice, and ensures consistency across every touchpoint.',
-    avatarKey: 'chef',
+    avatarKey: 'brand-strategist',
     defaultPersonality: personality(-2, 1, -1, 1, -1),
     baseSkillKeys: ['brand-strategist'],
     color: '#a855f7',
@@ -128,7 +128,7 @@ export const AGENT_ROLE_DEFINITIONS: Record<AgentRole, AgentRoleMeta> = {
     displayName: 'Marketing Strategist',
     description:
       'Plans campaigns, targets audiences, optimizes funnels, and drives measurable growth through strategic marketing.',
-    avatarKey: 'surfer',
+    avatarKey: 'marketing-strategist',
     defaultPersonality: personality(-2, 0, 0, 1, 1),
     baseSkillKeys: ['marketing-strategist'],
     color: '#f43f5e',
@@ -138,7 +138,7 @@ export const AGENT_ROLE_DEFINITIONS: Record<AgentRole, AgentRoleMeta> = {
     displayName: 'Print Designer',
     description:
       'Creates production-ready designs for physical media — packaging, signage, brochures, and large-format print.',
-    avatarKey: 'umbrella',
+    avatarKey: 'print-designer',
     defaultPersonality: personality(-1, 1, 1, 1, 0),
     baseSkillKeys: ['print-designer'],
     color: '#84cc16',
@@ -148,7 +148,7 @@ export const AGENT_ROLE_DEFINITIONS: Record<AgentRole, AgentRoleMeta> = {
     displayName: 'Motion Designer',
     description:
       'Brings designs to life with animation, transitions, micro-interactions, and motion graphics.',
-    avatarKey: 'musician',
+    avatarKey: 'motion-designer',
     defaultPersonality: personality(-3, -2, -3, 0, -1),
     baseSkillKeys: ['motion-designer'],
     color: '#06b6d4',
@@ -158,7 +158,7 @@ export const AGENT_ROLE_DEFINITIONS: Record<AgentRole, AgentRoleMeta> = {
     displayName: 'Accessibility Specialist',
     description:
       'Ensures designs are inclusive and usable by everyone — WCAG compliance, assistive technology, and universal design.',
-    avatarKey: 'doctor',
+    avatarKey: 'accessibility-specialist',
     defaultPersonality: personality(2, 1, 1, 2, -1),
     baseSkillKeys: ['accessibility-specialist'],
     color: '#14b8a6',
@@ -168,7 +168,7 @@ export const AGENT_ROLE_DEFINITIONS: Record<AgentRole, AgentRoleMeta> = {
     displayName: 'Content Strategist',
     description:
       'Plans content architecture, editorial calendars, taxonomy, and ensures content serves both users and business goals.',
-    avatarKey: 'detective',
+    avatarKey: 'content-strategist',
     defaultPersonality: personality(1, 0, 0, 1, -1),
     baseSkillKeys: ['content-strategist'],
     color: '#d946ef',
@@ -178,7 +178,7 @@ export const AGENT_ROLE_DEFINITIONS: Record<AgentRole, AgentRoleMeta> = {
     displayName: 'SEO Specialist',
     description:
       'Optimizes content and structure for search visibility — keywords, meta tags, technical SEO, and structured data.',
-    avatarKey: 'ducky',
+    avatarKey: 'seo-specialist',
     defaultPersonality: personality(2, 1, 1, 2, 2),
     baseSkillKeys: ['seo-specialist'],
     color: '#f97316',
