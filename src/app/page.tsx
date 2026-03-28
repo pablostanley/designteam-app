@@ -46,23 +46,20 @@ export default function Home() {
       </header>
 
       {/* Hero */}
-      <main className="flex flex-1 flex-col items-center px-6 py-16 sm:py-24 text-center">
+      <main className="flex flex-1 flex-col items-center justify-center px-6 py-16 sm:py-24 text-center">
         {/* Agent doodles — randomized on each load */}
-        <div className="flex items-end justify-center -space-x-6 mb-8">
+        <div className="flex items-end justify-center -space-x-2 mb-8">
           {avatars.map((avatar, i) => (
-            <div
+            <Image
               key={avatar.key}
-              className="relative h-[120px] w-[80px]"
+              src={avatar.src}
+              alt={avatar.key}
+              width={140}
+              height={140}
+              className="h-[140px] w-auto object-contain drop-shadow-sm"
               style={{ zIndex: avatars.length - i }}
-            >
-              <Image
-                src={avatar.src}
-                alt={avatar.key}
-                fill
-                className="object-contain object-bottom drop-shadow-sm"
-                priority
-              />
-            </div>
+              priority
+            />
           ))}
         </div>
 
