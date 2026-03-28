@@ -1,3 +1,6 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { AVATAR_MAP } from "@/components/agent-avatars"
@@ -17,7 +20,8 @@ function getRandomAvatars(count: number) {
 }
 
 export default function Home() {
-  const avatars = getRandomAvatars(5)
+  const [avatars, setAvatars] = useState(ALL_AVATARS.slice(0, 5))
+  useEffect(() => { setAvatars(getRandomAvatars(5)) }, [])
 
   return (
     <div className="flex flex-1 flex-col">
