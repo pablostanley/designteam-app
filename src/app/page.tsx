@@ -48,7 +48,7 @@ export default function Home() {
       {/* Hero */}
       <main className="flex flex-1 flex-col items-center justify-center px-6 py-16 sm:py-24 text-center">
         {/* Agent doodles — randomized on each load */}
-        <div className="flex items-end justify-center -space-x-2 mb-8">
+        <div className="flex items-end justify-center -space-x-4 mb-8">
           {avatars.map((avatar, i) => (
             <Image
               key={avatar.key}
