@@ -30,12 +30,12 @@ export default function RolesPage() {
           return (
             <Card key={role.role}>
               <CardHeader className="flex flex-row items-start gap-4">
-                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
+                <div className="relative h-14 w-14 shrink-0">
                   <Image
                     src={avatarSrc}
                     alt={role.displayName}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                   />
                 </div>
                 <div className="flex-1 space-y-1">
