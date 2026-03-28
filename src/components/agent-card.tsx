@@ -66,13 +66,13 @@ export function AgentCard({ agent, isSelected, onSelect, onNameChange }: AgentCa
               if (e.key === "Escape") { setDraft(agent.name); setEditing(false) }
             }}
             onClick={(e) => e.stopPropagation()}
-            className="w-24 border-b border-foreground bg-transparent text-center text-sm font-semibold outline-none"
+            className="w-28 border-b border-foreground bg-transparent text-center text-base font-semibold outline-none"
           />
         ) : (
           <>
-            <span className="text-sm font-semibold">{agent.name}</span>
+            <span className="text-base font-semibold">{agent.name}</span>
             <Pencil
-              className="h-3 w-3 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 cursor-pointer"
+              className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 cursor-pointer"
               onClick={(e) => { e.stopPropagation(); setDraft(agent.name); setEditing(true) }}
             />
           </>
@@ -82,7 +82,7 @@ export function AgentCard({ agent, isSelected, onSelect, onNameChange }: AgentCa
       {/* Role badge */}
       <Badge
         variant="secondary"
-        className="mt-2 text-xs"
+        className="mt-2 text-sm"
         style={{ backgroundColor: meta.color + "18", color: meta.color }}
       >
         {meta.displayName}
@@ -96,7 +96,7 @@ export function AgentCard({ agent, isSelected, onSelect, onNameChange }: AgentCa
           const pct = ((value + 5) / 10) * 100
           return (
             <div key={axis.key} className="flex items-center gap-1">
-              <div className="h-1 w-full rounded-full bg-muted">
+              <div className="h-1.5 w-full rounded-full bg-muted">
                 <div className="relative h-full">
                   <div
                     className="absolute top-0 h-full rounded-full"
@@ -122,7 +122,7 @@ export function AgentCard({ agent, isSelected, onSelect, onNameChange }: AgentCa
             <Badge
               key={trait}
               variant="secondary"
-              className="text-[10px] px-1.5 py-0"
+              className="text-xs px-2 py-0.5"
             >
               {trait}
             </Badge>
@@ -130,7 +130,7 @@ export function AgentCard({ agent, isSelected, onSelect, onNameChange }: AgentCa
           {agent.traits.length > 3 && (
             <Badge
               variant="secondary"
-              className="text-[10px] px-1.5 py-0"
+              className="text-xs px-2 py-0.5"
             >
               +{agent.traits.length - 3}
             </Badge>
