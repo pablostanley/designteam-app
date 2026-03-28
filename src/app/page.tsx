@@ -50,16 +50,19 @@ export default function Home() {
         {/* Agent doodles — randomized on each load */}
         <div className="flex items-end justify-center -space-x-6 mb-8">
           {avatars.map((avatar, i) => (
-            <Image
+            <div
               key={avatar.key}
-              src={avatar.src}
-              alt={avatar.key}
-              width={100}
-              height={120}
-              className="relative object-contain drop-shadow-sm"
+              className="relative h-[120px] w-[80px]"
               style={{ zIndex: avatars.length - i }}
-              priority
-            />
+            >
+              <Image
+                src={avatar.src}
+                alt={avatar.key}
+                fill
+                className="object-contain object-bottom drop-shadow-sm"
+                priority
+              />
+            </div>
           ))}
         </div>
 
