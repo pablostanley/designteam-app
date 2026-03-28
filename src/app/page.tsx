@@ -6,37 +6,19 @@ import { UserMenu } from "@/components/user-menu"
 
 const INSTALL_CMD = "npx skills add pablostanley/designteam-app"
 
-const AVATARS = Object.entries(AVATAR_MAP).map(([key, src]) => ({ key, src }))
+const ALL_AVATARS = Object.entries(AVATAR_MAP).map(([key, src]) => ({
+  key,
+  src,
+}))
 
-const FEATURES = [
-  {
-    title: "16 Agents",
-    description:
-      "Researcher, copywriter, graphic designer, UX designer, brand strategist, and more. 32 personality traits across 4 categories with team tension dynamics.",
-  },
-  {
-    title: "17 Skills",
-    description:
-      "One skill per agent role, plus an orchestrator. Install all or pick the ones you need.",
-  },
-  {
-    title: "AI Team Builder",
-    description:
-      "Describe your project, get a team in seconds. Or build manually with bipolar personality sliders and trait pills.",
-  },
-  {
-    title: "Share & Fork",
-    description:
-      "Share your team with a link. Fork public teams to use as a starting point.",
-  },
-  {
-    title: "Works Everywhere",
-    description:
-      "Claude Code, Cursor, Codex, Windsurf, and any tool that supports skills.sh.",
-  },
-]
+function getRandomAvatars(count: number) {
+  const shuffled = [...ALL_AVATARS].sort(() => Math.random() - 0.5)
+  return shuffled.slice(0, count)
+}
 
 export default function Home() {
+  const avatars = getRandomAvatars(5)
+
   return (
     <div className="flex flex-1 flex-col">
       {/* Header */}
@@ -64,61 +46,47 @@ export default function Home() {
       </header>
 
       {/* Hero */}
-      <main className="flex flex-1 flex-col items-center px-6 py-24 text-center">
+      <main className="flex flex-1 flex-col items-center px-6 py-16 sm:py-24 text-center">
+        {/* Agent doodles — randomized on each load */}
+        <div className="flex items-end justify-center -space-x-6 mb-8">
+          {avatars.map((avatar, i) => (
+            <Image
+              key={avatar.key}
+              src={avatar.src}
+              alt={avatar.key}
+              width={100}
+              height={120}
+              className="relative object-contain drop-shadow-sm"
+              style={{ zIndex: avatars.length - i }}
+              priority
+            />
+          ))}
+        </div>
+
         <h1 className="max-w-xl text-4xl font-bold tracking-tight sm:text-5xl">
           Your AI Design Crew
         </h1>
-        <p className="mt-4 max-w-lg text-lg text-muted-foreground">
-          Install one skill. Get 16 specialized design agents.
+        <p className="mt-4 max-w-md text-lg text-muted-foreground">
+          16 specialized agents. One install. They research, write, design, and
+          ship.
         </p>
 
-        {/* Install commands */}
-        <div className="mt-8 space-y-3">
-          <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-4 py-3">
-            <code className="font-mono text-sm">{INSTALL_CMD}</code>
-            <CopyButton text={INSTALL_CMD} />
-          </div>
-          <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-4 py-3">
-            <code className="font-mono text-sm">npx designteam install &lt;team-id&gt;</code>
-            <CopyButton text="npx designteam install " />
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Install the full skill set, or install a{" "}
-            <Link href="/build" className="underline hover:text-foreground">
-              custom team
-            </Link>{" "}
-            by ID.
-          </p>
+        {/* One install command */}
+        <div className="mt-8 flex items-center gap-2 rounded-lg border bg-muted/50 px-4 py-3">
+          <code className="font-mono text-sm">{INSTALL_CMD}</code>
+          <CopyButton text={INSTALL_CMD} />
         </div>
 
-        {/* What you get */}
-        <div className="mt-20 grid w-full max-w-3xl gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map((f) => (
-            <div key={f.title} className="text-left">
-              <h3 className="text-sm font-semibold">{f.title}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {f.description}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        {/* Agent roster */}
-        <div className="mt-20 flex flex-wrap items-end justify-center gap-3">
-          {AVATARS.map((avatar) => (
-            <div
-              key={avatar.key}
-              className="relative h-14 w-14 overflow-hidden rounded-full bg-muted"
-            >
-              <Image
-                src={avatar.src}
-                alt={avatar.key}
-                fill
-                className="object-cover"
-              />
-            </div>
-          ))}
-        </div>
+        <p className="mt-3 text-sm text-muted-foreground">
+          or{" "}
+          <Link href="/build" className="underline hover:text-foreground">
+            build your team visually
+          </Link>
+          {" "}&middot;{" "}
+          <Link href="/docs" className="underline hover:text-foreground">
+            read the docs
+          </Link>
+        </p>
       </main>
 
       {/* Footer */}
