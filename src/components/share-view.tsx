@@ -13,7 +13,9 @@ interface ShareViewProps {
 export function ShareView({ team }: ShareViewProps) {
   const [sharing, setSharing] = useState(false)
   const [shareUrl, setShareUrl] = useState<string | null>(null)
+  const [shortId, setShortId] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [copiedCmd, setCopiedCmd] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -50,8 +52,10 @@ export function ShareView({ team }: ShareViewProps) {
         return
       }
 
-      const url = `${window.location.origin}/team/${data.team.short_id}`
+      const id = data.team.short_id
+      const url = `${window.location.origin}/team/${id}`
       setShareUrl(url)
+      setShortId(id)
     } catch {
       setError("Network error. Please try again.")
     } finally {
@@ -148,35 +152,51 @@ export function ShareView({ team }: ShareViewProps) {
           )}
         </div>
       ) : (
-        <div className="space-y-4 rounded-lg border p-4">
-          <p className="text-sm font-medium">Share link</p>
-          <div className="flex items-center gap-2">
-            <code className="flex-1 truncate rounded bg-muted px-3 py-2 text-sm">
-              {shareUrl}
-            </code>
-            <Button variant="outline" size="sm" onClick={handleCopy}>
-              {copied ? (
-                <Check className="h-4 w-4" />
-              ) : (
-                <Copy className="h-4 w-4" />
-              )}
-            </Button>
-            <a href={shareUrl} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="sm">
-                <ExternalLink className="h-4 w-4" />
+        <div className="space-y-6">
+          {/* CLI install command */}
+          <div className="rounded-xl border p-6 space-y-3">
+            <p className="text-sm font-medium">Install on your CLI</p>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 rounded bg-muted px-3 py-2 font-mono text-sm">
+                npx designteam install {shortId}
+              </code>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  await navigator.clipboard.writeText(`npx designteam install ${shortId}`)
+                  setCopiedCmd(true)
+                  setTimeout(() => setCopiedCmd(false), 2000)
+                }}
+              >
+                {copiedCmd ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               </Button>
-            </a>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Installs your team as a skill file in any project.
+            </p>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setShareUrl(null)
-              setError(null)
-            }}
-          >
-            Generate new link
-          </Button>
+
+          {/* Share link */}
+          <div className="rounded-xl border p-6 space-y-3">
+            <p className="text-sm font-medium">Share link</p>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 truncate rounded bg-muted px-3 py-2 text-sm">
+                {shareUrl}
+              </code>
+              <Button variant="outline" size="sm" onClick={handleCopy}>
+                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              </Button>
+              <a href={shareUrl} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="sm">
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
+              </a>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Anyone with this link can view and fork your team.
+            </p>
+          </div>
         </div>
       )}
     </div>
