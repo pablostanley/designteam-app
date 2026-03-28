@@ -36,7 +36,7 @@ export function AgentCard({ agent, isSelected, onSelect, onNameChange }: AgentCa
     <button
       type="button"
       onClick={onSelect}
-      className={`group relative flex w-56 flex-col items-center rounded-xl border-2 bg-card p-5 text-left transition-all hover:shadow-md h-[340px] ${
+      className={`group relative flex w-56 flex-col items-center rounded-xl border-2 bg-card p-5 text-left transition-all hover:shadow-md h-[380px] ${
         isSelected
           ? "border-foreground shadow-md"
           : "border-transparent hover:border-muted-foreground/30"
@@ -115,26 +115,18 @@ export function AgentCard({ agent, isSelected, onSelect, onNameChange }: AgentCa
         })}
       </div>
 
-      {/* Trait pills */}
+      {/* Trait pills — single line, horizontal scroll */}
       {agent.traits.length > 0 && (
-        <div className="mt-2 flex flex-wrap justify-center gap-1">
-          {agent.traits.slice(0, 3).map((trait) => (
+        <div className="mt-2 flex w-full gap-1 overflow-x-auto scrollbar-none">
+          {agent.traits.map((trait) => (
             <Badge
               key={trait}
               variant="secondary"
-              className="text-xs px-2 py-0.5"
+              className="shrink-0 text-xs px-2 py-0.5"
             >
               {trait}
             </Badge>
           ))}
-          {agent.traits.length > 3 && (
-            <Badge
-              variant="secondary"
-              className="text-xs px-2 py-0.5"
-            >
-              +{agent.traits.length - 3}
-            </Badge>
-          )}
         </div>
       )}
     </button>

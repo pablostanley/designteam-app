@@ -75,7 +75,7 @@ export function PartyLineup({
               key={`empty-${i}`}
               variant="outline"
               onClick={onRecruit}
-              className="flex h-[340px] w-56 flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-muted-foreground/20 text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground"
+              className="flex h-[380px] w-56 flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-muted-foreground/20 text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground"
             >
               <Plus className="h-6 w-6" />
               <span className="text-sm font-medium">Recruit</span>
