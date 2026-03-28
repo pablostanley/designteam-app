@@ -81,12 +81,12 @@ export function PersonalityEditor({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-md p-0">
+      <SheetContent side="right" className="w-full sm:max-w-lg p-0">
         <ScrollArea className="h-full">
-          <div className="flex flex-col gap-6 p-6">
+          <div className="flex flex-col gap-8 p-8">
             <SheetHeader className="p-0">
               {/* Portrait */}
-              <div className="relative mx-auto h-40 w-40">
+              <div className="relative mx-auto h-48 w-48">
                 <Image
                   src={avatarSrc}
                   alt={agent.name}
@@ -126,12 +126,12 @@ export function PersonalityEditor({
             </SheetHeader>
 
             {/* Bipolar Sliders */}
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-5">
               <h3 className="text-sm font-semibold">Personality</h3>
               {PERSONALITY_AXES.map((axis) => {
                 const value = agent.personality.sliders[axis.key]
                 return (
-                  <div key={axis.key} className="flex flex-col gap-1.5">
+                  <div key={axis.key} className="flex flex-col gap-2">
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <span>{axis.leftLabel}</span>
                       <span>{axis.rightLabel}</span>
@@ -156,7 +156,7 @@ export function PersonalityEditor({
             </div>
 
             {/* Trait Pills — organized by category */}
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-5">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold">Traits</h3>
                 <span className="text-xs text-muted-foreground">max {MAX_TRAITS_PER_CATEGORY} per category</span>
