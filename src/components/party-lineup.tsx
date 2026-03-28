@@ -29,7 +29,7 @@ export function PartyLineup({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-end justify-center gap-4">
+      <div className="flex flex-wrap items-end justify-center gap-6">
         {agents.map((agent, index) => (
           <div key={agent.id} className="group relative">
             <AgentCard
@@ -75,7 +75,7 @@ export function PartyLineup({
               key={`empty-${i}`}
               variant="outline"
               onClick={onRecruit}
-              className="flex h-56 w-44 flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-muted-foreground/20 text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground"
+              className="flex h-[340px] w-56 flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-muted-foreground/20 text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground"
             >
               <Plus className="h-6 w-6" />
               <span className="text-sm font-medium">Recruit</span>

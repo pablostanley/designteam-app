@@ -36,14 +36,14 @@ export function AgentCard({ agent, isSelected, onSelect, onNameChange }: AgentCa
     <button
       type="button"
       onClick={onSelect}
-      className={`group relative flex w-44 flex-col items-center rounded-xl border-2 bg-card p-4 text-left transition-all hover:shadow-md ${
+      className={`group relative flex w-56 flex-col items-center rounded-xl border-2 bg-card p-5 text-left transition-all hover:shadow-md h-[340px] ${
         isSelected
           ? "border-foreground shadow-md"
           : "border-transparent hover:border-muted-foreground/30"
       }`}
     >
       {/* Avatar */}
-      <div className="relative mb-3 h-32 w-32">
+      <div className="relative mb-4 h-36 w-36">
         <Image
           src={avatarSrc}
           alt={agent.name}
@@ -82,14 +82,14 @@ export function AgentCard({ agent, isSelected, onSelect, onNameChange }: AgentCa
       {/* Role badge */}
       <Badge
         variant="secondary"
-        className="mt-1.5 text-xs"
+        className="mt-2 text-xs"
         style={{ backgroundColor: meta.color + "18", color: meta.color }}
       >
         {meta.displayName}
       </Badge>
 
       {/* Personality mini bars */}
-      <div className="mt-3 flex w-full flex-col gap-1.5">
+      <div className="mt-4 flex w-full flex-1 flex-col gap-2">
         {PERSONALITY_AXES.map((axis) => {
           const value = agent.personality.sliders[axis.key]
           // Map -5..+5 to 0..100%
