@@ -84,17 +84,26 @@ export function PartyLineup({
       </div>
 
       {tensions.length > 0 && (
-        <div className="flex flex-col gap-2 rounded-lg border border-border bg-muted/30 p-4">
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Team Dynamics</h4>
-          <div className="flex flex-col gap-1.5">
-            {tensions.map((t, i) => (
-              <div key={i} className="flex items-center gap-2 text-sm">
-                <Zap className="h-3.5 w-3.5 shrink-0 text-amber-500" />
-                <span className="text-foreground">
-                  {t.description} &mdash; {t.agentA} ({t.traitA}) vs {t.agentB} ({t.traitB})
-                </span>
-              </div>
-            ))}
+        <div className="mx-auto w-full max-w-prose">
+          <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-6">
+            <h4 className="text-sm font-semibold text-foreground">Team Dynamics</h4>
+            <p className="text-sm text-muted-foreground">
+              Productive tensions between your agents that lead to better work.
+            </p>
+            <div className="flex flex-col gap-2.5 mt-1">
+              {tensions.map((t, i) => (
+                <div key={i} className="flex items-start gap-3 text-sm">
+                  <Zap className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                  <div>
+                    <span className="font-medium text-foreground">{t.agentA}</span>
+                    <span className="text-muted-foreground"> ({t.traitA}) vs </span>
+                    <span className="font-medium text-foreground">{t.agentB}</span>
+                    <span className="text-muted-foreground"> ({t.traitB})</span>
+                    <p className="text-muted-foreground mt-0.5">{t.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
