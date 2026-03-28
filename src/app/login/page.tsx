@@ -1,15 +1,19 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState("")
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
+  const searchParams = useSearchParams()
+  const authError = searchParams.get("error")
+  const errorMessage = searchParams.get("message")
   const supabase = createClient()
 
   async function handleGitHub() {
@@ -39,6 +43,12 @@ export default function LoginPage() {
             to save and manage your teams
           </p>
         </div>
+
+        {authError && (
+          <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+            {errorMessage || "Sign in failed. Try again or use a different method."}
+          </div>
+        )}
 
         <Button onClick={handleGitHub} className="w-full" size="lg">
           Continue with GitHub
@@ -84,5 +94,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   )
 }

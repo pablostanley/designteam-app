@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Wand2, Sparkles, AlertCircle } from "lucide-react"
+import { Wand2, AlertCircle } from "lucide-react"
 import { useCompletion } from "@ai-sdk/react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -9,12 +9,12 @@ import type { Team } from "@/lib/agent-builder"
 import { parseAITeamResponse } from "@/lib/agent-builder/ai-team-builder"
 
 const SUGGESTIONS = [
-  "A SaaS landing page for a fintech startup",
-  "Complete rebrand for a sustainable fashion brand",
-  "Social media campaign for a product launch",
-  "Mobile app onboarding flow for a health app",
-  "Marketing site for an AI developer tool",
-  "Pitch deck for a Series A fundraise",
+  "SaaS landing page",
+  "Brand identity",
+  "Product launch",
+  "App onboarding",
+  "Marketing site",
+  "Pitch deck",
 ]
 
 interface AITeamBuilderProps {
@@ -50,7 +50,6 @@ export function AITeamBuilder({ onTeamGenerated }: AITeamBuilderProps) {
   function handleSuggestion(s: string) {
     if (isLoading) return
     setProjectDesc(s)
-    complete(s)
   }
 
   // Try to parse streaming JSON for a live preview of agent count
@@ -82,19 +81,16 @@ export function AITeamBuilder({ onTeamGenerated }: AITeamBuilderProps) {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 py-8">
-      <div className="text-center space-y-2">
-        <h2 className="text-xl font-bold">Build Your Team with AI</h2>
-        <p className="text-sm text-muted-foreground">
-          Describe your project and we&apos;ll assemble the right team with the right personalities.
-        </p>
+      <div className="text-center">
+        <h2 className="text-xl font-bold">What should your team build?</h2>
       </div>
 
       <div className="space-y-3">
         <Textarea
-          placeholder="Describe your project... (e.g., 'A SaaS landing page for a fintech startup targeting millennials')"
+          placeholder="What's the project? Add personality hints too, like 'bold and playful' or 'minimal and serious'"
           value={projectDesc}
           onChange={(e) => setProjectDesc(e.target.value)}
-          rows={3}
+          rows={2}
           disabled={isLoading}
           className="resize-none"
           onKeyDown={(e) => {
@@ -105,39 +101,28 @@ export function AITeamBuilder({ onTeamGenerated }: AITeamBuilderProps) {
           }}
         />
 
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex flex-wrap gap-1.5 min-w-0">
-            {SUGGESTIONS.slice(0, 3).map((s) => (
-              <Button
-                key={s}
-                variant="outline"
-                size="sm"
-                onClick={() => handleSuggestion(s)}
-                disabled={isLoading}
-                className="rounded-full text-xs truncate max-w-48 h-auto px-2.5 py-1"
-              >
-                {s}
-              </Button>
-            ))}
-          </div>
-          <Button
-            onClick={handleSubmit}
-            disabled={isLoading || !projectDesc.trim()}
-            className="shrink-0"
-          >
-            {isLoading ? (
-              <>
-                <Sparkles className="mr-1.5 h-3.5 w-3.5 animate-pulse" />
-                Building...
-              </>
-            ) : (
-              <>
-                <Wand2 className="mr-1.5 h-3.5 w-3.5" />
-                Build Team
-              </>
-            )}
-          </Button>
+        <div className="flex flex-wrap gap-1.5">
+          {SUGGESTIONS.map((s) => (
+            <Button
+              key={s}
+              variant="outline"
+              size="sm"
+              onClick={() => handleSuggestion(s)}
+              disabled={isLoading}
+              className="rounded-full text-xs h-auto px-2.5 py-1"
+            >
+              {s}
+            </Button>
+          ))}
         </div>
+
+        <Button
+          onClick={handleSubmit}
+          disabled={isLoading || !projectDesc.trim()}
+          className="w-full"
+        >
+          {isLoading ? "Building..." : "Build team"}
+        </Button>
       </div>
 
       {error && !fallbackMode && (
