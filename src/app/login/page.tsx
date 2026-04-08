@@ -69,7 +69,11 @@ function LoginForm() {
           </p>
         ) : (
           <div className="space-y-2">
+            <label htmlFor="login-email" className="text-sm font-medium">
+              Email address
+            </label>
             <Input
+              id="login-email"
               placeholder="you@example.com"
               type="email"
               value={email}

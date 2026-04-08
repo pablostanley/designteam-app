@@ -91,7 +91,7 @@ export async function POST(req: Request) {
   }
 
   const result = streamText({
-    model: anthropic("claude-sonnet-4-20250514"),
+    model: anthropic("claude-sonnet-4-6"),
     system: SYSTEM_PROMPT,
     prompt: `Build a design team for this project: ${prompt.trim()}`,
     maxOutputTokens: 4000,

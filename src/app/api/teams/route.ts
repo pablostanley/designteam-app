@@ -65,7 +65,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Too many agents (max 16)' }, { status: 400 })
   }
 
-  const teamName = typeof name === 'string' ? name.slice(0, 100) : 'My Team'
+  // Sanitize string fields in team_data to prevent stored XSS
+  const stripHtml = (s: unknown) => typeof s === 'string' ? s.replace(/<[^>]*>/g, '').slice(0, 500) : s
+  if (typeof team_data.name === 'string') team_data.name = stripHtml(team_data.name)
+  for (const agent of agents) {
+    if (agent && typeof agent === 'object') {
+      agent.name = stripHtml(agent.name)
+      agent.role = stripHtml(agent.role)
+      agent.customPrompt = stripHtml(agent.customPrompt)
+    }
+  }
+
+  const teamName = typeof name === 'string' ? name.replace(/<[^>]*>/g, '').slice(0, 100) : 'My Team'
 
   // Get user if authenticated (optional)
   const { data: { user } } = await supabase.auth.getUser()

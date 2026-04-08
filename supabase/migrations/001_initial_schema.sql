@@ -88,8 +88,8 @@ create policy "Users can insert own profile"
   on public.profiles for insert
   with check (auth.uid() = id);
 
--- RPC: increment fork count
+-- RPC: increment fork count (SECURITY DEFINER so it works for anonymous users)
 create or replace function public.increment_fork_count(team_id uuid)
 returns void as $$
   update public.teams set fork_count = fork_count + 1 where id = team_id;
-$$ language sql;
+$$ language sql security definer;

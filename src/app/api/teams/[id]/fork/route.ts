@@ -17,8 +17,8 @@ export async function POST(
   const { id } = await params
 
   // Get the source team
-  const isUuid = id.length === 36 && id.includes('-')
-  const column = isUuid ? 'id' : 'short_id'
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  const column = UUID_RE.test(id) ? 'id' : 'short_id'
 
   const { data: source, error: fetchErr } = await supabase
     .from('teams')

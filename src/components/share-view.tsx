@@ -144,7 +144,7 @@ export function ShareView({ team }: ShareViewProps) {
 
       {!shareUrl ? (
         <div className="flex flex-col items-center gap-3">
-          <Button onClick={handleShare} disabled={sharing} size="lg">
+          <Button onClick={handleShare} disabled={sharing || !!shareUrl} size="lg">
             {sharing ? "Sharing..." : "Generate share link"}
           </Button>
           {error && (
