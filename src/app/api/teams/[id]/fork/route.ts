@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { nanoid } from 'nanoid'
 import { rateLimit, getIP } from '@/lib/rate-limit'
+import { idColumn } from '@/lib/validation'
 
 // POST /api/teams/:id/fork — fork a public team
 export async function POST(
@@ -17,8 +18,7 @@ export async function POST(
   const { id } = await params
 
   // Get the source team
-  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-  const column = UUID_RE.test(id) ? 'id' : 'short_id'
+  const column = idColumn(id)
 
   const { data: source, error: fetchErr } = await supabase
     .from('teams')

@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { rateLimit, getIP } from '@/lib/rate-limit'
-
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-
-function idColumn(id: string) {
-  return UUID_RE.test(id) ? 'id' : 'short_id'
-}
+import { idColumn } from '@/lib/validation'
 
 // GET /api/teams/:id — get team by short_id or uuid
 export async function GET(

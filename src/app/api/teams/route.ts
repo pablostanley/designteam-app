@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { nanoid } from 'nanoid'
 import { rateLimit, getIP } from '@/lib/rate-limit'
+import { sanitizeString } from '@/lib/validation'
 
 // GET /api/teams — list public teams (or user's own)
 // Query params: ?user=me (authenticated user's teams), default = recent public
@@ -65,18 +66,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Too many agents (max 16)' }, { status: 400 })
   }
 
-  // Sanitize string fields in team_data to prevent stored XSS
-  const stripHtml = (s: unknown) => typeof s === 'string' ? s.replace(/<[^>]*>/g, '').slice(0, 500) : s
-  if (typeof team_data.name === 'string') team_data.name = stripHtml(team_data.name)
+  // Sanitize string fields in team_data (defense-in-depth alongside React's output encoding)
+  if (typeof team_data.name === 'string') team_data.name = sanitizeString(team_data.name)
   for (const agent of agents) {
     if (agent && typeof agent === 'object') {
-      agent.name = stripHtml(agent.name)
-      agent.role = stripHtml(agent.role)
-      agent.customPrompt = stripHtml(agent.customPrompt)
+      agent.name = sanitizeString(agent.name)
+      agent.role = sanitizeString(agent.role)
+      agent.customPrompt = sanitizeString(agent.customPrompt)
+      if (Array.isArray(agent.traits)) {
+        agent.traits = agent.traits.map((t: unknown) => sanitizeString(t, 100))
+      }
     }
   }
 
-  const teamName = typeof name === 'string' ? name.replace(/<[^>]*>/g, '').slice(0, 100) : 'My Team'
+  const teamName = typeof name === 'string' ? sanitizeString(name, 100) as string : 'My Team'
 
   // Get user if authenticated (optional)
   const { data: { user } } = await supabase.auth.getUser()
