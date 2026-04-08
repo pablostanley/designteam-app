@@ -70,16 +70,16 @@ export async function POST(request: NextRequest) {
   if (typeof team_data.name === 'string') team_data.name = sanitizeString(team_data.name)
   for (const agent of agents) {
     if (agent && typeof agent === 'object') {
-      agent.name = sanitizeString(agent.name)
-      agent.role = sanitizeString(agent.role)
-      agent.customPrompt = sanitizeString(agent.customPrompt)
+      if (typeof agent.name === 'string') agent.name = sanitizeString(agent.name)
+      if (typeof agent.role === 'string') agent.role = sanitizeString(agent.role)
+      if (typeof agent.customPrompt === 'string') agent.customPrompt = sanitizeString(agent.customPrompt)
       if (Array.isArray(agent.traits)) {
-        agent.traits = agent.traits.map((t: unknown) => sanitizeString(t, 100))
+        agent.traits = agent.traits.slice(0, 20).filter((t: unknown): t is string => typeof t === 'string').map((t: string) => sanitizeString(t, 100))
       }
     }
   }
 
-  const teamName = typeof name === 'string' ? sanitizeString(name, 100) as string : 'My Team'
+  const teamName = typeof name === 'string' ? sanitizeString(name, 100) : 'My Team'
 
   // Get user if authenticated (optional)
   const { data: { user } } = await supabase.auth.getUser()

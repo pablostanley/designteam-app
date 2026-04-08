@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useState } from "react"
+import { Suspense, useRef, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,7 +14,7 @@ function LoginForm() {
   const searchParams = useSearchParams()
   const authError = searchParams.get("error")
   const errorMessage = searchParams.get("message")
-  const supabase = createClient()
+  const supabase = useRef(createClient()).current
 
   async function handleGitHub() {
     await supabase.auth.signInWithOAuth({

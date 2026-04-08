@@ -6,8 +6,7 @@ export function idColumn(id: string): 'id' | 'short_id' {
 }
 
 /** Strip anything that looks like an HTML tag or encoded entity, then truncate */
-export function sanitizeString(s: unknown, maxLength = 500): unknown {
-  if (typeof s !== 'string') return s
+export function sanitizeString(s: string, maxLength = 500): string {
   return s
     .replace(/<[^>]*>?/g, '')        // strip HTML tags (including unclosed)
     .replace(/&[a-z]+;/gi, '')       // strip HTML entities like &lt; &gt;

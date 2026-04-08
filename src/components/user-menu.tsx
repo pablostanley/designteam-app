@@ -19,7 +19,8 @@ export function UserMenu() {
       setUser(session?.user ?? null)
     })
     return () => subscription.unsubscribe()
-  }, [supabase])
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- supabase is stable via useRef
+  }, [])
 
   if (!user) {
     return (

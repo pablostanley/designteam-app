@@ -18,7 +18,6 @@ export function ShareView({ team }: ShareViewProps) {
   const [copiedCmd, setCopiedCmd] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
   const [savedId, setSavedId] = useState<string | null>(null)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
@@ -87,7 +86,6 @@ export function ShareView({ team }: ShareViewProps) {
         setError(data.error ?? "Failed to save team")
         return
       }
-      setSaved(true)
       setSavedId(data.team.short_id)
     } catch {
       setError("Network error. Please try again.")
@@ -122,7 +120,7 @@ export function ShareView({ team }: ShareViewProps) {
             disabled={saving || !!savedId}
             size="lg"
           >
-            {saved ? (
+            {savedId ? (
               <>
                 <Check className="mr-2 h-4 w-4" />
                 Saved to account
@@ -146,7 +144,7 @@ export function ShareView({ team }: ShareViewProps) {
 
       {!shareUrl ? (
         <div className="flex flex-col items-center gap-3">
-          <Button onClick={handleShare} disabled={sharing || !!shareUrl} size="lg">
+          <Button onClick={handleShare} disabled={sharing} size="lg">
             {sharing ? "Sharing..." : "Generate share link"}
           </Button>
           {error && (
