@@ -1,22 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { rateLimit, getIP } from '@/lib/rate-limit'
+import { idColumn } from '@/lib/validation'
 
 // GET /api/teams/:id — get team by short_id or uuid
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const ip = getIP(request)
+  if (!rateLimit(`teams-get:${ip}`, 30, 60_000)) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   const { createClient } = await import('@/lib/supabase/server')
   const supabase = await createClient()
   const { id } = await params
 
-  // Try short_id first, then uuid
-  const isUuid = id.length === 36 && id.includes('-')
-  const column = isUuid ? 'id' : 'short_id'
-
   const { data, error } = await supabase
     .from('teams')
     .select('*')
-    .eq(column, id)
+    .eq(idColumn(id), id)
     .single()
 
   if (error || !data) return NextResponse.json({ error: 'Team not found' }, { status: 404 })
@@ -28,6 +31,11 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const ip = getIP(request)
+  if (!rateLimit(`teams-put:${ip}`, 15, 60_000)) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   const { createClient } = await import('@/lib/supabase/server')
   const supabase = await createClient()
   const { id } = await params
@@ -35,9 +43,6 @@ export async function PUT(
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
-
-  const isUuid = id.length === 36 && id.includes('-')
-  const column = isUuid ? 'id' : 'short_id'
 
   const updates: Record<string, unknown> = {}
   if (body.name) updates.name = body.name
@@ -50,7 +55,7 @@ export async function PUT(
   const { data, error } = await supabase
     .from('teams')
     .update(updates)
-    .eq(column, id)
+    .eq(idColumn(id), id)
     .eq('user_id', user.id)
     .select('id, short_id')
     .single()
@@ -65,6 +70,11 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const ip = getIP(request)
+  if (!rateLimit(`teams-delete:${ip}`, 15, 60_000)) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   const { createClient } = await import('@/lib/supabase/server')
   const supabase = await createClient()
   const { id } = await params
@@ -72,15 +82,14 @@ export async function DELETE(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
-  const isUuid = id.length === 36 && id.includes('-')
-  const column = isUuid ? 'id' : 'short_id'
-
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('teams')
     .delete()
-    .eq(column, id)
+    .eq(idColumn(id), id)
     .eq('user_id', user.id)
+    .select('id')
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (!data || data.length === 0) return NextResponse.json({ error: 'Not found or not authorized' }, { status: 404 })
   return NextResponse.json({ ok: true })
 }

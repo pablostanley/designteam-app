@@ -1,21 +1,25 @@
 import { NextRequest } from 'next/server'
+import { rateLimit, getIP } from '@/lib/rate-limit'
+import { idColumn } from '@/lib/validation'
 
 // GET /api/teams/:id/skill — returns raw SKILL.md content
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const ip = getIP(request)
+  if (!rateLimit(`teams-skill:${ip}`, 30, 60_000)) {
+    return new Response('Too many requests', { status: 429, headers: { 'Content-Type': 'text/plain' } })
+  }
+
   const { createClient } = await import('@/lib/supabase/server')
   const supabase = await createClient()
   const { id } = await params
 
-  const isUuid = id.length === 36 && id.includes('-')
-  const column = isUuid ? 'id' : 'short_id'
-
   const { data, error } = await supabase
     .from('teams')
     .select('*')
-    .eq(column, id)
+    .eq(idColumn(id), id)
     .eq('is_public', true)
     .single()
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { nanoid } from 'nanoid'
 import { rateLimit, getIP } from '@/lib/rate-limit'
+import { sanitizeString } from '@/lib/validation'
 
 // GET /api/teams — list public teams (or user's own)
 // Query params: ?user=me (authenticated user's teams), default = recent public
@@ -65,7 +66,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Too many agents (max 16)' }, { status: 400 })
   }
 
-  const teamName = typeof name === 'string' ? name.slice(0, 100) : 'My Team'
+  // Sanitize string fields in team_data (defense-in-depth alongside React's output encoding)
+  if (typeof team_data.name === 'string') team_data.name = sanitizeString(team_data.name)
+  for (const agent of agents) {
+    if (agent && typeof agent === 'object') {
+      if (typeof agent.name === 'string') agent.name = sanitizeString(agent.name)
+      if (typeof agent.role === 'string') agent.role = sanitizeString(agent.role)
+      if (typeof agent.customPrompt === 'string') agent.customPrompt = sanitizeString(agent.customPrompt)
+      if (Array.isArray(agent.traits)) {
+        agent.traits = agent.traits.slice(0, 20).filter((t: unknown): t is string => typeof t === 'string').map((t: string) => sanitizeString(t, 100))
+      }
+    }
+  }
+
+  const teamName = typeof name === 'string' ? sanitizeString(name, 100) : 'My Team'
 
   // Get user if authenticated (optional)
   const { data: { user } } = await supabase.auth.getUser()

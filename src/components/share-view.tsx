@@ -18,7 +18,7 @@ export function ShareView({ team }: ShareViewProps) {
   const [copiedCmd, setCopiedCmd] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [savedId, setSavedId] = useState<string | null>(null)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
@@ -64,6 +64,7 @@ export function ShareView({ team }: ShareViewProps) {
   }
 
   async function handleSave() {
+    if (savedId) return
     if (team.agents.length === 0) {
       setError("Add at least one agent before saving.")
       return
@@ -85,8 +86,7 @@ export function ShareView({ team }: ShareViewProps) {
         setError(data.error ?? "Failed to save team")
         return
       }
-      setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
+      setSavedId(data.team.short_id)
     } catch {
       setError("Network error. Please try again.")
     } finally {
@@ -117,10 +117,10 @@ export function ShareView({ team }: ShareViewProps) {
           <Button
             variant="outline"
             onClick={handleSave}
-            disabled={saving || saved}
+            disabled={saving || !!savedId}
             size="lg"
           >
-            {saved ? (
+            {savedId ? (
               <>
                 <Check className="mr-2 h-4 w-4" />
                 Saved to account

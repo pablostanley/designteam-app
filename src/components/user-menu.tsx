@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
@@ -8,7 +8,8 @@ import type { User } from "@supabase/supabase-js"
 
 export function UserMenu() {
   const [user, setUser] = useState<User | null>(null)
-  const supabase = createClient()
+  const supabaseRef = useRef(createClient())
+  const supabase = supabaseRef.current
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data.user))
@@ -18,7 +19,8 @@ export function UserMenu() {
       setUser(session?.user ?? null)
     })
     return () => subscription.unsubscribe()
-  }, [supabase])
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- supabase is stable via useRef
+  }, [])
 
   if (!user) {
     return (

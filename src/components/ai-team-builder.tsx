@@ -145,7 +145,7 @@ export function AITeamBuilder({ onTeamGenerated }: AITeamBuilderProps) {
               Assembling{streamingTeamName ? ` "${streamingTeamName}"` : " your team"}
               {streamingAgentCount > 0 && (
                 <span>
-                  {" "}&mdash; {streamingAgentCount} agent{streamingAgentCount !== 1 ? "s" : ""} so far
+                  , {streamingAgentCount} agent{streamingAgentCount !== 1 ? "s" : ""} so far
                 </span>
               )}
             </span>
