@@ -14,6 +14,7 @@ import {
   uid, teamUid,
   getMood, getConvictionScore, personalityToModifiers,
   reportOutcome, applyDecay,
+  addMemory, recordCollaboration,
 } from '@designteam/core'
 
 const API_BASE = 'https://designteam.app'
@@ -258,15 +259,17 @@ function timeAgo(isoDate) {
  */
 function loadAllDecayedStates(team) {
   const raw = loadAllAgentStates()
-  const graph = loadRelationships() || { teamId: team.id, relationships: [] }
+  let graph = loadRelationships() || { teamId: team.id, relationships: [] }
   const states = {}
   for (const agent of team.agents) {
     const s = raw[agent.id]
     if (!s) continue
-    const { state: decayed } = applyDecay(s, graph)
-    states[agent.id] = decayed
-    saveAgentState(agent.id, decayed)
+    const result = applyDecay(s, graph)
+    states[agent.id] = result.state
+    graph = result.graph
+    saveAgentState(agent.id, result.state)
   }
+  saveRelationships(graph)
   return states
 }
 
@@ -274,9 +277,10 @@ function loadDecayedAgentState(agentId, teamId) {
   const state = loadAgentState(agentId)
   if (!state) return null
   const graph = loadRelationships() || { teamId, relationships: [] }
-  const { state: decayed } = applyDecay(state, graph)
-  saveAgentState(agentId, decayed)
-  return decayed
+  const result = applyDecay(state, graph)
+  saveAgentState(agentId, result.state)
+  saveRelationships(result.graph)
+  return result.state
 }
 
 function requireTeam() {
@@ -523,7 +527,7 @@ async function cmdRecruit(roleName) {
   }
 
   const newAgent = {
-    id: `agent-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+    id: uid(),
     name: agentName,
     role,
     personality: meta.defaultPersonality,
@@ -536,8 +540,7 @@ async function cmdRecruit(roleName) {
   team.updatedAt = new Date().toISOString()
   saveTeam(team)
 
-  const { saveAgentState: saveState } = await import('./state.mjs')
-  saveState(newAgent.id, createDefaultLivingState(newAgent.id))
+  saveAgentState(newAgent.id, createDefaultLivingState(newAgent.id))
 
   console.log()
   console.log(`  ${agentName} (${meta.displayName}) has joined your team!`)
@@ -569,7 +572,7 @@ async function cmdFire(name) {
   console.log(`  ${agent.name} (${displayName(agent.role)}) has left the team.`)
   console.log()
   console.log(`  Your team now has ${team.agents.length} agents.`)
-  console.log(`  Their memories and state have been archived.`)
+  console.log(`  Their state is preserved in .designteam/state/ if you re-recruit them.`)
   console.log()
 }
 
@@ -628,8 +631,33 @@ async function cmdReport(name, flags) {
   let totalXp = 0
   let finalResult = null
 
-  // If no outcome flags but has memory/collab, default to completed
-  if (outcomes.length === 0) outcomes.push('completed')
+  // Memory-only or collab-only: record directly without task outcome (no XP, no task count)
+  if (outcomes.length === 0) {
+    let currentState = { ...state, lastActiveAt: new Date().toISOString() }
+    let currentGraph = { ...graph, relationships: [...graph.relationships] }
+
+    if (memoryContent) {
+      currentState.memory = addMemory(currentState.memory, 'design_preference', memoryContent, { salience: 0.7 })
+    }
+    if (collabId) {
+      currentGraph = recordCollaboration(currentGraph, agent.id, collabId, hasFlag('--successful'))
+    }
+
+    saveAgentState(agent.id, currentState)
+    saveRelationships(currentGraph)
+
+    const mood = getMoodFromState(currentState)
+    const emoji = MOOD_EMOJI[mood] || ''
+    console.log()
+    if (memoryContent) console.log(`  ${agent.name} remembers: "${memoryContent}"`)
+    if (collabId) {
+      const partner = team.agents.find(a => a.id === collabId)
+      if (partner) console.log(`  Collaboration: ${agent.name} + ${partner.name}`)
+    }
+    console.log(`  Mood: ${mood} ${emoji}  |  Level ${currentState.level}  |  ${currentState.xp} XP`)
+    console.log()
+    return
+  }
 
   for (const outcomeType of outcomes) {
     const outcome = {
