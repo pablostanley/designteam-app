@@ -201,7 +201,7 @@ export function reinforceAgentMemory(
 // Helpers
 // ---------------------------------------------------------------------------
 
-function inferMemoryType(content: string): MemoryType {
+export function inferMemoryType(content: string): MemoryType {
   const lower = content.toLowerCase()
 
   if (/\b(don't|not |stop |wrong|change |fix )\b/.test(lower)) return 'feedback'

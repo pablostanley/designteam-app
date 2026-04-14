@@ -13,7 +13,7 @@ import {
   createDefaultLivingState, createDefaultPersonality,
   uid, teamUid,
   getMood, getConvictionScore, personalityToModifiers,
-  reportOutcome, applyDecay,
+  reportOutcome, applyDecay, inferMemoryType,
   addMemory, recordCollaboration,
 } from '@designteam/core'
 
@@ -625,28 +625,24 @@ async function cmdReport(name, flags) {
     process.exit(1)
   }
 
-  // Apply each outcome sequentially so XP stacks
-  let currentState = state
-  let currentGraph = graph
-  let totalXp = 0
-  let finalResult = null
-
   // Memory-only or collab-only: record directly without task outcome (no XP, no task count)
   if (outcomes.length === 0) {
-    let currentState = { ...state, lastActiveAt: new Date().toISOString() }
-    let currentGraph = { ...graph, relationships: [...graph.relationships] }
+    const memState = { ...state, lastActiveAt: new Date().toISOString() }
+    let memGraph = { ...graph, relationships: [...graph.relationships] }
 
     if (memoryContent) {
-      currentState.memory = addMemory(currentState.memory, 'design_preference', memoryContent, { salience: 0.7 })
+      const memType = inferMemoryType(memoryContent)
+      const salience = memType === 'feedback' ? 0.85 : 0.7
+      memState.memory = addMemory(memState.memory, memType, memoryContent, { salience })
     }
     if (collabId) {
-      currentGraph = recordCollaboration(currentGraph, agent.id, collabId, hasFlag('--successful'))
+      memGraph = recordCollaboration(memGraph, agent.id, collabId, hasFlag('--successful'))
     }
 
-    saveAgentState(agent.id, currentState)
-    saveRelationships(currentGraph)
+    saveAgentState(agent.id, memState)
+    saveRelationships(memGraph)
 
-    const mood = getMoodFromState(currentState)
+    const mood = getMoodFromState(memState)
     const emoji = MOOD_EMOJI[mood] || ''
     console.log()
     if (memoryContent) console.log(`  ${agent.name} remembers: "${memoryContent}"`)
@@ -654,10 +650,16 @@ async function cmdReport(name, flags) {
       const partner = team.agents.find(a => a.id === collabId)
       if (partner) console.log(`  Collaboration: ${agent.name} + ${partner.name}`)
     }
-    console.log(`  Mood: ${mood} ${emoji}  |  Level ${currentState.level}  |  ${currentState.xp} XP`)
+    console.log(`  Mood: ${mood} ${emoji}  |  Level ${memState.level}  |  ${memState.xp} XP`)
     console.log()
     return
   }
+
+  // Apply each outcome sequentially so XP stacks
+  let currentState = state
+  let currentGraph = graph
+  let totalXp = 0
+  let finalResult = null
 
   for (const outcomeType of outcomes) {
     const outcome = {
