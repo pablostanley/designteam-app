@@ -163,19 +163,21 @@ export function applyDecay(
   state: AgentLivingState,
   graph: RelationshipGraph,
 ): { state: AgentLivingState; graph: RelationshipGraph } {
-  const hoursSinceActive = Math.max(0,
-    (Date.now() - new Date(state.lastActiveAt).getTime()) / (1000 * 60 * 60),
-  )
+  const lastActiveMs = new Date(state.lastActiveAt).getTime()
+  // Guard against invalid dates
+  if (isNaN(lastActiveMs)) return { state, graph }
+
+  const hoursSinceActive = Math.max(0, (Date.now() - lastActiveMs) / (1000 * 60 * 60))
+
+  // Skip decay if less than 5 minutes — avoids pointless writes on rapid reads
+  if (hoursSinceActive < 0.083) return { state, graph }
+
   const daysSinceActive = hoursSinceActive / 24
 
   const newState: AgentLivingState = {
     ...state,
-    emotions: hoursSinceActive > 0
-      ? applyEmotionalDecay(state.emotions, hoursSinceActive)
-      : state.emotions,
-    memory: daysSinceActive > 0
-      ? decayMemories(state.memory)
-      : state.memory,
+    emotions: applyEmotionalDecay(state.emotions, hoursSinceActive),
+    memory: decayMemories(state.memory),
   }
 
   const newGraph = daysSinceActive > 0.5
@@ -204,8 +206,8 @@ export function reinforceAgentMemory(
 export function inferMemoryType(content: string): MemoryType {
   const lower = content.toLowerCase()
 
-  if (/\b(don't|not |stop |wrong|change |fix )\b/.test(lower)) return 'feedback'
-  if (/\b(brand |client |project |audience|target|deadline)\b/.test(lower)) return 'project_context'
+  if (/\b(don't|not|stop|wrong|change|fix)\b/.test(lower)) return 'feedback'
+  if (/\b(brand|client|project|audience|target|deadline)\b/.test(lower)) return 'project_context'
   if (/\b(learned|improved|better at)\b/.test(lower)) return 'skill_growth'
 
   return 'design_preference'

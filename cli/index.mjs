@@ -299,6 +299,16 @@ function requireTeam() {
   return team
 }
 
+function findAgent(team, name) {
+  const agent = team.agents.find(a => a.name.toLowerCase() === name.toLowerCase())
+  if (!agent) {
+    console.error(`No agent named "${name}" on your team.`)
+    console.error(`Your agents: ${team.agents.map(a => a.name).join(', ')}`)
+    process.exit(1)
+  }
+  return agent
+}
+
 async function cmdRoster() {
   const team = requireTeam()
   const states = loadAllDecayedStates(team)
@@ -394,12 +404,7 @@ async function cmdStatus() {
 
 async function cmdCheck(name) {
   const team = requireTeam()
-  const agent = team.agents.find(a => a.name.toLowerCase() === name.toLowerCase())
-  if (!agent) {
-    console.error(`No agent named "${name}" on your team.`)
-    console.error(`Your agents: ${team.agents.map(a => a.name).join(', ')}`)
-    process.exit(1)
-  }
+  const agent = findAgent(team, name)
 
   const state = loadDecayedAgentState(agent.id, team.id)
   const graph = loadRelationships()
@@ -555,16 +560,8 @@ async function cmdRecruit(roleName) {
 
 async function cmdFire(name) {
   const team = requireTeam()
-  const agentIndex = team.agents.findIndex(a => a.name.toLowerCase() === name.toLowerCase())
-
-  if (agentIndex === -1) {
-    console.error(`No agent named "${name}" on your team.`)
-    console.error(`Your agents: ${team.agents.map(a => a.name).join(', ')}`)
-    process.exit(1)
-  }
-
-  const agent = team.agents[agentIndex]
-  team.agents.splice(agentIndex, 1)
+  const agent = findAgent(team, name)
+  team.agents = team.agents.filter(a => a.id !== agent.id)
   team.updatedAt = new Date().toISOString()
   saveTeam(team)
 
@@ -578,12 +575,7 @@ async function cmdFire(name) {
 
 async function cmdReport(name, flags) {
   const team = requireTeam()
-  const agent = team.agents.find(a => a.name.toLowerCase() === name.toLowerCase())
-  if (!agent) {
-    console.error(`No agent named "${name}" on your team.`)
-    console.error(`Your agents: ${team.agents.map(a => a.name).join(', ')}`)
-    process.exit(1)
-  }
+  const agent = findAgent(team, name)
 
   const state = loadAgentState(agent.id) || createDefaultLivingState(agent.id)
   const graph = loadRelationships() || { teamId: team.id, relationships: [] }
@@ -716,10 +708,9 @@ async function cmdReport(name, flags) {
 async function cmdRefresh() {
   const team = requireTeam()
   const states = loadAllDecayedStates(team)
-  const graph = loadRelationships() || { teamId: team.id, relationships: [] }
 
   // Generate dynamic skill file
-  const skillContent = generateDynamicSkill(team, states, graph)
+  const skillContent = generateDynamicSkill(team, states)
 
   // Find existing skill dir or create new one
   const { readdirSync, existsSync: exists } = await import('fs')
@@ -759,7 +750,7 @@ async function cmdRefresh() {
 // Dynamic skill generation — skills that carry live state
 // ---------------------------------------------------------------------------
 
-function generateDynamicSkill(team, states, graph) {
+function generateDynamicSkill(team, states) {
   const lines = []
   lines.push('---')
   lines.push(`name: designteam`)
@@ -860,7 +851,7 @@ function generateDynamicSkill(team, states, graph) {
   lines.push('')
 
   // Each agent
-  lines.push('## Your Team')
+  lines.push('## Agent Profiles')
   lines.push('')
 
   for (const agent of team.agents) {
@@ -1146,10 +1137,9 @@ function installTeam(team, teamId) {
 
   // Use dynamic skill if we have local state, static otherwise
   const states = loadAllAgentStates()
-  const graph = loadRelationships() || { teamId: team.id, relationships: [] }
   const hasState = Object.keys(states).length > 0
   const skillContent = hasState
-    ? generateDynamicSkill(team, states, graph)
+    ? generateDynamicSkill(team, states)
     : generateSkillFile(teamName, agents, teamId)
 
   // Determine install directory

@@ -255,7 +255,11 @@ describe('inferMemoryType', () => {
     expect(inferMemoryType("prefers dark mode with warm accents")).toBe('design_preference')
   })
 
-  it('defaults for generic content', () => {
-    expect(inferMemoryType("something about the project")).toBe('design_preference')
+  it('detects project_context from "project" keyword', () => {
+    expect(inferMemoryType("something about the project")).toBe('project_context')
+  })
+
+  it('defaults for truly generic content', () => {
+    expect(inferMemoryType("nice work on this one")).toBe('design_preference')
   })
 })
