@@ -1,0 +1,18 @@
+// @designteam/core — single source of truth for AI design teams
+
+export * from './types'
+export * from './personality-engine'
+export * from './role-definitions'
+export * from './team-composition'
+export * from './team-presets'
+export * from './skill-generator'
+export * from './agent-skills-generated'
+export * from './ai-team-builder'
+export * from './team-export'
+export * from './emotional-model'
+export * from './memory-system'
+export * from './messaging'
+export * from './relationship-graph'
+export * from './swarm'
+export * from './scale-utils'
+export * from './lifecycle'

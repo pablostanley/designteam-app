@@ -41,9 +41,17 @@ yarn-error.log*
 next-env.d.ts
 .env*.local
 
+# local agent state
+.designteam/
+.claude/skills/designteam-*
+
+# package build output
+packages/*/dist/
+
 # stale reports
 AGENTS.md
 AUDIT-REPORT.md
 TEST-REPORT.md
 TEST-REPORT-FULL.md
 COPY-AUDIT.md
+packages/*/node_modules/

@@ -15,7 +15,7 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet"
 import { getAvatarSrc } from "@/components/agent-avatars"
-import type { Agent, PersonalityAxis, TraitCategory } from "@/lib/agent-builder"
+import type { Agent, PersonalityAxis, PersonalityTrait, TraitCategory } from "@/lib/agent-builder"
 import {
   AGENT_ROLE_DEFINITIONS,
   PERSONALITY_AXES,
@@ -59,7 +59,7 @@ export function PersonalityEditor({
     })
   }
 
-  function handleTraitToggle(trait: string, category: TraitCategory) {
+  function handleTraitToggle(trait: PersonalityTrait, category: TraitCategory) {
     if (!agent) return
     const isRemoving = agent.traits.includes(trait)
     if (isRemoving) {
