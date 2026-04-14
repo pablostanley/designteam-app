@@ -1,18 +1,19 @@
 {
   "name": "designteam",
-  "version": "0.2.1",
+  "version": "0.3.3",
   "private": false,
   "bin": {
     "designteam": "./cli/index.mjs"
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "pnpm --filter @designteam/core build && next build",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run"
   },
   "dependencies": {
+    "@designteam/core": "workspace:*",
     "@ai-sdk/anthropic": "^3.0.64",
     "@ai-sdk/react": "^3.0.143",
     "@base-ui/react": "^1.3.0",
