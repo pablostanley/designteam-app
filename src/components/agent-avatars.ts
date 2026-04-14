@@ -1,3 +1,5 @@
+const PIXABOTS_API = 'https://pixabots.com/api/pixabot'
+
 export const AVATAR_MAP: Record<string, string> = {
   'researcher': '/images/robots/researcher.png',
   'copywriter': '/images/robots/copywriter.png',
@@ -17,6 +19,13 @@ export const AVATAR_MAP: Record<string, string> = {
   'seo-specialist': '/images/robots/seo-specialist.png',
 }
 
-export function getAvatarSrc(avatarKey: string): string {
+/**
+ * Get avatar source for an agent.
+ * Priority: pixabotId (Pixabots API) → role-based fallback.
+ */
+export function getAvatarSrc(avatarKey: string, pixabotId?: string): string {
+  if (pixabotId) {
+    return `${PIXABOTS_API}/${pixabotId}?size=240`
+  }
   return AVATAR_MAP[avatarKey] ?? '/images/robots/creative-director.png'
 }
