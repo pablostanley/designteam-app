@@ -43,7 +43,7 @@ export function PersonalityEditor({
   if (!agent) return null
 
   const meta = AGENT_ROLE_DEFINITIONS[agent.role]
-  const avatarSrc = getAvatarSrc(meta.avatarKey)
+  const avatarSrc = getAvatarSrc(meta.avatarKey, agent.pixabotId)
 
   function handleSliderChange(axis: PersonalityAxis, value: number[]) {
     if (!agent) return
@@ -92,6 +92,8 @@ export function PersonalityEditor({
                   alt={agent.name}
                   fill
                   className="object-contain"
+                  unoptimized={!!agent.pixabotId}
+                  style={agent.pixabotId ? { imageRendering: 'pixelated' } : undefined}
                 />
               </div>
 
