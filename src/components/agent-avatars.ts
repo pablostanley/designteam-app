@@ -57,7 +57,9 @@ export function getAvatarSrc(avatarKey: string, pixabotId?: string): string {
 
 /** Get a random Pixabot URL (for homepage hero, decorative use) */
 export function getRandomPixabotSrc(size = 240): string {
-  const ranges = [16, 8, 7, 11]
-  const id = ranges.map(n => Math.floor(Math.random() * n).toString(36)).join('')
-  return `${PIXABOTS_API}/${id}?size=${size}`
+  return `${PIXABOTS_API}/${randomPixabotId()}?size=${size}`
 }
+
+// Re-export for convenience
+import { randomPixabotId } from '@designteam/core'
+export { randomPixabotId }

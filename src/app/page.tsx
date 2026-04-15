@@ -9,16 +9,23 @@ import { UserMenu } from "@/components/user-menu"
 
 const INSTALL_CMD = "npx skills add pablostanley/designteam-app"
 
-function getRandomPixabots(count: number) {
-  return Array.from({ length: count }, (_, i) => ({
-    key: `pixabot-${i}`,
-    src: getRandomPixabotSrc(240),
-  }))
+// Stable initial pixabots (shown during SSR + first paint, then randomized on client)
+const INITIAL_PIXABOTS = ['2515', '7130', 'a241', '3051', '1462']
+
+function pixabotUrl(id: string) {
+  return `https://pixabots.com/api/pixabot/${id}?size=240`
 }
 
 export default function Home() {
-  const [avatars, setAvatars] = useState<{ key: string; src: string }[]>([])
-  useEffect(() => { setAvatars(getRandomPixabots(5)) }, [])
+  const [avatars, setAvatars] = useState(
+    INITIAL_PIXABOTS.map((id, i) => ({ key: `pixabot-${i}`, src: pixabotUrl(id) }))
+  )
+  useEffect(() => {
+    setAvatars(Array.from({ length: 5 }, (_, i) => ({
+      key: `pixabot-${i}`,
+      src: getRandomPixabotSrc(240),
+    })))
+  }, [])
 
   return (
     <div className="flex flex-1 flex-col">
@@ -54,7 +61,7 @@ export default function Home() {
             <Image
               key={avatar.key}
               src={avatar.src}
-              alt="Design Team agent"
+              alt=""
               width={140}
               height={140}
               unoptimized
