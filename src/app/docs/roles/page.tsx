@@ -35,7 +35,9 @@ export default function RolesPage() {
                     src={avatarSrc}
                     alt={role.displayName}
                     fill
+                    unoptimized
                     className="object-contain"
+                    style={{ imageRendering: 'pixelated' }}
                   />
                 </div>
                 <div className="flex-1 space-y-1">

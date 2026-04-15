@@ -133,6 +133,8 @@ export interface Agent {
   customPrompt: string
   /** Generated markdown combining baseline skill + personality injection */
   skillFile: string
+  /** Pixabot avatar ID — 4-char base36 string. Renders via Pixabots API. */
+  pixabotId?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -215,6 +217,13 @@ export const AGENT_NAMES: Record<AgentRole, string> = {
   'marketing-strategist': 'Maven',
 }
 
+/** Generate a random Pixabots avatar ID (4-char base36, one per category).
+ *  TODO: Replace with `randomId()` from `@pixabots/core` once published to npm. */
+export function randomPixabotId(): string {
+  const ranges = [16, 8, 7, 11] // eyes, heads, body, top — must match @pixabots/core PARTS
+  return ranges.map(n => Math.floor(Math.random() * n).toString(36)).join('')
+}
+
 export function createDefaultAgent(role: AgentRole, meta?: AgentRoleMeta): Agent {
   return {
     id: uid(),
@@ -224,6 +233,7 @@ export function createDefaultAgent(role: AgentRole, meta?: AgentRoleMeta): Agent
     traits: [] as PersonalityTrait[],
     customPrompt: '',
     skillFile: '',
+    pixabotId: randomPixabotId(),
   }
 }
 

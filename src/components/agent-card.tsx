@@ -17,7 +17,7 @@ interface AgentCardProps {
 
 export function AgentCard({ agent, isSelected, onSelect, onNameChange }: AgentCardProps) {
   const meta = AGENT_ROLE_DEFINITIONS[agent.role]
-  const avatarSrc = getAvatarSrc(meta.avatarKey)
+  const avatarSrc = getAvatarSrc(meta.avatarKey, agent.pixabotId)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(agent.name)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -49,6 +49,8 @@ export function AgentCard({ agent, isSelected, onSelect, onNameChange }: AgentCa
           alt={agent.name}
           fill
           className="object-contain"
+          unoptimized
+          style={{ imageRendering: 'pixelated' }}
         />
       </div>
 

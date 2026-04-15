@@ -1,27 +1,24 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { AVATAR_MAP } from "@/components/agent-avatars"
+import { getAvatarSrc } from "@/components/agent-avatars"
 import { CopyButton } from "@/components/copy-button"
 import { UserMenu } from "@/components/user-menu"
 
 const INSTALL_CMD = "npx skills add pablostanley/designteam-app"
 
-const ALL_AVATARS = Object.entries(AVATAR_MAP).map(([key, src]) => ({
-  key,
-  src,
-}))
-
-function getRandomAvatars(count: number) {
-  const shuffled = [...ALL_AVATARS].sort(() => Math.random() - 0.5)
-  return shuffled.slice(0, count)
-}
+// Stable pixabots for the hero — consistent across SSR + client, no wasted fetches
+const HERO_PIXABOTS = [
+  { key: 'nova', src: getAvatarSrc('creative-director') },
+  { key: 'pixel', src: getAvatarSrc('graphic-designer') },
+  { key: 'aria', src: getAvatarSrc('copywriter') },
+  { key: 'scout', src: getAvatarSrc('researcher') },
+  { key: 'flow', src: getAvatarSrc('ux-designer') },
+]
 
 export default function Home() {
-  const [avatars, setAvatars] = useState(ALL_AVATARS.slice(0, 5))
-  useEffect(() => { setAvatars(getRandomAvatars(5)) }, [])
+  const avatars = HERO_PIXABOTS
 
   return (
     <div className="flex flex-1 flex-col">
@@ -51,17 +48,18 @@ export default function Home() {
 
       {/* Hero */}
       <main className="flex flex-1 flex-col items-center justify-center px-6 py-16 sm:py-24 text-center">
-        {/* Agent doodles — randomized on each load */}
+        {/* Agent pixabots */}
         <div className="flex items-end justify-center -space-x-4 mb-8">
           {avatars.map((avatar, i) => (
             <Image
               key={avatar.key}
               src={avatar.src}
-              alt={avatar.key}
+              alt=""
               width={140}
               height={140}
+              unoptimized
               className="h-[140px] w-auto object-contain drop-shadow-sm"
-              style={{ zIndex: avatars.length - i }}
+              style={{ zIndex: avatars.length - i, imageRendering: 'pixelated' }}
               priority
             />
           ))}

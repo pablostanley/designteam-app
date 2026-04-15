@@ -144,11 +144,13 @@ export default function TeamPage() {
             return (
               <div key={agent.id} className="space-y-2 rounded-lg border p-4">
                 <Image
-                  src={getAvatarSrc(role?.avatarKey ?? "creative-director")}
+                  src={getAvatarSrc(role?.avatarKey ?? "creative-director", agent.pixabotId)}
                   alt={agent.name}
                   width={80}
                   height={80}
                   className="mx-auto object-contain"
+                  unoptimized
+                  style={{ imageRendering: 'pixelated' }}
                 />
                 <h3 className="text-center font-semibold">{agent.name}</h3>
                 <div className="flex justify-center">

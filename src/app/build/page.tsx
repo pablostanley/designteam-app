@@ -168,10 +168,11 @@ export default function BuildPage() {
     })
   }
 
-  function handleRecruit(role: AgentRole) {
+  function handleRecruit(role: AgentRole, pixabotId?: string) {
     if (team.agents.length >= MAX_TEAM_SIZE) return
     const meta = AGENT_ROLE_DEFINITIONS[role]
     const agent = createDefaultAgent(role, meta)
+    if (pixabotId) agent.pixabotId = pixabotId
     setTeam((prev) => ({
       ...prev,
       agents: [...prev.agents, agent],
