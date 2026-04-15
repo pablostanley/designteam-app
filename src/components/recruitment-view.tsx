@@ -36,7 +36,9 @@ export function RecruitmentView({ existingRoles, onRecruit }: RecruitmentViewPro
                   src={avatarSrc}
                   alt={meta.displayName}
                   fill
+                  unoptimized
                   className="object-contain"
+                  style={{ imageRendering: 'pixelated' }}
                 />
               </div>
 

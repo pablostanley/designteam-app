@@ -3,25 +3,22 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { AVATAR_MAP } from "@/components/agent-avatars"
+import { getRandomPixabotSrc } from "@/components/agent-avatars"
 import { CopyButton } from "@/components/copy-button"
 import { UserMenu } from "@/components/user-menu"
 
 const INSTALL_CMD = "npx skills add pablostanley/designteam-app"
 
-const ALL_AVATARS = Object.entries(AVATAR_MAP).map(([key, src]) => ({
-  key,
-  src,
-}))
-
-function getRandomAvatars(count: number) {
-  const shuffled = [...ALL_AVATARS].sort(() => Math.random() - 0.5)
-  return shuffled.slice(0, count)
+function getRandomPixabots(count: number) {
+  return Array.from({ length: count }, (_, i) => ({
+    key: `pixabot-${i}`,
+    src: getRandomPixabotSrc(240),
+  }))
 }
 
 export default function Home() {
-  const [avatars, setAvatars] = useState(ALL_AVATARS.slice(0, 5))
-  useEffect(() => { setAvatars(getRandomAvatars(5)) }, [])
+  const [avatars, setAvatars] = useState<{ key: string; src: string }[]>([])
+  useEffect(() => { setAvatars(getRandomPixabots(5)) }, [])
 
   return (
     <div className="flex flex-1 flex-col">
@@ -57,11 +54,12 @@ export default function Home() {
             <Image
               key={avatar.key}
               src={avatar.src}
-              alt={avatar.key}
+              alt="Design Team agent"
               width={140}
               height={140}
+              unoptimized
               className="h-[140px] w-auto object-contain drop-shadow-sm"
-              style={{ zIndex: avatars.length - i }}
+              style={{ zIndex: avatars.length - i, imageRendering: 'pixelated' }}
               priority
             />
           ))}

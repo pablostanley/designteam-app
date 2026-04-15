@@ -56,7 +56,9 @@ export function PresetPicker({ onSelectPreset, onStartFromScratch }: PresetPicke
                       src={getAvatarSrc(meta.avatarKey)}
                       alt={meta.displayName}
                       fill
+                      unoptimized
                       className="object-cover"
+                      style={{ imageRendering: 'pixelated' }}
                     />
                   </div>
                 ))}
