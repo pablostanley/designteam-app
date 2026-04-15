@@ -1,3 +1,5 @@
+import { randomPixabotId } from '@designteam/core'
+
 const PIXABOTS_API = 'https://pixabots.com/api/pixabot'
 
 /** Stable pixabotIds per role — consistent character identity across the app */
@@ -60,6 +62,4 @@ export function getRandomPixabotSrc(size = 240): string {
   return `${PIXABOTS_API}/${randomPixabotId()}?size=${size}`
 }
 
-// Re-export for convenience
-import { randomPixabotId } from '@designteam/core'
 export { randomPixabotId }

@@ -149,8 +149,8 @@ export default function TeamPage() {
                   width={80}
                   height={80}
                   className="mx-auto object-contain"
-                  unoptimized={!!agent.pixabotId}
-                  style={agent.pixabotId ? { imageRendering: 'pixelated' } : undefined}
+                  unoptimized
+                  style={{ imageRendering: 'pixelated' }}
                 />
                 <h3 className="text-center font-semibold">{agent.name}</h3>
                 <div className="flex justify-center">

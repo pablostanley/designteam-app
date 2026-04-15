@@ -49,8 +49,8 @@ export function AgentCard({ agent, isSelected, onSelect, onNameChange }: AgentCa
           alt={agent.name}
           fill
           className="object-contain"
-          unoptimized={!!agent.pixabotId}
-          style={agent.pixabotId ? { imageRendering: 'pixelated' } : undefined}
+          unoptimized
+          style={{ imageRendering: 'pixelated' }}
         />
       </div>
 

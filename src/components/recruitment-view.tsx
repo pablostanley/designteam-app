@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { getAvatarSrc, getRandomPixabotSrc } from "@/components/agent-avatars"
+import { Shuffle } from "lucide-react"
+import { getAvatarSrc } from "@/components/agent-avatars"
 import type { AgentRole } from "@/lib/agent-builder"
 import { AGENT_ROLE_LIST, randomPixabotId } from "@/lib/agent-builder"
 
@@ -61,11 +62,12 @@ export function RecruitmentView({ existingRoles, onRecruit }: RecruitmentViewPro
                 />
                 {!inTeam && (
                   <button
+                    type="button"
                     onClick={() => handleShuffle(meta.role)}
-                    className="absolute -top-1 -right-1 h-6 w-6 rounded-full bg-muted border text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                    title="Shuffle character"
+                    className="absolute -top-1 -right-1 h-6 w-6 rounded-full bg-muted border opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                    aria-label={`Shuffle ${meta.displayName} character`}
                   >
-                    🎲
+                    <Shuffle className="h-3 w-3 text-muted-foreground" />
                   </button>
                 )}
               </div>

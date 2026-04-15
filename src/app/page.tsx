@@ -1,31 +1,24 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { getRandomPixabotSrc } from "@/components/agent-avatars"
+import { getAvatarSrc } from "@/components/agent-avatars"
 import { CopyButton } from "@/components/copy-button"
 import { UserMenu } from "@/components/user-menu"
 
 const INSTALL_CMD = "npx skills add pablostanley/designteam-app"
 
-// Stable initial pixabots (shown during SSR + first paint, then randomized on client)
-const INITIAL_PIXABOTS = ['2515', '7130', 'a241', '3051', '1462']
-
-function pixabotUrl(id: string) {
-  return `https://pixabots.com/api/pixabot/${id}?size=240`
-}
+// Stable pixabots for the hero — consistent across SSR + client, no wasted fetches
+const HERO_PIXABOTS = [
+  { key: 'nova', src: getAvatarSrc('creative-director') },
+  { key: 'pixel', src: getAvatarSrc('graphic-designer') },
+  { key: 'aria', src: getAvatarSrc('copywriter') },
+  { key: 'scout', src: getAvatarSrc('researcher') },
+  { key: 'flow', src: getAvatarSrc('ux-designer') },
+]
 
 export default function Home() {
-  const [avatars, setAvatars] = useState(
-    INITIAL_PIXABOTS.map((id, i) => ({ key: `pixabot-${i}`, src: pixabotUrl(id) }))
-  )
-  useEffect(() => {
-    setAvatars(Array.from({ length: 5 }, (_, i) => ({
-      key: `pixabot-${i}`,
-      src: getRandomPixabotSrc(240),
-    })))
-  }, [])
+  const avatars = HERO_PIXABOTS
 
   return (
     <div className="flex flex-1 flex-col">

@@ -272,7 +272,9 @@ function PixabotEditor({ pixabotId, onChange }: { pixabotId: string; onChange: (
             <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{part.label}</span>
             <div className="flex items-center gap-0">
               <button
+                type="button"
                 onClick={() => handlePartChange(i, -1)}
+                aria-label={`Previous ${part.label.toLowerCase()} variant`}
                 className="h-7 w-7 flex items-center justify-center rounded-l-md border bg-muted hover:bg-accent text-muted-foreground"
               >
                 <ChevronLeft className="h-3 w-3" />
@@ -281,7 +283,9 @@ function PixabotEditor({ pixabotId, onChange }: { pixabotId: string; onChange: (
                 {parts[i]}
               </div>
               <button
+                type="button"
                 onClick={() => handlePartChange(i, 1)}
+                aria-label={`Next ${part.label.toLowerCase()} variant`}
                 className="h-7 w-7 flex items-center justify-center rounded-r-md border bg-muted hover:bg-accent text-muted-foreground"
               >
                 <ChevronRight className="h-3 w-3" />
