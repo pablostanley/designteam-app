@@ -15,7 +15,9 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet"
 import { getAvatarSrc } from "@/components/agent-avatars"
+import { Shuffle, ChevronLeft, ChevronRight } from "lucide-react"
 import type { Agent, PersonalityAxis, PersonalityTrait, TraitCategory } from "@/lib/agent-builder"
+import { randomPixabotId } from "@/lib/agent-builder"
 import {
   AGENT_ROLE_DEFINITIONS,
   PERSONALITY_AXES,
@@ -85,15 +87,21 @@ export function PersonalityEditor({
         <ScrollArea className="h-full">
           <div className="flex flex-col gap-8 p-8">
             <SheetHeader className="p-0">
-              {/* Portrait */}
-              <div className="relative mx-auto h-48 w-48">
-                <Image
-                  src={avatarSrc}
-                  alt={agent.name}
-                  fill
-                  className="object-contain"
-                  unoptimized={!!agent.pixabotId}
-                  style={agent.pixabotId ? { imageRendering: 'pixelated' } : undefined}
+              {/* Portrait + Avatar Editor */}
+              <div className="flex flex-col items-center gap-3">
+                <div className="relative mx-auto h-48 w-48">
+                  <Image
+                    src={avatarSrc}
+                    alt={agent.name}
+                    fill
+                    className="object-contain"
+                    unoptimized
+                    style={{ imageRendering: 'pixelated' }}
+                  />
+                </div>
+                <PixabotEditor
+                  pixabotId={agent.pixabotId || '0000'}
+                  onChange={(id) => onUpdate({ ...agent, pixabotId: id })}
                 />
               </div>
 
@@ -224,5 +232,73 @@ export function PersonalityEditor({
         </ScrollArea>
       </SheetContent>
     </Sheet>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Pixabot Editor — shuffle + per-part controls
+// ---------------------------------------------------------------------------
+
+const PIXABOT_PARTS = [
+  { label: 'Eyes', max: 16 },
+  { label: 'Head', max: 8 },
+  { label: 'Body', max: 7 },
+  { label: 'Top', max: 11 },
+] as const
+
+function parsePixabotId(id: string): number[] {
+  return id.split('').map(c => parseInt(c, 36))
+}
+
+function buildPixabotId(parts: number[]): string {
+  return parts.map(n => n.toString(36)).join('')
+}
+
+function PixabotEditor({ pixabotId, onChange }: { pixabotId: string; onChange: (id: string) => void }) {
+  const parts = parsePixabotId(pixabotId)
+
+  function handlePartChange(index: number, delta: number) {
+    const newParts = [...parts]
+    const max = PIXABOT_PARTS[index].max
+    newParts[index] = ((newParts[index] + delta) % max + max) % max
+    onChange(buildPixabotId(newParts))
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-2 w-full max-w-xs">
+      <div className="flex items-center gap-2">
+        {PIXABOT_PARTS.map((part, i) => (
+          <div key={part.label} className="flex flex-col items-center gap-0.5">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{part.label}</span>
+            <div className="flex items-center gap-0">
+              <button
+                onClick={() => handlePartChange(i, -1)}
+                className="h-7 w-7 flex items-center justify-center rounded-l-md border bg-muted hover:bg-accent text-muted-foreground"
+              >
+                <ChevronLeft className="h-3 w-3" />
+              </button>
+              <div className="h-7 w-7 flex items-center justify-center border-y text-xs font-mono">
+                {parts[i]}
+              </div>
+              <button
+                onClick={() => handlePartChange(i, 1)}
+                className="h-7 w-7 flex items-center justify-center rounded-r-md border bg-muted hover:bg-accent text-muted-foreground"
+              >
+                <ChevronRight className="h-3 w-3" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="text-xs"
+        onClick={() => onChange(randomPixabotId())}
+      >
+        <Shuffle className="mr-1.5 h-3 w-3" />
+        Shuffle
+      </Button>
+    </div>
   )
 }

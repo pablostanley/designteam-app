@@ -1,7 +1,7 @@
 const PIXABOTS_API = 'https://pixabots.com/api/pixabot'
 
 /** Stable pixabotIds per role — consistent character identity across the app */
-const ROLE_PIXABOT_IDS: Record<string, string> = {
+export const ROLE_PIXABOT_IDS: Record<string, string> = {
   'researcher': '3051',
   'copywriter': 'a241',
   'graphic-designer': '7130',
