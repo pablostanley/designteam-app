@@ -18,7 +18,7 @@ export async function GET(
   const { data: team, error: teamError } = await supabase
     .from('teams')
     .select('id, short_id, name, user_id, is_public')
-    .or(`short_id.eq.${id},id.eq.${id}`)
+    .eq('short_id', id)
     .single()
 
   if (teamError || !team) {
@@ -72,7 +72,7 @@ export async function PUT(
   const { data: team, error: teamError } = await supabase
     .from('teams')
     .select('id, short_id, user_id')
-    .or(`short_id.eq.${id},id.eq.${id}`)
+    .eq('short_id', id)
     .single()
 
   if (teamError || !team) {
