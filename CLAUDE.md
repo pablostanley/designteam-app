@@ -1,10 +1,57 @@
 # Design Team
 
-**Design Team** is an AI design crew that ships. Not just pretty pictures -- research, strategy, copy, design, code, review, deploy. 16 agent roles, 6 Claude Code agents, 17 installable skills, one workflow.
+**Your AI creative studio. Hire a team, customize their personalities, watch them grow.**
+
+16 agent roles. Tamagotchi persistence (XP, moods, memories, relationships). Works in Claude Code, Cursor, Codex, Efecto.
 
 - Website: https://designteam.app
-- Install: `npx skills add pablostanley/designteam-app`
-- Vision: See VISION.md for the full product vision and roadmap
+- CLI: `npx designteam create --preset=landing-page-sprint`
+- npm: `@designteam/core` (engine), `designteam` (CLI)
+- Install skills: `npx skills add pablostanley/designteam-app`
+
+## Key Files — Check Before Working
+
+- **`ROADMAP.md`** — What's done, what's next, what's planned. **Check this first.**
+- **`DESIGN-TEAM-VISION.md`** — The WHY. Product vision, architecture, Paperclip patterns.
+- **`TASKS.md`** — Detailed task board with per-task status.
+- **`packages/core/`** — `@designteam/core` npm package (engine, single source of truth for agent logic)
+- **`cli/index.mjs`** — CLI commands (roster, status, check, recruit, fire, report, refresh)
+- **`cli/state.mjs`** — Local `.designteam/` persistence
+
+## Architecture
+
+```
+packages/core/           @designteam/core (npm, MIT, zero deps)
+  src/types.ts           Agent, Team, Personality, Emotions, Memory, Relationships
+  src/personality-engine  5 axes, 32 traits, conviction, level modulation
+  src/emotional-model     5 emotions, 11 events, 7 moods, decay
+  src/memory-system       Salience decay, reinforcement, extraction
+  src/relationship-graph  Synergy scoring, bond decay, conflict
+  src/lifecycle           reportOutcome(), applyDecay() — THE living loop
+  src/swarm               Task templates, dependency scheduling
+
+cli/index.mjs            npx designteam (roster, status, check, recruit, fire, report, refresh)
+cli/state.mjs            .designteam/ file persistence
+
+src/lib/agent-builder/   Re-export shims → @designteam/core
+src/components/          Next.js app UI (team builder, personality editor, pixabot editor)
+
+skills/                  17 installable skills (skills.sh compatible)
+.claude/agents/          6 Claude Code agents
+.claude/commands/        6 slash commands
+.claude/rules/           4 design rules (always enforced)
+```
+
+## Pixabots Integration
+
+Agents have pixel-art avatars via [Pixabots](https://pixabots.com).
+
+- **npm**: `@pixabots/core` — use `randomId()`, `seededId()`, `PARTS`, `partCount()`
+- **API**: `https://pixabots.com/api/pixabot/{id}?size=240` (PNG), `?animated=true` (GIF)
+- **Sizes**: 32, 64, 128, 240, 480, 960
+- **ID format**: 4-char base36 (eyes, heads, body, top)
+- **Rendering**: always `unoptimized` + `imageRendering: 'pixelated'` on Image components
+- **TODO**: Replace hand-rolled `randomPixabotId()` with `@pixabots/core`'s `randomId()`
 
 ## Project Structure
 
@@ -12,33 +59,24 @@
 designteam/
 ├── .claude/
 │   ├── agents/           # Agent definitions (6 agents)
-│   │   ├── creative-director.md   # Orchestration, phase gates
-│   │   ├── copywriter.md          # Headlines, CTAs, messaging
-│   │   ├── design-reviewer.md     # Visual QA, slop detection
-│   │   ├── qa-lead.md             # A11y, responsive, production
-│   │   ├── design-engineer.md     # React/Tailwind implementation
-│   │   └── researcher.md          # Competitive analysis, audience
 │   ├── commands/          # Slash commands (6 commands)
-│   │   ├── design-audit.md
-│   │   ├── brand-review.md
-│   │   ├── copy-review.md
-│   │   ├── a11y-check.md
-│   │   ├── ship.md
-│   │   └── design-slop-check.md
 │   ├── rules/             # Design rules (always enforced)
-│   │   ├── design-standards.md
-│   │   ├── accessibility.md
-│   │   ├── writing-style.md
-│   │   └── ai-slop-detection.md
 │   └── settings.json
-├── skills/                # Public skills (for npx skills add)
+├── packages/core/         # @designteam/core npm package
+│   ├── src/               # 17 source files
+│   └── __tests__/         # 12 test files, 307 tests
+├── cli/
+│   ├── index.mjs          # CLI entry point
+│   └── state.mjs          # .designteam/ file I/O
+├── skills/                # 17 installable skills
 ├── src/
-│   └── lib/
-│       └── agent-builder/
-│           ├── skills/          # Role-based skill markdown files
-│           └── design-skills/   # Design context skill files
-├── CLAUDE.md              # This file
-└── README.md
+│   ├── app/               # Next.js 16 pages
+│   ├── components/        # UI (team builder, personality editor, pixabot editor)
+│   └── lib/agent-builder/ # Re-export shims → @designteam/core
+├── ROADMAP.md             # What's done, what's next
+├── DESIGN-TEAM-VISION.md  # Product vision
+├── TASKS.md               # Detailed task board
+└── CLAUDE.md              # This file
 ```
 
 ## Available Agents
@@ -110,8 +148,22 @@ Flag instantly and fix:
 
 ## Sources of Truth
 
-- `VISION.md` -- Product vision, architecture, roadmap (keep updated!)
-- `CLAUDE.md` -- This file. Project config and conventions.
-- `skills/` -- CLI skills (what gets installed via skills.sh)
-- `src/lib/agent-builder/` -- Core engine (types, personality, roles, skills)
-- `.claude/` -- Claude Code native agents, commands, rules
+- **`ROADMAP.md`** — What's done, what's next, what's planned. **Always check and update after work.**
+- **`DESIGN-TEAM-VISION.md`** — Product vision, architecture, Paperclip patterns
+- **`TASKS.md`** — Detailed task board with per-task status
+- **`packages/core/`** — `@designteam/core` engine (types, personality, emotions, memory, lifecycle)
+- **`cli/`** — CLI commands + local state persistence
+- **`skills/`** — 17 installable skills (skills.sh compatible)
+- **`.claude/`** — Claude Code agents, commands, rules
+- **Pixabots**: `@pixabots/core` npm + API at pixabots.com. Source: `/Users/pablostanley/pixabots`
+
+## Checklist — Before and After Work
+
+**Before starting**: Read `ROADMAP.md` to understand current state and priorities.
+
+**After finishing**:
+1. Update `ROADMAP.md` — move completed items, add discovered work
+2. Run `cd packages/core && pnpm test` — 307 tests must pass
+3. Run `pnpm build` — Next.js app must build
+4. Check if `@pixabots/core` has updates: `/Users/pablostanley/pixabots`
+5. If publishing to npm: bump version, build, publish core first then CLI
