@@ -1,6 +1,6 @@
 # Design Team — Roadmap
 
-**Last updated**: 2026-04-15
+**Last updated**: 2026-04-16
 
 ---
 
@@ -19,85 +19,131 @@
 - [x] Published: `@designteam/core@0.1.1`, `designteam@0.3.3`
 
 ### v0.2 — Tamagotchi CLI (PR #2, merged Apr 14)
-- [x] `designteam roster` — team with mood, level, XP, last active
-- [x] `designteam status` — energy/morale/friction bars
-- [x] `designteam check <name>` — deep dive (personality, memories, relationships)
-- [x] `designteam recruit [role]` — hire agents
-- [x] `designteam fire <name>` — remove agents
-- [x] `designteam report <name>` — XP, emotions, memories, collaborations
-- [x] `designteam refresh` — regenerate skill with live state
+- [x] `roster`, `status`, `check`, `recruit`, `fire`, `report`, `refresh`
 - [x] Local state persistence (`.designteam/` directory)
-- [x] Dynamic skill generation (mood, memories, level, conviction injected into SKILL.md)
-- [x] Self-reporting protocol (skill instructs agents to run `npx designteam report`)
-- [x] Combined flags (`--completed --approved --memory` in one call)
-- [x] Decay on read (emotions, memories, bonds drift on every CLI read)
+- [x] Dynamic skill generation with live state injection
+- [x] Self-reporting protocol
+- [x] Combined flags (`--completed --approved --memory`)
+- [x] Decay on read
 
 ### v0.3 — Pixabots Avatars (PR #3, merged Apr 15)
-- [x] Pixabots API integration (all agents render as pixel-art characters)
-- [x] Per-role stable pixabotIds (consistent identity across the app)
-- [x] Per-agent custom pixabotId (set on creation, customizable)
-- [x] PixabotEditor in personality sheet (per-part controls + shuffle)
-- [x] Recruitment preview (random on mount, shuffle button, keeps ID on recruit)
-- [x] All Image components: `unoptimized` + `imageRendering: pixelated`
-- [x] Homepage hero with stable pixabot characters
+- [x] Pixabots API integration everywhere
+- [x] Per-role stable IDs + per-agent custom IDs
+- [x] PixabotEditor (per-part controls + shuffle)
+- [x] Recruitment preview with shuffle
+
+### v0.4 — @pixabots/core from npm (PR #4, merged Apr 15)
+- [x] Replaced hand-rolled `randomPixabotId()` with `@pixabots/core`
+- [x] PixabotEditor uses `CATEGORY_ORDER`, `partCount()`, `encode()`, `decode()`
+- [x] Single source of truth for avatar logic
+
+### v0.5 — Supabase Cloud Sync (PR #5, merged Apr 16)
+- [x] `agent_states` table (emotions, memories, XP, level per team/agent)
+- [x] `team_relationships` table (relationship graph jsonb)
+- [x] RLS policies (public read, owner write, anonymous team write)
+- [x] API: `GET/PUT /api/teams/:id/state`
+- [x] CLI: `designteam sync`, `designteam pull`
+- [x] Agents persist across machines — tested end-to-end
 
 ---
 
 ## Up Next
 
-### v0.4 — Use `@pixabots/core` from npm
-- [ ] Replace hand-rolled `randomPixabotId()` in `packages/core/src/types.ts` with `import { randomId } from '@pixabots/core'`
-- [ ] Replace `PIXABOT_PARTS` ranges in `personality-editor.tsx` with `import { PARTS, partCount } from '@pixabots/core'`
-- [ ] Use `seededId(agentId)` for deterministic default avatars (same agent ID = same pixabot, no randomness)
-- [ ] Use `isValidId()` for validation when loading from Supabase/JSON
-- [ ] Export `PIXABOT_PART_RANGES` from core types so everything uses one source
-- [ ] Explore animated GIF API (`?animated=true`) — show on hover in team cards?
+### v0.6 — The Memory Loop [current priority]
 
-### v0.5 — Cloud Persistence (Supabase)
-- [ ] `agent_states` table (team_id, agent_id, emotions, memories, xp, level)
-- [ ] `team_relationships` table (team_id, relationships jsonb)
-- [ ] Supabase migration files
-- [ ] `designteam login` — Supabase auth
-- [ ] `designteam sync` — push/pull state to cloud
-- [ ] Auto-sync on report if logged in
-- [ ] `designteam pull` — set up on new machine
+**The vision**: Agents, teams, and users all have growing memory that flows into every interaction. Nothing is lost. Everything the team learns about the user, the brand, the project — it all sticks.
 
-### v0.6 — Web App Living State
+**What's missing today**:
+- Agents have individual memories, but the TEAM has no shared context
+- No USER/PROJECT profile — the team doesn't "know" the user
+- Memory capture is manual (`designteam report --memory "..."`)
+- No memory queries — agents can't recall relevant memories before working
+
+**What to build**:
+
+- [ ] **Team memory** — shared knowledge every agent can read
+  - Brand guidelines (colors, voice, typography preferences)
+  - Project constraints (audience, deadlines, tech stack)
+  - Past decisions ("we tried dark mode, user didn't like it")
+  - New table: `team_memory` with `{team_id, category, content, salience, created_at}`
+  - CLI: `designteam remember "our brand uses warm earth tones"`
+  - CLI: `designteam recall "brand colors"`
+- [ ] **User profile** — who the user is, what they care about
+  - Business name, industry, goals, target audience
+  - Style preferences, voice/tone, design taste
+  - Track record (what they've approved/rejected)
+  - New table: `user_profiles` (when logged in) or `.designteam/user.json` (local)
+  - CLI: `designteam profile` — view/edit your profile
+  - CLI: `designteam profile set business "Acme Co, B2B SaaS, devs"`
+- [ ] **Auto-memory extraction** — stop making users type `--memory`
+  - After each `designteam report`, AI extracts what was learned
+  - Uses Haiku (cheap, fast) to summarize the task outcome
+  - Categorizes: user preference, brand fact, project context, skill growth
+  - Stores in agent memory + team memory based on category
+- [ ] **Memory injection in skills** — richer context per agent
+  - Dynamic skill already injects agent's own memories
+  - Also inject: team memory, user profile, relevant project context
+  - Query-based: "agent working on hero section" → pull memories about hero patterns
+- [ ] **`designteam recall`** — query memories across the whole team
+  - `designteam recall "dark theme"` → returns all memories across agents + team + user
+  - Sorted by salience + recency
+  - Optional: `--agent Scout` to scope to one agent
+
+### v0.7 — Autonomous Mode (`designteam run`)
+
+Make the team work through a project autonomously within Claude Code.
+
+- [ ] **`designteam plan "design a landing page"`** — creates task graph
+  - Nova (Creative Director) breaks the goal into tasks with dependencies
+  - Each task has: role assignment, parent task, success criteria, "why chain"
+  - Saved to `.designteam/projects/<id>.json`
+- [ ] **`designteam run <project-id>`** — executes the plan
+  - Walks the task graph in dependency order
+  - Invokes each agent (via Claude Code Task tool or API)
+  - Auto-reports completion after each task
+  - Extracts memories automatically
+  - Shows progress as it goes
+- [ ] **Adapter interface** — same code works in Efecto, Claude Code, Cursor, Codex
+  - `DesignTeamAdapter` in core
+  - Efecto adapter: MCP bridge, 64 design tools
+  - Claude Code adapter: Task tool, file writes
+  - Codex/Cursor: skills + state injection
+
+### v0.8 — Web App Living State
+
 - [ ] Team page shows mood, XP, memories, level per agent
 - [ ] Agent detail view (full emotion bars, all memories, relationships)
-- [ ] Team health dashboard (energy/morale/friction bars)
-- [ ] Relationship map visualization (nodes + edges)
-- [ ] Project timeline (task history)
+- [ ] Team memory viewer (brand, project context, user preferences)
+- [ ] Project timeline (task history, who did what, outcomes)
+- [ ] Relationship map visualization
 
-### v0.7 — Efecto Integration
-- [ ] Replace Efecto's `lib/agent-builder/` with `@designteam/core` dependency
-- [ ] Update 6 `agent-team-*.ts` files to import from core
-- [ ] Scale migration at IDB persistence boundary
-- [ ] Verify Efecto builds
+### v0.9 — Truly Autonomous (Cron-driven)
 
-### v0.8 — npm Package Cleanup
-- [ ] Add `.npmignore` to CLI package (currently ships 8.5MB with images/tests/source)
-- [ ] Should ship: `cli/`, `skills/`, `package.json`, `README.md` (~50KB)
-- [ ] Add GitHub Actions CI (test on PR, build check)
+The Paperclip model — agents work while you sleep.
+
+- [ ] Task queue in Supabase (pending tasks per team)
+- [ ] Vercel cron wakes agents every N minutes
+- [ ] Agents call LLM directly via Vercel AI Gateway
+- [ ] Atomic task checkout (one agent per task)
+- [ ] Token budgets with hard stops
+- [ ] Audit trail (every decision logged)
+- [ ] Real-time UI on designteam.app
+
+### v0.10 — Efecto Integration
+
+- [ ] Replace Efecto's `lib/agent-builder/` with `@designteam/core`
+- [ ] Update Efecto's agent-team-*.ts files
+- [ ] Efecto adapter using MCP
+
+### v0.11 — npm Package Cleanup
+
+- [ ] Add `.npmignore` (ship only `cli/`, `skills/`, `package.json`, `README.md`)
+- [ ] GitHub Actions CI (test on PR, build check)
 - [ ] Auto-publish on version tag
 
 ---
 
 ## Future
-
-### Paperclip Patterns
-- [ ] Goal hierarchy — tasks trace to user intent via parentId chain
-- [ ] Per-agent token budget tracking with soft/hard limits
-- [ ] Audit trail — log decisions with run ID linkage
-- [ ] Atomic task checkout — one agent per task, conflict prevention
-- [ ] Curated context generation — compact, relevant context per task
-
-### Adapter System
-- [ ] `DesignTeamAdapter` interface in core
-- [ ] Efecto adapter (MCP bridge, 64 design tools)
-- [ ] Claude Code adapter (skills + self-reporting)
-- [ ] Codex adapter
-- [ ] Generic REST adapter
 
 ### Agent Marketplace
 - [ ] Public agent profiles on designteam.app
@@ -105,13 +151,31 @@
 - [ ] Custom agent creation (beyond the 16 roles)
 - [ ] Agent marketplace — browse and hire community-built agents
 
+### Voice & Vision
+- [ ] Voice check-ins (spoken updates from the team)
+- [ ] Screen sharing — agents watch you work, learn your taste
+- [ ] Video outputs (animated team updates)
+
+---
+
+## The Vision
+
+**Design Team is the operating system for AI creative studios.**
+
+You hire a team. They have personalities you customize. They remember everything — about your brand, your business, each other. They work autonomously on projects, handing off to each other based on skill. They level up based on what they do. They're yours.
+
+One AI gives you one opinion. A team gives you a studio. A studio that remembers.
+
+**Paperclip is for AI companies. Design Team is for AI creative studios.**
+
 ---
 
 ## Notes
 
 - Core package: `packages/core/` — 17 source files, 307 tests
-- Personality scale: -5 to +5 (0 = neutral). Efecto uses 0-10 (scale-utils bridges them)
-- Pixabots: use `@pixabots/core` npm package. API at `https://pixabots.com/api/pixabot/{id}`
+- Personality scale: -5 to +5 (0 = neutral). Efecto uses 0-10 (scale-utils bridges)
+- Pixabots: `@pixabots/core` npm. API at `pixabots.com/api/pixabot/{id}`
 - Local state: `.designteam/` in project root
-- Supabase: vunmdnoervxpcvgiaamz
+- Cloud state: Supabase (vunmdnoervxpcvgiaamz) via `designteam sync`
 - Vercel: designteam (auto-deploys from main)
+- Latest npm: `@designteam/core@0.1.1`, `designteam@0.3.3`
