@@ -30,5 +30,8 @@
     "tsup": "^8.0.0",
     "typescript": "^5.0.0",
     "vitest": "^4.1.2"
+  },
+  "dependencies": {
+    "@pixabots/core": "^0.1.0"
   }
 }

@@ -239,19 +239,23 @@ export function PersonalityEditor({
 // Pixabot Editor — shuffle + per-part controls
 // ---------------------------------------------------------------------------
 
-const PIXABOT_PARTS = [
-  { label: 'Eyes', max: 16 },
-  { label: 'Head', max: 8 },
-  { label: 'Body', max: 7 },
-  { label: 'Top', max: 11 },
-] as const
+import { CATEGORY_ORDER, partCount, encode, decode, type PixabotCombo } from '@pixabots/core'
+
+const PIXABOT_PARTS = CATEGORY_ORDER.map(cat => ({
+  label: cat.charAt(0).toUpperCase() + cat.slice(1),
+  category: cat,
+  max: partCount(cat),
+}))
 
 function parsePixabotId(id: string): number[] {
-  return id.split('').map(c => parseInt(c, 36))
+  const combo = decode(id)
+  return CATEGORY_ORDER.map(cat => combo[cat])
 }
 
 function buildPixabotId(parts: number[]): string {
-  return parts.map(n => n.toString(36)).join('')
+  const combo = {} as PixabotCombo
+  CATEGORY_ORDER.forEach((cat, i) => { combo[cat] = parts[i] })
+  return encode(combo)
 }
 
 function PixabotEditor({ pixabotId, onChange }: { pixabotId: string; onChange: (id: string) => void }) {
