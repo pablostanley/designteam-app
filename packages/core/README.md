@@ -20,7 +20,7 @@ npm install @designteam/core
 - **AI team builder** — generate teams from project descriptions
 - **Swarm orchestrator** — parallel task scheduling with dependencies
 
-Zero runtime dependencies. Dual ESM/CJS. Full TypeScript types.
+One dependency (`@pixabots/core` for avatar IDs). Dual ESM/CJS. Full TypeScript types.
 
 ## Quick start
 

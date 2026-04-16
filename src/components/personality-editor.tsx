@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/sheet"
 import { getAvatarSrc } from "@/components/agent-avatars"
 import { Shuffle, ChevronLeft, ChevronRight } from "lucide-react"
+import { CATEGORY_ORDER, partCount, encode, decode, type PixabotCombo } from "@pixabots/core"
 import type { Agent, PersonalityAxis, PersonalityTrait, TraitCategory } from "@/lib/agent-builder"
 import { randomPixabotId } from "@/lib/agent-builder"
 import {
@@ -238,8 +239,6 @@ export function PersonalityEditor({
 // ---------------------------------------------------------------------------
 // Pixabot Editor — shuffle + per-part controls
 // ---------------------------------------------------------------------------
-
-import { CATEGORY_ORDER, partCount, encode, decode, type PixabotCombo } from '@pixabots/core'
 
 const PIXABOT_PARTS = CATEGORY_ORDER.map(cat => ({
   label: cat.charAt(0).toUpperCase() + cat.slice(1),
