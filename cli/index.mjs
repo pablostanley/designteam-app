@@ -46,6 +46,10 @@ Team Management:
   designteam report <name> [flags]         Update agent after work
   designteam refresh                       Regenerate skill with live state
 
+Cloud Sync:
+  designteam sync                          Push local state to cloud
+  designteam pull                          Pull cloud state to local
+
 Create & Install:
   designteam create "project description"  Create a team with AI
   designteam create --preset=<name>        Create from a preset
@@ -213,6 +217,16 @@ Presets:
 
   if (command === 'refresh') {
     await cmdRefresh()
+    return
+  }
+
+  if (command === 'sync') {
+    await cmdSync()
+    return
+  }
+
+  if (command === 'pull') {
+    await cmdPull()
     return
   }
 
@@ -976,6 +990,143 @@ function generateDynamicSkill(team, states) {
 }
 
 // ---------------------------------------------------------------------------
+// Cloud sync commands
+// ---------------------------------------------------------------------------
+
+async function cmdSync() {
+  const team = requireTeam()
+  const states = loadAllAgentStates()
+  const graph = loadRelationships() || { teamId: team.id, relationships: [] }
+
+  // Find the remote team ID (from the saved team or from Supabase short_id)
+  const remoteId = team.remoteId || team.short_id || team.id
+  if (!remoteId) {
+    console.error('No remote team ID found. Create the team first with "designteam create".')
+    process.exit(1)
+  }
+
+  console.log()
+  console.log(`  Syncing ${team.name} to cloud...`)
+
+  // Build state payload
+  const agentPayload = team.agents.map(agent => {
+    const state = states[agent.id]
+    if (!state) return null
+    return {
+      agent_id: agent.id,
+      role: agent.role,
+      emotions: state.emotions,
+      memories: state.memory?.entries || [],
+      xp: state.xp || 0,
+      level: state.level || 1,
+      tasks_completed: state.tasksCompleted || 0,
+      tasks_approved: state.tasksApproved || 0,
+      last_active_at: state.lastActiveAt || null,
+    }
+  }).filter(Boolean)
+
+  try {
+    const res = await fetch(`${API_BASE}/api/teams/${remoteId}/state`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        agent_states: agentPayload,
+        relationships: graph.relationships,
+      }),
+    })
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      console.error(`  Error: ${err.error || res.status}`)
+      process.exit(1)
+    }
+
+    const result = await res.json()
+    console.log(`  Synced ${result.agents_synced} agents to cloud.`)
+    if (result.relationships_synced) {
+      console.log(`  Relationships synced.`)
+    }
+  } catch (err) {
+    console.error(`  Error: ${err.message}`)
+    process.exit(1)
+  }
+
+  console.log()
+}
+
+async function cmdPull() {
+  const team = requireTeam()
+
+  const remoteId = team.remoteId || team.short_id || team.id
+  if (!remoteId) {
+    console.error('No remote team ID found.')
+    process.exit(1)
+  }
+
+  console.log()
+  console.log(`  Pulling state for ${team.name} from cloud...`)
+
+  try {
+    const res = await fetch(`${API_BASE}/api/teams/${remoteId}/state`)
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      console.error(`  Error: ${err.error || res.status}`)
+      process.exit(1)
+    }
+
+    const data = await res.json()
+    const remoteStates = data.agent_states || []
+    const remoteRels = data.relationships || []
+
+    let updated = 0
+
+    for (const remote of remoteStates) {
+      // Find matching local agent
+      const agent = team.agents.find(a => a.id === remote.agent_id)
+      if (!agent) continue
+
+      const local = loadAgentState(agent.id)
+      const localUpdated = local?.lastActiveAt ? new Date(local.lastActiveAt).getTime() : 0
+      const remoteUpdated = remote.last_active_at ? new Date(remote.last_active_at).getTime() : 0
+
+      // Latest wins
+      if (remoteUpdated > localUpdated) {
+        saveAgentState(agent.id, {
+          emotions: remote.emotions || { energy: 80, confidence: 60, enthusiasm: 70, frustration: 10, inspiration: 50 },
+          memory: { agentId: agent.id, entries: remote.memories || [], maxEntries: 100 },
+          mailbox: local?.mailbox || { agentId: agent.id, inbox: [], maxMessages: 50 },
+          tasksCompleted: remote.tasks_completed || 0,
+          tasksApproved: remote.tasks_approved || 0,
+          xp: remote.xp || 0,
+          level: remote.level || 1,
+          lastActiveAt: remote.last_active_at || new Date().toISOString(),
+        })
+        updated++
+      }
+    }
+
+    // Pull relationships if cloud is newer
+    if (remoteRels.length > 0) {
+      saveRelationships({ teamId: team.id, relationships: remoteRels })
+    }
+
+    console.log(`  Pulled ${updated} agent states from cloud.`)
+    if (remoteRels.length > 0) {
+      console.log(`  Relationships pulled.`)
+    }
+    if (updated === 0 && remoteRels.length === 0) {
+      console.log(`  Local state is already up to date.`)
+    }
+  } catch (err) {
+    console.error(`  Error: ${err.message}`)
+    process.exit(1)
+  }
+
+  console.log()
+}
+
+// ---------------------------------------------------------------------------
 // Create commands
 // ---------------------------------------------------------------------------
 
@@ -1117,6 +1268,12 @@ async function saveAndInstall(team) {
     }
   } catch {
     // Save failed silently — still install locally
+  }
+
+  // Save remote ID so sync/pull can find the team
+  if (shortId) {
+    team.short_id = shortId
+    saveTeam(team)
   }
 
   const id = shortId || `local-${Date.now()}`
