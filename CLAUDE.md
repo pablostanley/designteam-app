@@ -1,5 +1,9 @@
 # Design Team
 
+> **⚠️ ALWAYS check `ROADMAP.md` FIRST before starting any work.**
+> It's the single source of truth for what's shipped, what's in flight, and what's next.
+> After finishing work, update it — move items to Done, add discovered follow-ups.
+
 **Your AI creative studio. Hire a team, customize their personalities, watch them grow.**
 
 16 agent roles. Tamagotchi persistence (XP, moods, memories, relationships). Works in Claude Code, Cursor, Codex, Efecto.
@@ -159,11 +163,16 @@ Flag instantly and fix:
 
 ## Checklist — Before and After Work
 
-**Before starting**: Read `ROADMAP.md` to understand current state and priorities.
+**Before starting any work:**
+1. **Read `ROADMAP.md`** — find the current priority (marked `[next priority]`)
+2. Don't pick work that isn't in the roadmap unless the user asks for it
+3. If starting something new: add it to ROADMAP.md first, then build
 
-**After finishing**:
-1. Update `ROADMAP.md` — move completed items, add discovered work
-2. Run `cd packages/core && pnpm test` — 307 tests must pass
-3. Run `pnpm build` — Next.js app must build
-4. Check if `@pixabots/core` has updates: `/Users/pablostanley/pixabots`
-5. If publishing to npm: bump version, build, publish core first then CLI
+**After finishing work:**
+1. **Update `ROADMAP.md`** — move completed items to Done with PR # and merge date
+2. Add any discovered follow-up work to the appropriate phase
+3. Run `cd packages/core && pnpm test` — all tests must pass
+4. Run `pnpm build` — Next.js app must build
+5. Check if `@pixabots/core` has updates: `/Users/pablostanley/pixabots`
+6. If publishing to npm: bump version in both `package.json` and `packages/core/package.json`, build, publish core first then CLI
+7. Commit and push the ROADMAP update

@@ -68,27 +68,37 @@
 
 ### v0.8 — Autonomous Mode (`designteam run`) [next priority]
 
-Make the team work through a project autonomously within Claude Code.
+Make the team work through a project autonomously — one command kicks off research, copy, design, review, ship.
 
-- [ ] `designteam plan "design a landing page"` — creates task graph
-- [ ] `designteam run <project-id>` — executes the plan
-- [ ] Adapter interface — same code works in Efecto, Claude Code, Cursor, Codex
+**Phase 1: Planning** (start here)
+- [ ] `designteam plan "design a landing page"` — Haiku generates a task graph
+  - Nova (Creative Director) is the planner — uses team memory + user profile
+  - Each task has: agent role, instruction, dependencies, success criteria, "why chain"
+  - Saved to `.designteam/projects/<project-id>.json`
+- [ ] `designteam plans` — list all project plans (active + completed)
+- [ ] `designteam show <project-id>` — view the task graph, status per task
 
-### v0.7 — Autonomous Mode (`designteam run`)
+**Phase 2: Execution via Claude Code**
+- [ ] Skill template includes a "Running a project" section that tells Claude Code:
+  - Read the plan at `.designteam/projects/<id>.json`
+  - For each ready task (deps done), invoke the matching agent via Task tool
+  - After each task, run `designteam progress <project-id> <task-id> --done`
+  - Auto-extract memories from the task output
+- [ ] `designteam progress` command — update task status in the plan file
 
-Make the team work through a project autonomously within Claude Code.
+**Phase 3: Execution via API (optional, true autonomy)**
+- [ ] `designteam run <project-id>` — CLI invokes each agent via Anthropic API
+  - Walks dependency graph (topological order)
+  - Each agent gets: personality + memory + task context + deps output
+  - Returns text output, saved to `.designteam/projects/<id>/outputs/<task-id>.md`
+  - Auto-report XP + memory after each task
+  - Gate behind `ANTHROPIC_API_KEY`
 
-- [ ] **`designteam plan "design a landing page"`** — creates task graph
-  - Nova (Creative Director) breaks the goal into tasks with dependencies
-  - Each task has: role assignment, parent task, success criteria, "why chain"
-  - Saved to `.designteam/projects/<id>.json`
-- [ ] **`designteam run <project-id>`** — executes the plan
-  - Walks the task graph in dependency order
-  - Invokes each agent (via Claude Code Task tool or API)
-  - Auto-reports completion after each task
-  - Extracts memories automatically
-  - Shows progress as it goes
-- [ ] **Adapter interface** — same code works in Efecto, Claude Code, Cursor, Codex
+**Phase 4: Adapter interface**
+- [ ] `DesignTeamAdapter` in core — same code works in Efecto, Claude Code, Cursor, Codex
+- [ ] Efecto adapter (MCP bridge to design canvas)
+- [ ] Claude Code adapter (Task tool + file writes)
+- [ ] REST adapter (generic HTTP)
   - `DesignTeamAdapter` in core
   - Efecto adapter: MCP bridge, 64 design tools
   - Claude Code adapter: Task tool, file writes
