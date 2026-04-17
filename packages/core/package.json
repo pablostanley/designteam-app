@@ -1,6 +1,6 @@
 {
   "name": "@designteam/core",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Agent personality engine, emotional model, memory, relationships, and swarm orchestration for AI design teams",
   "license": "MIT",
   "type": "module",
