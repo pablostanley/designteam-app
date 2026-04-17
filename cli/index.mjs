@@ -6,6 +6,8 @@ import {
   loadTeam, saveTeam,
   loadAgentState, saveAgentState, loadAllAgentStates,
   loadRelationships, saveRelationships, initTeamState,
+  loadTeamMemory, saveTeamMemory,
+  loadUserProfile, saveUserProfile,
 } from './state.mjs'
 import {
   AGENT_ROLE_DEFINITIONS, AGENT_NAMES, AGENT_ROLE_LIST,
@@ -15,6 +17,9 @@ import {
   getMood, getConvictionScore, personalityToModifiers,
   reportOutcome, applyDecay, inferMemoryType,
   addMemory, recordCollaboration,
+  createEmptyTeamMemory, addTeamMemory, searchTeamMemories, getTopTeamMemories,
+  teamMemoryToPromptFragment,
+  createEmptyUserProfile, updateUserProfile, userProfileToPromptFragment,
 } from '@designteam/core'
 
 const API_BASE = 'https://designteam.app'
@@ -45,6 +50,12 @@ Team Management:
   designteam fire <name>                   Remove an agent
   designteam report <name> [flags]         Update agent after work
   designteam refresh                       Regenerate skill with live state
+
+Memory:
+  designteam remember <category> "content" Add team memory (brand/project/user/decision/fact)
+  designteam recall [query]                Search team memory
+  designteam memory                        Show all team memory
+  designteam profile [get|set key val]     View or edit user profile
 
 Cloud Sync:
   designteam sync                          Push local state to cloud
@@ -217,6 +228,33 @@ Presets:
 
   if (command === 'refresh') {
     await cmdRefresh()
+    return
+  }
+
+  if (command === 'remember') {
+    const category = args[1]
+    const content = args.slice(2).join(' ')
+    if (!category || !content) {
+      console.error('Usage: designteam remember <brand|project|user|decision|fact> "content"')
+      process.exit(1)
+    }
+    await cmdRemember(category, content)
+    return
+  }
+
+  if (command === 'recall') {
+    const query = args.slice(1).join(' ')
+    await cmdRecall(query)
+    return
+  }
+
+  if (command === 'memory') {
+    await cmdMemory()
+    return
+  }
+
+  if (command === 'profile') {
+    await cmdProfile(args.slice(1))
     return
   }
 
@@ -779,6 +817,26 @@ function generateDynamicSkill(team, states) {
   lines.push(`You have a design team: **${nameList}**.`)
   lines.push('')
 
+  // Inject user profile (who the user is)
+  const profile = loadUserProfile()
+  if (profile) {
+    const profileFragment = userProfileToPromptFragment(profile)
+    if (profileFragment) {
+      lines.push(profileFragment)
+      lines.push('')
+    }
+  }
+
+  // Inject team memory (shared knowledge)
+  const teamMemory = loadTeamMemory()
+  if (teamMemory && teamMemory.entries.length > 0) {
+    const memoryFragment = teamMemoryToPromptFragment(teamMemory, 30)
+    if (memoryFragment) {
+      lines.push(memoryFragment)
+      lines.push('')
+    }
+  }
+
   // Roster — use a table for maximum visibility
   lines.push('## Your Team')
   lines.push('')
@@ -842,6 +900,27 @@ function generateDynamicSkill(team, states) {
   lines.push('')
   lines.push('Always include `--memory "..."` with what the agent learned about the user or project.')
   lines.push('This is how agents level up, shift moods, and build memories.')
+  lines.push('')
+  lines.push('### Team knowledge (shared across all agents)')
+  lines.push('')
+  lines.push('When you learn something the WHOLE TEAM should know (not just one agent), save it as team memory:')
+  lines.push('')
+  lines.push('```bash')
+  lines.push('# Brand facts (colors, voice, typography):')
+  lines.push('npx designteam remember brand "warm earth-tone palette, no purple"')
+  lines.push('')
+  lines.push('# Project context (constraints, audience):')
+  lines.push('npx designteam remember project "targeting indie devs, ship in 2 weeks"')
+  lines.push('')
+  lines.push('# User preferences (style, taste):')
+  lines.push('npx designteam remember user "prefers asymmetric layouts"')
+  lines.push('')
+  lines.push('# Team decisions (tried and rejected):')
+  lines.push('npx designteam remember decision "tried dark mode, user rejected it"')
+  lines.push('```')
+  lines.push('')
+  lines.push('Use agent memory (`report --memory`) for what THAT AGENT learned.')
+  lines.push('Use team memory (`remember`) for what THE WHOLE TEAM should know.')
   lines.push('')
   lines.push('### End-of-task summary template')
   lines.push('')
@@ -987,6 +1066,191 @@ function generateDynamicSkill(team, states) {
   lines.push('')
 
   return lines.join('\n')
+}
+
+// ---------------------------------------------------------------------------
+// Memory commands — team memory and user profile
+// ---------------------------------------------------------------------------
+
+const VALID_MEMORY_CATEGORIES = ['brand', 'project', 'user', 'decision', 'fact']
+
+async function cmdRemember(category, content) {
+  const team = requireTeam()
+  const cat = category.toLowerCase()
+
+  if (!VALID_MEMORY_CATEGORIES.includes(cat)) {
+    console.error(`Invalid category: ${category}`)
+    console.error(`Valid: ${VALID_MEMORY_CATEGORIES.join(', ')}`)
+    process.exit(1)
+  }
+
+  const memory = loadTeamMemory() || createEmptyTeamMemory(team.id)
+  const updated = addTeamMemory(memory, cat, content, { source: 'user', salience: 0.8 })
+  saveTeamMemory(updated)
+
+  console.log()
+  console.log(`  Team remembers [${cat}]: "${content}"`)
+  console.log(`  Total team memories: ${updated.entries.length}`)
+  console.log()
+}
+
+async function cmdRecall(query) {
+  requireTeam()
+  const memory = loadTeamMemory()
+
+  if (!memory || memory.entries.length === 0) {
+    console.log()
+    console.log('  No team memories yet.')
+    console.log('  Add one: designteam remember <category> "content"')
+    console.log()
+    return
+  }
+
+  const results = query
+    ? searchTeamMemories(memory, query, 10)
+    : getTopTeamMemories(memory, 10)
+
+  console.log()
+  if (query) {
+    console.log(`  Matching "${query}" (${results.length} found):`)
+  } else {
+    console.log(`  Top ${results.length} team memories:`)
+  }
+  console.log()
+
+  if (results.length === 0) {
+    console.log(`  No matches.`)
+  } else {
+    for (const entry of results) {
+      const tag = `[${entry.category}]`.padEnd(11)
+      const source = entry.source ? ` (${entry.source})` : ''
+      console.log(`  ${tag} ${entry.content}${source}`)
+    }
+  }
+  console.log()
+}
+
+async function cmdMemory() {
+  const team = requireTeam()
+  const memory = loadTeamMemory()
+
+  console.log()
+  console.log(`  ${team.name} — Team Memory`)
+  console.log()
+
+  if (!memory || memory.entries.length === 0) {
+    console.log('  No team memories yet.')
+    console.log()
+    console.log('  Add brand facts, project context, user preferences:')
+    console.log('    designteam remember brand "warm earth-tone palette"')
+    console.log('    designteam remember user "prefers minimal layouts"')
+    console.log('    designteam remember decision "tried dark mode, user rejected it"')
+    console.log()
+    return
+  }
+
+  const grouped = {}
+  for (const cat of VALID_MEMORY_CATEGORIES) grouped[cat] = []
+  for (const entry of memory.entries) {
+    (grouped[entry.category] || grouped.fact).push(entry)
+  }
+
+  const labels = {
+    brand: 'Brand',
+    project: 'Project',
+    user: 'About the user',
+    decision: 'Decisions',
+    fact: 'Facts',
+  }
+
+  for (const cat of VALID_MEMORY_CATEGORIES) {
+    const entries = grouped[cat]
+    if (entries.length === 0) continue
+    entries.sort((a, b) => b.salience - a.salience)
+    console.log(`  ${labels[cat]}:`)
+    for (const e of entries) {
+      const strength = e.salience >= 0.7 ? 'strong' : e.salience >= 0.4 ? 'fading' : 'weak'
+      console.log(`    - ${e.content} (${strength})`)
+    }
+    console.log()
+  }
+
+  console.log(`  Total: ${memory.entries.length} memories`)
+  console.log()
+}
+
+async function cmdProfile(args) {
+  const sub = args[0]
+  const profile = loadUserProfile() || createEmptyUserProfile()
+
+  // Show profile
+  if (!sub || sub === 'get') {
+    console.log()
+    console.log('  Your Profile')
+    console.log()
+    const keys = Object.keys(profile).filter(k => k !== 'updatedAt')
+    if (keys.length === 0) {
+      console.log('  Empty — tell your team about you:')
+      console.log('    designteam profile set business "Acme Co"')
+      console.log('    designteam profile set industry "B2B SaaS for developers"')
+      console.log('    designteam profile set audience "indie devs and startups"')
+      console.log('    designteam profile set voice "direct, punchy, no fluff"')
+      console.log()
+      return
+    }
+    for (const key of keys) {
+      const val = profile[key]
+      if (Array.isArray(val)) {
+        console.log(`  ${key}: ${val.join(', ')}`)
+      } else if (val) {
+        console.log(`  ${key}: ${val}`)
+      }
+    }
+    console.log()
+    return
+  }
+
+  // Set profile field
+  if (sub === 'set') {
+    const key = args[1]
+    const value = args.slice(2).join(' ')
+    if (!key || !value) {
+      console.error('Usage: designteam profile set <key> "value"')
+      console.error('Keys: name, business, businessDescription, industry, audience, goals, voice, style, brandColors, notes')
+      process.exit(1)
+    }
+    // Arrays: goals, brandColors — comma-separated
+    const arrayKeys = ['goals', 'brandColors']
+    const parsedValue = arrayKeys.includes(key)
+      ? value.split(',').map(s => s.trim()).filter(Boolean)
+      : value
+    const updated = updateUserProfile(profile, { [key]: parsedValue })
+    saveUserProfile(updated)
+    console.log()
+    console.log(`  Profile updated: ${key} = ${Array.isArray(parsedValue) ? parsedValue.join(', ') : parsedValue}`)
+    console.log()
+    return
+  }
+
+  // Clear field
+  if (sub === 'unset') {
+    const key = args[1]
+    if (!key) {
+      console.error('Usage: designteam profile unset <key>')
+      process.exit(1)
+    }
+    const updated = { ...profile }
+    delete updated[key]
+    updated.updatedAt = new Date().toISOString()
+    saveUserProfile(updated)
+    console.log()
+    console.log(`  Profile cleared: ${key}`)
+    console.log()
+    return
+  }
+
+  console.error('Usage: designteam profile [get|set|unset]')
+  process.exit(1)
 }
 
 // ---------------------------------------------------------------------------

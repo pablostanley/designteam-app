@@ -108,3 +108,43 @@ export function initTeamState(team, createDefaultLivingStateFn) {
     saveRelationships({ teamId: team.id, relationships: [] })
   }
 }
+
+// ---------------------------------------------------------------------------
+// Team Memory (shared across all agents)
+// ---------------------------------------------------------------------------
+
+export function loadTeamMemory() {
+  const path = join(getStateDir(), 'team-memory.json')
+  if (!existsSync(path)) return null
+  try {
+    return JSON.parse(readFileSync(path, 'utf8'))
+  } catch {
+    return null
+  }
+}
+
+export function saveTeamMemory(memory) {
+  const dir = getStateDir()
+  ensureDir(dir)
+  writeFileSync(join(dir, 'team-memory.json'), JSON.stringify(memory, null, 2), 'utf8')
+}
+
+// ---------------------------------------------------------------------------
+// User Profile (who you are, what you care about)
+// ---------------------------------------------------------------------------
+
+export function loadUserProfile() {
+  const path = join(getStateDir(), 'user.json')
+  if (!existsSync(path)) return null
+  try {
+    return JSON.parse(readFileSync(path, 'utf8'))
+  } catch {
+    return null
+  }
+}
+
+export function saveUserProfile(profile) {
+  const dir = getStateDir()
+  ensureDir(dir)
+  writeFileSync(join(dir, 'user.json'), JSON.stringify(profile, null, 2), 'utf8')
+}
