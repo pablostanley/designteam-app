@@ -53,23 +53,20 @@
 - [x] Migration 004 — `team_memory` table with RLS
 - [x] CLI: `remember`, `recall`, `memory`, `profile get/set/unset`
 - [x] Dynamic skill injects `ABOUT THE USER` + `TEAM KNOWLEDGE` at the top
-- [x] Published `@designteam/core@0.2.0`, `designteam@0.4.0`
+
+### v0.7 — Auto Memory Extraction (PR #7, merged Apr 17)
+- [x] `@designteam/core`: new `auto-extract` module (AI + heuristic)
+- [x] `--memory` now auto-routes to agent or team memory based on content
+- [x] Haiku extraction when `ANTHROPIC_API_KEY` is set (up to 3 memories per report)
+- [x] Heuristic fallback — categorizes by keyword patterns (brand/user/decision/project)
+- [x] Const tuples drive both unions (no stringly-typed drift)
+- [x] Prompt injection hardened (content wrapped in `<agent_report>` tags)
+- [x] 344 tests passing
+- [x] Published `@designteam/core@0.3.1`, `designteam@0.5.1`
 
 ## Up Next
 
-### v0.7 — Auto Memory Extraction [next priority]
-
-Stop making users type `--memory`. Let the team extract what it learned automatically.
-
-- [ ] After each `designteam report`, spawn a Haiku call to extract memories
-- [ ] AI reads the work context (task description + agent's recent actions)
-- [ ] Returns 1-3 memories with category (user/brand/project/decision/fact/agent)
-- [ ] Agent-specific memories → agent_states.memories
-- [ ] Team-level memories → team_memory
-- [ ] Gate behind `ANTHROPIC_API_KEY` env var (optional)
-- [ ] CLI: `designteam extract "what happened"` — manual mode
-
-### v0.8 — Autonomous Mode (`designteam run`)
+### v0.8 — Autonomous Mode (`designteam run`) [next priority]
 
 Make the team work through a project autonomously within Claude Code.
 
