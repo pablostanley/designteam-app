@@ -47,47 +47,35 @@
 
 ---
 
+### v0.6 — The Memory Loop (PR #6, merged Apr 17)
+- [x] `@designteam/core`: new `team-memory` module (brand/project/user/decision/fact categories)
+- [x] `@designteam/core`: new `user-profile` module (business/industry/audience/voice/style)
+- [x] Migration 004 — `team_memory` table with RLS
+- [x] CLI: `remember`, `recall`, `memory`, `profile get/set/unset`
+- [x] Dynamic skill injects `ABOUT THE USER` + `TEAM KNOWLEDGE` at the top
+- [x] Published `@designteam/core@0.2.0`, `designteam@0.4.0`
+
 ## Up Next
 
-### v0.6 — The Memory Loop [current priority]
+### v0.7 — Auto Memory Extraction [next priority]
 
-**The vision**: Agents, teams, and users all have growing memory that flows into every interaction. Nothing is lost. Everything the team learns about the user, the brand, the project — it all sticks.
+Stop making users type `--memory`. Let the team extract what it learned automatically.
 
-**What's missing today**:
-- Agents have individual memories, but the TEAM has no shared context
-- No USER/PROJECT profile — the team doesn't "know" the user
-- Memory capture is manual (`designteam report --memory "..."`)
-- No memory queries — agents can't recall relevant memories before working
+- [ ] After each `designteam report`, spawn a Haiku call to extract memories
+- [ ] AI reads the work context (task description + agent's recent actions)
+- [ ] Returns 1-3 memories with category (user/brand/project/decision/fact/agent)
+- [ ] Agent-specific memories → agent_states.memories
+- [ ] Team-level memories → team_memory
+- [ ] Gate behind `ANTHROPIC_API_KEY` env var (optional)
+- [ ] CLI: `designteam extract "what happened"` — manual mode
 
-**What to build**:
+### v0.8 — Autonomous Mode (`designteam run`)
 
-- [ ] **Team memory** — shared knowledge every agent can read
-  - Brand guidelines (colors, voice, typography preferences)
-  - Project constraints (audience, deadlines, tech stack)
-  - Past decisions ("we tried dark mode, user didn't like it")
-  - New table: `team_memory` with `{team_id, category, content, salience, created_at}`
-  - CLI: `designteam remember "our brand uses warm earth tones"`
-  - CLI: `designteam recall "brand colors"`
-- [ ] **User profile** — who the user is, what they care about
-  - Business name, industry, goals, target audience
-  - Style preferences, voice/tone, design taste
-  - Track record (what they've approved/rejected)
-  - New table: `user_profiles` (when logged in) or `.designteam/user.json` (local)
-  - CLI: `designteam profile` — view/edit your profile
-  - CLI: `designteam profile set business "Acme Co, B2B SaaS, devs"`
-- [ ] **Auto-memory extraction** — stop making users type `--memory`
-  - After each `designteam report`, AI extracts what was learned
-  - Uses Haiku (cheap, fast) to summarize the task outcome
-  - Categorizes: user preference, brand fact, project context, skill growth
-  - Stores in agent memory + team memory based on category
-- [ ] **Memory injection in skills** — richer context per agent
-  - Dynamic skill already injects agent's own memories
-  - Also inject: team memory, user profile, relevant project context
-  - Query-based: "agent working on hero section" → pull memories about hero patterns
-- [ ] **`designteam recall`** — query memories across the whole team
-  - `designteam recall "dark theme"` → returns all memories across agents + team + user
-  - Sorted by salience + recency
-  - Optional: `--agent Scout` to scope to one agent
+Make the team work through a project autonomously within Claude Code.
+
+- [ ] `designteam plan "design a landing page"` — creates task graph
+- [ ] `designteam run <project-id>` — executes the plan
+- [ ] Adapter interface — same code works in Efecto, Claude Code, Cursor, Codex
 
 ### v0.7 — Autonomous Mode (`designteam run`)
 
