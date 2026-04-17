@@ -643,8 +643,8 @@ async function routeMemoryToBucket(content, agent, context = {}) {
         userInput: content,
         ...context,
       })
-    } catch {
-      // Fall through to heuristic
+    } catch (err) {
+      console.error(`  (AI extraction failed: ${err.message} — falling back to heuristic)`)
     }
   }
 
