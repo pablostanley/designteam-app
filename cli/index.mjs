@@ -20,6 +20,7 @@ import {
   createEmptyTeamMemory, addTeamMemory, searchTeamMemories, getTopTeamMemories,
   teamMemoryToPromptFragment,
   createEmptyUserProfile, updateUserProfile, userProfileToPromptFragment,
+  extractMemoriesWithAI, categorizeHeuristic,
 } from '@designteam/core'
 
 const API_BASE = 'https://designteam.app'
@@ -625,6 +626,61 @@ async function cmdFire(name) {
   console.log()
 }
 
+/**
+ * Route a memory into the right bucket (agent or team).
+ * Uses AI extraction if ANTHROPIC_API_KEY is set, heuristic fallback otherwise.
+ * Returns { agentMemoriesToAdd, teamMemoriesToAdd } for callers to apply.
+ */
+async function routeMemoryToBucket(content, agent, context = {}) {
+  let extracted = []
+
+  // Try AI extraction first (multiple memories from rich context)
+  if (process.env.ANTHROPIC_API_KEY) {
+    try {
+      extracted = await extractMemoriesWithAI({
+        agentName: agent.name,
+        agentRole: agent.role,
+        userInput: content,
+        ...context,
+      })
+    } catch {
+      // Fall through to heuristic
+    }
+  }
+
+  // Heuristic fallback: single memory, smart categorization
+  if (extracted.length === 0) {
+    extracted = [categorizeHeuristic(content)]
+  }
+
+  return extracted
+}
+
+/** Apply a list of extracted memories to agent state and team memory */
+function applyExtractedMemories(extracted, agent, agentState, teamMemory) {
+  let newAgentState = agentState
+  let newTeamMemory = teamMemory
+  const applied = []
+
+  for (const mem of extracted) {
+    if (mem.scope === 'agent') {
+      newAgentState = {
+        ...newAgentState,
+        memory: addMemory(newAgentState.memory, mem.agentType || 'design_preference', mem.content, { salience: mem.salience }),
+      }
+      applied.push({ scope: 'agent', content: mem.content, type: mem.agentType })
+    } else {
+      newTeamMemory = addTeamMemory(newTeamMemory, mem.teamCategory || 'fact', mem.content, {
+        salience: mem.salience,
+        source: agent.name,
+      })
+      applied.push({ scope: 'team', content: mem.content, category: mem.teamCategory })
+    }
+  }
+
+  return { agentState: newAgentState, teamMemory: newTeamMemory, applied }
+}
+
 async function cmdReport(name, flags) {
   const team = requireTeam()
   const agent = findAgent(team, name)
@@ -671,13 +727,17 @@ async function cmdReport(name, flags) {
 
   // Memory-only or collab-only: record directly without task outcome (no XP, no task count)
   if (outcomes.length === 0) {
-    const memState = { ...state, lastActiveAt: new Date().toISOString() }
+    let memState = { ...state, lastActiveAt: new Date().toISOString() }
     let memGraph = { ...graph, relationships: [...graph.relationships] }
+    let memApplied = []
 
     if (memoryContent) {
-      const memType = inferMemoryType(memoryContent)
-      const salience = memType === 'feedback' ? 0.85 : 0.7
-      memState.memory = addMemory(memState.memory, memType, memoryContent, { salience })
+      const teamMem = loadTeamMemory() || createEmptyTeamMemory(team.id)
+      const extracted = await routeMemoryToBucket(memoryContent, agent)
+      const result = applyExtractedMemories(extracted, agent, memState, teamMem)
+      memState = result.agentState
+      saveTeamMemory(result.teamMemory)
+      memApplied = result.applied
     }
     if (collabId) {
       memGraph = recordCollaboration(memGraph, agent.id, collabId, hasFlag('--successful'))
@@ -689,7 +749,13 @@ async function cmdReport(name, flags) {
     const mood = getMoodFromState(memState)
     const emoji = MOOD_EMOJI[mood] || ''
     console.log()
-    if (memoryContent) console.log(`  ${agent.name} remembers: "${memoryContent}"`)
+    for (const m of memApplied) {
+      if (m.scope === 'agent') {
+        console.log(`  ${agent.name} remembers: "${m.content}"`)
+      } else {
+        console.log(`  Team remembers [${m.category}]: "${m.content}"`)
+      }
+    }
     if (collabId) {
       const partner = team.agents.find(a => a.id === collabId)
       if (partner) console.log(`  Collaboration: ${agent.name} + ${partner.name}`)
@@ -700,6 +766,7 @@ async function cmdReport(name, flags) {
   }
 
   // Apply each outcome sequentially so XP stacks
+  // Don't pass memory through reportOutcome — we route it via auto-extractor after
   let currentState = state
   let currentGraph = graph
   let totalXp = 0
@@ -708,8 +775,6 @@ async function cmdReport(name, flags) {
   for (const outcomeType of outcomes) {
     const outcome = {
       type: outcomeType,
-      // Only attach memory and collab to the last outcome to avoid duplicates
-      memory: outcomeType === outcomes[outcomes.length - 1] ? (memoryContent || undefined) : undefined,
       collaboratorId: outcomeType === outcomes[outcomes.length - 1] ? (collabId || undefined) : undefined,
       collaborationSuccessful: hasFlag('--successful') ? true : undefined,
     }
@@ -719,6 +784,19 @@ async function cmdReport(name, flags) {
     currentGraph = result.graph
     totalXp += result.xpGained
     finalResult = result
+  }
+
+  // Auto-extract and route memory
+  let applied = []
+  if (memoryContent) {
+    const teamMem = loadTeamMemory() || createEmptyTeamMemory(team.id)
+    const extracted = await routeMemoryToBucket(memoryContent, agent, {
+      outcome: outcomes.join(' + '),
+    })
+    const routed = applyExtractedMemories(extracted, agent, finalResult.state, teamMem)
+    finalResult.state = routed.agentState
+    saveTeamMemory(routed.teamMemory)
+    applied = routed.applied
   }
 
   // Persist
@@ -744,8 +822,12 @@ async function cmdReport(name, flags) {
     }
   }
 
-  if (memoryContent) {
-    console.log(`  ${agent.name} remembers: "${memoryContent}"`)
+  for (const m of applied) {
+    if (m.scope === 'agent') {
+      console.log(`  ${agent.name} remembers: "${m.content}"`)
+    } else {
+      console.log(`  Team remembers [${m.category}]: "${m.content}"`)
+    }
   }
 
   if (collabId) {
