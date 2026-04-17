@@ -10,9 +10,11 @@
  * categorization when no AI is available.
  */
 
-import type { MemoryType } from './types'
-import type { TeamMemoryCategory } from './team-memory'
+import { MEMORY_TYPES, type MemoryType } from './types'
+import { TEAM_MEMORY_CATEGORIES, type TeamMemoryCategory } from './team-memory'
 import { inferMemoryType } from './lifecycle'
+
+const MAX_EXTRACTED_MEMORIES = 3
 
 export interface ExtractionContext {
   /** Who did the work (e.g., "Scout", "Pixel") */
@@ -69,8 +71,8 @@ For each memory, decide the scope:
 - "agent" = specific to how this agent works (e.g., "learned to use grid layouts", "struggled with this kind of task")
 - "team" = something the whole team should know (e.g., "user prefers dark themes", "brand uses warm palette")
 
-For agent memories, pick a type: design_preference | feedback | relationship | project_context | skill_growth
-For team memories, pick a category: brand | project | user | decision | fact
+For agent memories, pick a type: ${MEMORY_TYPES.join(' | ')}
+For team memories, pick a category: ${TEAM_MEMORY_CATEGORIES.join(' | ')}
 
 Return ONLY valid JSON, no prose:
 {"memories":[{"scope":"team","content":"user prefers dark themes","teamCategory":"user","salience":0.85}]}
@@ -94,7 +96,7 @@ If nothing memorable, return: {"memories":[]}`
     })
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
-    throw new Error(`Network error: ${msg}`)
+    throw new Error(`Network error: ${msg}`, { cause: err })
   }
 
   if (!res.ok) {
@@ -111,9 +113,8 @@ If nothing memorable, return: {"memories":[]}`
   return parseExtractionJSON(text)
 }
 
-/** Parse Haiku's JSON output, tolerant of minor formatting */
-function parseExtractionJSON(text: string): ExtractedMemory[] {
-  // Strip markdown fences if present
+/** Parse Haiku's JSON output, tolerant of minor formatting. Exported for testing. */
+export function parseExtractionJSON(text: string): ExtractedMemory[] {
   const match = text.match(/\{[\s\S]*\}/)
   if (!match) return []
 
@@ -122,6 +123,7 @@ function parseExtractionJSON(text: string): ExtractedMemory[] {
     if (!Array.isArray(obj.memories)) return []
 
     return (obj.memories as unknown[])
+      .slice(0, MAX_EXTRACTED_MEMORIES)
       .filter((m): m is Record<string, unknown> => m !== null && typeof m === 'object')
       .map((m: Record<string, unknown>): ExtractedMemory | null => {
         const content = typeof m.content === 'string' ? m.content : null
@@ -133,52 +135,41 @@ function parseExtractionJSON(text: string): ExtractedMemory[] {
           : 0.7
 
         if (scope === 'team') {
-          const validCats = ['brand', 'project', 'user', 'decision', 'fact']
-          const teamCategory = validCats.includes(m.teamCategory as string)
+          const teamCategory = TEAM_MEMORY_CATEGORIES.includes(m.teamCategory as TeamMemoryCategory)
             ? (m.teamCategory as TeamMemoryCategory)
             : 'fact'
           return { scope, content, teamCategory, salience }
         } else {
-          const validTypes = ['design_preference', 'feedback', 'relationship', 'project_context', 'skill_growth']
-          const agentType = validTypes.includes(m.agentType as string)
+          const agentType = MEMORY_TYPES.includes(m.agentType as MemoryType)
             ? (m.agentType as MemoryType)
             : inferMemoryType(content)
           return { scope, content, agentType, salience }
         }
       })
       .filter((m: ExtractedMemory | null): m is ExtractedMemory => m !== null)
-      .slice(0, 3)
   } catch {
     return []
   }
 }
 
+// Hoisted regexes — module-scope allocation for the shared package
+const BRAND_RE = /\b(brand|palette|colors?|typography|fonts?|logo|serif|sans[- ]serif|minimalist)\b/
+const USER_PREF_RE = /\b(user|client|customer)\b.{0,40}\b(prefers?|likes?|wants?|hates?|needs?|loves?|dislikes?)\b/
+const DECISION_RE = /\b(tried|rejected|decided|chose)\b/
+const PROJECT_RE = /\b(audience|target audience|deadline|friday|monday|tuesday|wednesday|thursday|saturday|sunday|constraint|scope|budget)\b/
+
 /**
- * Heuristic fallback when no AI is available. Takes user-provided memory
- * text and categorizes it as agent or team memory based on keywords.
+ * Heuristic fallback when no AI is available. Categorizes a memory as
+ * agent- or team-scope based on keyword patterns. Order matters —
+ * brand wins over user-pref, user-pref wins over decision, etc.
  */
 export function categorizeHeuristic(content: string): ExtractedMemory {
   const lower = content.toLowerCase()
 
-  // Team-level signals — checked in priority order
-  if (/\b(brand|palette|colors?|typography|fonts?|logo|serif|sans[- ]serif|minimalist?|minimal)\b/.test(lower)) {
-    return { scope: 'team', content, teamCategory: 'brand', salience: 0.8 }
-  }
-  if (/\b(user|client|customer|they)\b.*\b(prefers?|likes?|wants?|hates?|needs?|loves?|dislikes?)\b/.test(lower)) {
-    return { scope: 'team', content, teamCategory: 'user', salience: 0.8 }
-  }
-  if (/\b(tried|rejected|decided|chose|approved|denied)\b/.test(lower)) {
-    return { scope: 'team', content, teamCategory: 'decision', salience: 0.75 }
-  }
-  if (/\b(audience|target|deadline|ship|launch|before|after|friday|monday|week|month|constraint|scope|budget)\b/.test(lower)) {
-    return { scope: 'team', content, teamCategory: 'project', salience: 0.75 }
-  }
+  if (BRAND_RE.test(lower)) return { scope: 'team', content, teamCategory: 'brand', salience: 0.8 }
+  if (USER_PREF_RE.test(lower)) return { scope: 'team', content, teamCategory: 'user', salience: 0.8 }
+  if (DECISION_RE.test(lower)) return { scope: 'team', content, teamCategory: 'decision', salience: 0.75 }
+  if (PROJECT_RE.test(lower)) return { scope: 'team', content, teamCategory: 'project', salience: 0.75 }
 
-  // Fallback: agent memory with inferred type
-  return {
-    scope: 'agent',
-    content,
-    agentType: inferMemoryType(content),
-    salience: 0.7,
-  }
+  return { scope: 'agent', content, agentType: inferMemoryType(content), salience: 0.7 }
 }

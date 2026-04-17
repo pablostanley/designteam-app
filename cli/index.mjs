@@ -627,28 +627,26 @@ async function cmdFire(name) {
 }
 
 /**
- * Route a memory into the right bucket (agent or team).
- * Uses AI extraction if ANTHROPIC_API_KEY is set, heuristic fallback otherwise.
- * Returns { agentMemoriesToAdd, teamMemoriesToAdd } for callers to apply.
+ * Route a memory into agent-scope or team-scope buckets.
+ * Uses AI extraction when ANTHROPIC_API_KEY is set, heuristic otherwise.
+ * @returns {Promise<Array>} Extracted memories (1 from heuristic, up to 3 from AI)
  */
-async function routeMemoryToBucket(content, agent, context = {}) {
+async function routeMemoryToBucket(content, agent, { outcome } = {}) {
   let extracted = []
 
-  // Try AI extraction first (multiple memories from rich context)
   if (process.env.ANTHROPIC_API_KEY) {
     try {
       extracted = await extractMemoriesWithAI({
         agentName: agent.name,
         agentRole: agent.role,
         userInput: content,
-        ...context,
+        outcome,
       })
     } catch (err) {
       console.error(`  (AI extraction failed: ${err.message} — falling back to heuristic)`)
     }
   }
 
-  // Heuristic fallback: single memory, smart categorization
   if (extracted.length === 0) {
     extracted = [categorizeHeuristic(content)]
   }
@@ -728,7 +726,7 @@ async function cmdReport(name, flags) {
   // Memory-only or collab-only: record directly without task outcome (no XP, no task count)
   if (outcomes.length === 0) {
     let memState = { ...state, lastActiveAt: new Date().toISOString() }
-    let memGraph = { ...graph, relationships: [...graph.relationships] }
+    let memGraph = graph
     let memApplied = []
 
     if (memoryContent) {
