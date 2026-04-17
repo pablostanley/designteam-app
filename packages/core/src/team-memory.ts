@@ -11,7 +11,8 @@
  * the Creative Director or user writes.
  */
 
-export type TeamMemoryCategory = 'brand' | 'project' | 'user' | 'decision' | 'fact'
+export const TEAM_MEMORY_CATEGORIES = ['brand', 'project', 'user', 'decision', 'fact'] as const
+export type TeamMemoryCategory = typeof TEAM_MEMORY_CATEGORIES[number]
 
 export interface TeamMemoryEntry {
   id: string

@@ -298,12 +298,8 @@ export type EmotionalEvent =
 // Agent Memory
 // ---------------------------------------------------------------------------
 
-export type MemoryType =
-  | 'design_preference'
-  | 'feedback'
-  | 'relationship'
-  | 'project_context'
-  | 'skill_growth'
+export const MEMORY_TYPES = ['design_preference', 'feedback', 'relationship', 'project_context', 'skill_growth'] as const
+export type MemoryType = typeof MEMORY_TYPES[number]
 
 export interface AgentMemoryEntry {
   id: string
