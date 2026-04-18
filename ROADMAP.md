@@ -107,7 +107,7 @@ Shared brand/user/project knowledge now flows into every agent prompt.
 **Follow-ups opened from PR review:**
 - [x] **Swarm runner — wire team memory into `injectLivingState`.** Shipped in PR #534 alongside user-profile wiring — same injection runs once per swarm task now.
 - [x] **Team Memory panel UI** — shipped in PR #536. Right-side sheet grouped by category with salience dots + hover-to-forget + manual add.
-- [ ] **Cloud sync for team memory** — currently IDB-only; mirror the `pushTeamLivingState` pattern so memory follows the user across devices.
+- [x] **Cloud sync for team memory** — shipped in PR #537 alongside profile sync. Migration 021 + `team-memory-sync.ts` with push-on-write + pull-on-file-load.
 
 ---
 
@@ -124,7 +124,7 @@ Plumbing shipped — every agent now reads an `ABOUT THE USER` block, sourced fr
 **Follow-ups opened from PR review:**
 - [x] **Profile form UI** — shipped in PR #535. Right-side sheet with all UserProfile fields, reachable from a UserCircle button in the team panel header.
 - [x] **Swarm runner** — shipped in PR #534. `injectLivingState` now loads the profile and appends `userProfileToPromptFragment(profile)` to every swarm task prompt.
-- [ ] **Cloud sync** — mirror `pushTeamLivingState` so profile follows the user across devices.
+- [x] **Cloud sync** — shipped in PR #537. Migration 021 adds a singleton `user_profile` row per user, push-on-save + pull-on-file-load wired alongside team memory + living state.
 
 ---
 
