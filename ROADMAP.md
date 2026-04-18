@@ -106,7 +106,7 @@ Shared brand/user/project knowledge now flows into every agent prompt.
 
 **Follow-ups opened from PR review:**
 - [x] **Swarm runner — wire team memory into `injectLivingState`.** Shipped in PR #534 alongside user-profile wiring — same injection runs once per swarm task now.
-- [ ] **Team Memory panel UI** — "Team Memory" tab in `components/studio/agent-team-panel.tsx` showing grouped memories (brand/project/user/decision/fact) + manual "Remember this…" add button.
+- [x] **Team Memory panel UI** — shipped in PR #536. Right-side sheet grouped by category with salience dots + hover-to-forget + manual add.
 - [ ] **Cloud sync for team memory** — currently IDB-only; mirror the `pushTeamLivingState` pattern so memory follows the user across devices.
 
 ---
