@@ -1,6 +1,6 @@
 # Design Team — Roadmap
 
-**Last updated**: 2026-04-16
+**Last updated**: 2026-04-18
 
 ---
 
@@ -94,28 +94,24 @@ Efecto uses its own table shape (`agent_living_state` keyed by `user_id+agent_id
 
 ---
 
-**Phase 1B.2: Team Memory in Efecto [NEXT PRIORITY]**
+**Phase 1B.2: Team Memory in Efecto (PR #531, merged Apr 18)**
 
-Today: Efecto has per-agent memory. No shared team knowledge.
-Goal: Agents read shared brand/user/project context before every response.
+Shared brand/user/project knowledge now flows into every agent prompt.
+- [x] New `lib/studio/agent-team-memory.ts` — IDB-backed `TeamMemory` store via `createIdbStore`
+- [x] `extractAndStoreMemories` now routes via `categorizeHeuristic` → team bucket for brand/user/project/decision content, agent bucket otherwise
+- [x] `ai-chat-panel.tsx` loads team memory alongside relationship graph (parallel `Promise.all`) and prepends `teamMemoryToPromptFragment(mem, 20)` to the per-agent context string
+- [x] Agent context cap raised 2000 → 4000 chars; label changed to "TEAM & AGENT LIVING STATE"
+- [x] `buildTeamAgentPrompt` gained an optional `teamMemory` param (kept for future formal-path callers)
+- [x] Build + MCP build both green; CI + Vercel preview pass
 
-- [ ] Add team memory storage (separate IDB store or extend existing)
-- [ ] Wire `teamMemoryToPromptFragment()` into system prompt builder
-- [ ] Use auto-extract to route memories: agent bucket vs team bucket
-  - Requires `ANTHROPIC_API_KEY` for AI path, heuristic fallback otherwise
-- [ ] UI: a "Team Memory" tab/section in the agent team panel
-  - Shows grouped memories (brand/project/user/decision/fact)
-  - Manual add button: "Remember this..."
-
-**Files to touch:**
-- `lib/studio/agent-team-living-state.ts` (team memory persistence)
-- `lib/studio/agent-team-prompt-builder.ts` (inject team memory)
-- `lib/studio/agent-team-chat-hooks.ts` (auto-extract routing)
-- `components/studio/agent-team-panel.tsx` (UI)
+**Follow-ups opened from PR review:**
+- [ ] **Swarm runner — wire team memory into `injectLivingState`.** Today only single-agent chat reads team memory. `lib/studio/agent-swarm-runner.ts:823` needs to `loadTeamMemory(teamId)` and append a team-memory fragment so swarm agents also honour shared brand/project context.
+- [ ] **Team Memory panel UI** — "Team Memory" tab in `components/studio/agent-team-panel.tsx` showing grouped memories (brand/project/user/decision/fact) + manual "Remember this…" add button.
+- [ ] **Cloud sync for team memory** — currently IDB-only; mirror the `pushTeamLivingState` pattern so memory follows the user across devices.
 
 ---
 
-**Phase 1B.3: User Profile in Efecto**
+**Phase 1B.3: User Profile in Efecto [NEXT PRIORITY]**
 
 Today: Agents don't know who the user is or what the business does.
 Goal: Every agent prompt includes the user profile.
