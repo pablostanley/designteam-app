@@ -197,7 +197,7 @@ Make the team work through a project autonomously — one command kicks off rese
 - [x] **Team page shows mood + XP + level per agent** — shipped in PR #9. Mood emoji on avatar, level badge, XP progress bar sized to the current level band, task count underneath. Fetches `/api/teams/:id/state` in parallel with team metadata.
 - [x] **Agent detail view** — shipped in PR #11. Click any agent card to open a right-side sheet with all 5 emotion bars, XP-to-next-level, memories grouped by type with salience dots, personality sliders (−5..+5 centered visualization), traits.
 - [x] **Team memory viewer** — shipped in PR #10. New `GET /api/teams/:id/memory` + grouped section on the team page. Categories (brand/project/user/decision/fact), ordered by salience, source attribution.
-- [ ] Project timeline (task history, who did what, outcomes)
+- [x] **Project timeline** — shipped in PR #15. Migration 005 adds `task_events`, CLI `report` fires one row per outcome, team page renders a verb-driven timeline with relative timestamps. Every v0.10 bullet is now shipped.
 - [x] **Relationship map visualization** — shipped in PR #12. Circular SVG graph on the team page: agents around a ring, edges colored by bond (foreground positive / muted neutral / red negative) with thickness proportional to collaboration count.
 
 ### v0.11 — Truly Autonomous (Cron-driven)
