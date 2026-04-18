@@ -105,7 +105,7 @@ Shared brand/user/project knowledge now flows into every agent prompt.
 - [x] Build + MCP build both green; CI + Vercel preview pass
 
 **Follow-ups opened from PR review:**
-- [ ] **Swarm runner — wire team memory into `injectLivingState`.** Today only single-agent chat reads team memory. `lib/studio/agent-swarm-runner.ts:823` needs to `loadTeamMemory(teamId)` and append a team-memory fragment so swarm agents also honour shared brand/project context.
+- [x] **Swarm runner — wire team memory into `injectLivingState`.** Shipped in PR #534 alongside user-profile wiring — same injection runs once per swarm task now.
 - [ ] **Team Memory panel UI** — "Team Memory" tab in `components/studio/agent-team-panel.tsx` showing grouped memories (brand/project/user/decision/fact) + manual "Remember this…" add button.
 - [ ] **Cloud sync for team memory** — currently IDB-only; mirror the `pushTeamLivingState` pattern so memory follows the user across devices.
 
@@ -123,7 +123,7 @@ Plumbing shipped — every agent now reads an `ABOUT THE USER` block, sourced fr
 
 **Follow-ups opened from PR review:**
 - [ ] **Profile form UI** — today only programmatic writes to IDB can populate the profile. Need a small panel (business, industry, audience, voice, style, brand colors, notes) accessible from the team panel or a settings entry.
-- [ ] **Swarm runner** — `agent-swarm-runner.ts` fetch sites don't pass `userProfileContext` yet (same gap as team memory noted in Phase 1B.2).
+- [x] **Swarm runner** — shipped in PR #534. `injectLivingState` now loads the profile and appends `userProfileToPromptFragment(profile)` to every swarm task prompt.
 - [ ] **Cloud sync** — mirror `pushTeamLivingState` so profile follows the user across devices.
 
 ---
