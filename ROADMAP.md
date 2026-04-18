@@ -66,11 +66,44 @@
 
 ## Up Next
 
-### v0.8 — Autonomous Mode (`designteam run`) [next priority]
+### v0.8 — Efecto Integration [next priority]
+
+Efecto still has its own `lib/agent-builder/` copy (pre-extraction, drifted). Close the loop so every improvement we ship to Design Team flows into Efecto via npm.
+
+**Why first:** Efecto is the product with users. They get zero benefit from v0.5-v0.7 (memory loop, cloud sync, auto-extract, avatars) until we integrate. Higher leverage than more Design Team features on a repo without users.
+
+**Phase 1: Replace Efecto's agent-builder with @designteam/core**
+- [ ] `pnpm add @designteam/core` in Efecto
+- [ ] Delete `lib/agent-builder/*.ts` (17 files)
+- [ ] Replace with re-export shims (`export * from '@designteam/core'`) — same pattern as designteam app
+- [ ] Update any deep imports (e.g., `from '@/lib/agent-builder/types'` → `from '@designteam/core'`)
+- [ ] Verify Efecto main app builds + Efecto MCP builds
+
+**Phase 2: Scale migration at IDB boundary**
+- [ ] Efecto stores personality on 0-10 scale. Core uses -5/+5.
+- [ ] Use `configToCore()` when reading from IDB, `configFromCore()` when writing
+- [ ] Test with an existing saved team to ensure no data loss
+
+**Phase 3: Pixabots avatars in Efecto**
+- [ ] Wire Efecto's agent panel to use `pixabotUrlForRole()` from core
+- [ ] Show per-agent pixabot based on `agent.pixabotId` (if present) or fallback to role
+- [ ] Match designteam.app character consistency
+
+**Phase 4: Wire up living state**
+- [ ] Efecto reads/writes agent memories via `@designteam/core` lifecycle functions
+- [ ] Team memory + user profile injected into Efecto's agent prompts
+- [ ] After Efecto swarm tasks complete, auto-extract runs (same as CLI)
+
+**Phase 5: Cloud sync in Efecto**
+- [ ] Efecto calls `/api/teams/:id/state` for sync/pull (same endpoint as CLI)
+- [ ] Agents from CLI projects show up in Efecto (same team, same memories)
+- [ ] The loop: user uses CLI in Claude Code → state syncs → opens Efecto → same agents, same context
+
+### v0.9 — Autonomous Mode (`designteam run`)
 
 Make the team work through a project autonomously — one command kicks off research, copy, design, review, ship.
 
-**Phase 1: Planning** (start here)
+**Phase 1: Planning**
 - [ ] `designteam plan "design a landing page"` — Haiku generates a task graph
   - Nova (Creative Director) is the planner — uses team memory + user profile
   - Each task has: agent role, instruction, dependencies, success criteria, "why chain"
@@ -79,14 +112,14 @@ Make the team work through a project autonomously — one command kicks off rese
 - [ ] `designteam show <project-id>` — view the task graph, status per task
 
 **Phase 2: Execution via Claude Code**
-- [ ] Skill template includes a "Running a project" section that tells Claude Code:
+- [ ] Skill template includes a "Running a project" section
   - Read the plan at `.designteam/projects/<id>.json`
   - For each ready task (deps done), invoke the matching agent via Task tool
   - After each task, run `designteam progress <project-id> <task-id> --done`
   - Auto-extract memories from the task output
 - [ ] `designteam progress` command — update task status in the plan file
 
-**Phase 3: Execution via API (optional, true autonomy)**
+**Phase 3: Execution via API (true autonomy)**
 - [ ] `designteam run <project-id>` — CLI invokes each agent via Anthropic API
   - Walks dependency graph (topological order)
   - Each agent gets: personality + memory + task context + deps output
@@ -96,15 +129,11 @@ Make the team work through a project autonomously — one command kicks off rese
 
 **Phase 4: Adapter interface**
 - [ ] `DesignTeamAdapter` in core — same code works in Efecto, Claude Code, Cursor, Codex
-- [ ] Efecto adapter (MCP bridge to design canvas)
+- [ ] Efecto adapter (MCP bridge to design canvas, 64 design tools)
 - [ ] Claude Code adapter (Task tool + file writes)
 - [ ] REST adapter (generic HTTP)
-  - `DesignTeamAdapter` in core
-  - Efecto adapter: MCP bridge, 64 design tools
-  - Claude Code adapter: Task tool, file writes
-  - Codex/Cursor: skills + state injection
 
-### v0.8 — Web App Living State
+### v0.10 — Web App Living State
 
 - [ ] Team page shows mood, XP, memories, level per agent
 - [ ] Agent detail view (full emotion bars, all memories, relationships)
@@ -112,7 +141,7 @@ Make the team work through a project autonomously — one command kicks off rese
 - [ ] Project timeline (task history, who did what, outcomes)
 - [ ] Relationship map visualization
 
-### v0.9 — Truly Autonomous (Cron-driven)
+### v0.11 — Truly Autonomous (Cron-driven)
 
 The Paperclip model — agents work while you sleep.
 
@@ -124,13 +153,7 @@ The Paperclip model — agents work while you sleep.
 - [ ] Audit trail (every decision logged)
 - [ ] Real-time UI on designteam.app
 
-### v0.10 — Efecto Integration
-
-- [ ] Replace Efecto's `lib/agent-builder/` with `@designteam/core`
-- [ ] Update Efecto's agent-team-*.ts files
-- [ ] Efecto adapter using MCP
-
-### v0.11 — npm Package Cleanup
+### v0.12 — npm Package Cleanup
 
 - [ ] Add `.npmignore` (ship only `cli/`, `skills/`, `package.json`, `README.md`)
 - [ ] GitHub Actions CI (test on PR, build check)
