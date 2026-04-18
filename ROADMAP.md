@@ -1,6 +1,6 @@
 # Design Team — Roadmap
 
-**Last updated**: 2026-04-18 (post-cycle 2)
+**Last updated**: 2026-04-18 (control-plane track added)
 
 ---
 
@@ -219,6 +219,49 @@ The Paperclip model — agents work while you sleep.
 
 ---
 
+## v0.13 — Control Plane (paperclip-inspired)
+
+**Why this exists:** the end state isn't "more CLI commands" — it's **automated design teams that create finished work for people**. Efecto is the first AI design agency built on Design Team. Its 7-phase product roadmap (front door → team view → quality gate → portfolio → delivery packaging → pricing shift → API) all depend on a control plane underneath that is more than a plan file and a Haiku call. That's what v0.13 builds.
+
+Adopted from `paperclipai/paperclip` (MIT, Apr 2026). Their model is "open-source orchestration for zero-human companies." We want the same plumbing for creative studios — with personalities, moods, and memory the companies layer doesn't have.
+
+### Cheap + visible (ship alongside existing work)
+
+- [x] **AGENTS.md at repo root** — contributor orientation (PR #19). Read-order, repo map, engineering rules, invariants, PR checklist.
+- [ ] **`doc/` hierarchy** — split the five root-level strategy docs (`VISION.md`, `DESIGN-TEAM-VISION.md`, `ROADMAP.md`, `TASKS.md`, `CLAUDE.md`) into paperclip's cleaner layout: `doc/GOAL.md`, `doc/PRODUCT.md`, `doc/SPEC.md`, `doc/SPEC-implementation.md`, `doc/DATABASE.md`, `doc/DEVELOPING.md`, `doc/execution-semantics.md`.
+- [ ] **`evals/` directory** — 3-5 scripted scenarios using the CLI + plans to verify agents actually honor voice/personality/brand memory. Catches regressions unit tests miss.
+
+### Execution infrastructure (unblocks the 7-phase Efecto roadmap)
+
+- [ ] **Activity log** — one shared `activity_log` table + `emitActivity()` helper. Every mutating action emits an entry so the team page timeline, the autonomous mode auditor, and future Efecto "Team View" (Phase 2) can all read from one source. Extends the `task_events` pattern from PR #15 to every write.
+- [ ] **Atomic checkout on plan tasks** — mirror paperclip's `checkoutRunId` + `executionRunId` split. `checkoutRunId` locks ownership; `executionRunId` tracks the live run. Prevents two agents double-claiming the same task once v0.11 Phase 2 ships. *Prerequisite for any real parallel execution.*
+- [ ] **Blockers vs parent/child** — separate `blockedByTaskIds` (dependency) from future `parentTaskId` (structure). Our current plan `dependencies: []` array conflates both and will confuse sub-task breakdown later.
+- [ ] **Task lifecycle states** — upgrade plan tasks from `pending | in_progress | done | blocked` to paperclip's full set: `backlog | todo | in_progress | blocked | in_review | done | cancelled`. Each status implies ownership + execution expectations, not just a UI label.
+- [ ] **Heartbeats + stranded-work recovery** — agents pulse while running; if the last run dies mid-task, the control plane queues one recovery wake; if that also fails, task auto-moves to `blocked` with a visible comment. *Prerequisite for v0.11 Phase 3 true API execution.*
+
+### Safety + governance (before `designteam run` goes autonomous)
+
+- [ ] **Budget hard-stop** — monthly UTC windows, soft alerts, hard limit auto-pauses work. A single bug in autonomous mode could burn through an API card overnight — this is the safety net we need **before** v0.11 Phase 3 ships.
+- [ ] **Approval gates** — human checkpoints for governed actions. Maps to Efecto Phase 3 ("The Quality Gate") — Creative Director reviews every deliverable before the user sees it. Also covers: new hire proposals, large token-budget commits, publishing finished work.
+
+### Distribution (v0.11 Phase 4 — proper scope)
+
+- [ ] **`packages/adapters/` monorepo pattern** — one adapter package per runtime: `@designteam/adapter-claude-local`, `@designteam/adapter-codex-local`, `@designteam/adapter-cursor-local`, `@designteam/adapter-gemini-local`, `@designteam/adapter-efecto`. Each adapter implements a shared interface from `@designteam/adapter-utils`. Mutable server registry so third parties can register without rewriting shared schemas. *This is the proper shape for v0.11 Phase 4.*
+- [ ] **`adapter-plugin.md` spec at repo root** — the public interface contract. What an adapter must provide (agent resolver, task executor, cost reporter, heartbeat reporter) and what it gets from the control plane (plan file access, team memory, user profile).
+
+### Mapping: control-plane items → Efecto 7-phase roadmap
+
+| Control plane item | Unlocks in Efecto |
+|---|---|
+| Activity log | Phase 2: live "team working" feed instead of loading spinner |
+| Atomic checkout + lifecycle states | Phase 2: multiple agents visible working in parallel without collisions |
+| Approval gates | Phase 3: Creative Director review before the user sees work |
+| Heartbeats + recovery | Phase 4: portfolio of projects that survive restarts/crashes |
+| Budget hard-stop | Phase 6: project-based pricing economics (can't blow margin) |
+| Adapters monorepo | Phase 7: "Design as a Service" API, white-label, Slack/Zapier |
+
+---
+
 ## Efecto UI Polish (track alongside v0.8 integration)
 
 Small cosmetic fixes in Efecto that don't block integration but should ship as part of the overall polish pass.
@@ -257,16 +300,32 @@ You hire a team. They have personalities you customize. They remember everything
 
 One AI gives you one opinion. A team gives you a studio. A studio that remembers.
 
-**Paperclip is for AI companies. Design Team is for AI creative studios.**
+### The end state: automated design teams that create stuff for people
+
+A team isn't the product. A team is what **ships** the product. The product is **finished work delivered to a customer**: a brand, a landing page, a campaign, a deck. Someone pays for that outcome. The team, its memories, its relationships, its XP — they're the infrastructure.
+
+**Efecto is the first agency built on Design Team.** Its 7-phase product arc is the proof:
+1. **The Front Door** — project kickoff flow, not a blank canvas
+2. **The Team View** — you watch the team work (not a loading spinner)
+3. **The Quality Gate** — Creative Director reviews before you see drafts
+4. **The Portfolio** — projects dashboard, brand kits accumulate, agents remember per-brand
+5. **Delivery Packaging** — download entire campaigns as one handoff
+6. **Pricing Shift** — projects, not seats. $99 brand, $49 landing page
+7. **The API** — Design as a Service. Slack, CI/CD, Zapier, white-label
+
+Everything in **v0.13 Control Plane** (above) exists to make those phases real. Activity log → live team view. Atomic checkout → parallel execution without collisions. Approval gates → quality gate. Heartbeats → portfolio that survives restarts. Budget hard-stop → margin-safe pricing. Adapters → the Design-as-a-Service API.
+
+**Paperclip is for AI companies. Design Team is for AI creative studios. The difference is personality, taste, and the human moment at the end when someone sees their brand for the first time.**
 
 ---
 
 ## Notes
 
-- Core package: `packages/core/` — 17 source files, 307 tests
+- Core package: `packages/core/` — 17 source files, **417 tests** (as of PR #18)
 - Personality scale: -5 to +5 (0 = neutral). Efecto uses 0-10 (scale-utils bridges)
 - Pixabots: `@pixabots/core` npm. API at `pixabots.com/api/pixabot/{id}`
 - Local state: `.designteam/` in project root
-- Cloud state: Supabase (vunmdnoervxpcvgiaamz) via `designteam sync`
+- Cloud state: Supabase via `designteam sync`. Tables: `teams`, `agent_states`, `team_relationships`, `team_memory`, `user_profile`, `task_events`
 - Vercel: designteam (auto-deploys from main)
-- Latest npm: `@designteam/core@0.1.1`, `designteam@0.3.3`
+- Latest npm: `@designteam/core@0.3.1`, `designteam@0.5.1`
+- Contributor guide: `AGENTS.md` at repo root (PR #19)
