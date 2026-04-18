@@ -226,8 +226,7 @@ The Paperclip model — agents work while you sleep.
 
 Small cosmetic fixes in Efecto that don't block integration but should ship as part of the overall polish pass.
 
-- [ ] **Edge padding** — chrome containers (tools panel, layers list, inspector, topbar, toolkit) currently use `pl-4 pr-4`. Tighten to `p-2` so panels sit closer to the browser edge.
-  - Files: `components/studio/tool-sidebar.tsx`, layers panel, inspector panel, topbar
+- [x] **Edge padding** — shipped in PR #539. Floating panels drop from `left-4`/`right-4`/`bottom-4` to `-2`; tool sidebar `SNAP_MARGIN` 16→8. Toolbar-clearance `top-16` unchanged.
 - [x] **Chat message typography inconsistency** — shipped in PR #538. `MarkdownMessage` + the collapsed-preview wrappers are now `text-xs`, matching user bubbles and surrounding chrome.
 
 ---
