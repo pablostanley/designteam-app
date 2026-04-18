@@ -9,7 +9,11 @@ import {
   loadTeamMemory, saveTeamMemory,
   loadUserProfile, saveUserProfile,
 } from './state.mjs'
-import { loadPlan, savePlan, listPlans } from './plans.mjs'
+import {
+  loadPlan, savePlan, listPlans,
+  setTaskStatus, normalizeStatus,
+  TASK_STATUSES, TASK_STATUS_GLYPH,
+} from './plans.mjs'
 import {
   AGENT_ROLE_DEFINITIONS, AGENT_NAMES, AGENT_ROLE_LIST,
   TEAM_PRESETS, LEVEL_THRESHOLDS,
@@ -67,6 +71,13 @@ Planning (v0.11):
   designteam plan "<description>"          Generate a task graph with Haiku
   designteam plans                         List all saved plans
   designteam show <plan-id>                View a plan's tasks + status
+  designteam progress <plan-id> <task-id> [flags]
+                                           Advance a task's lifecycle.
+                                           Flags: --start --review --done
+                                                  --blocked --cancel --todo
+                                                  --status=<status>
+                                           Finishing a task auto-unblocks
+                                           dependents.
 
 Create & Install:
   designteam create "project description"  Create a team with AI
@@ -297,6 +308,17 @@ Presets:
       process.exit(1)
     }
     await cmdShow(planId)
+    return
+  }
+
+  if (command === 'progress') {
+    const planId = args[1]
+    const taskId = args[2]
+    if (!planId || !taskId) {
+      console.error('Usage: npx designteam progress <plan-id> <task-id> --done|--start|--review|--blocked|--cancel|--todo')
+      process.exit(1)
+    }
+    await cmdProgress(planId, taskId, args.slice(3))
     return
   }
 
@@ -1914,7 +1936,7 @@ Use 3-8 tasks. Assign the research/strategy tasks first, design tasks that depen
       dependencies: Array.isArray(t.dependencies) ? t.dependencies : [],
       successCriteria: t.successCriteria || '',
       why: t.why || '',
-      status: 'pending',
+      status: 'todo',
     })),
   }
 
@@ -1968,11 +1990,63 @@ async function cmdShow(planId) {
   console.log(`  ${plan.id} · ${plan.status} · created ${relativeAge(plan.createdAt)}`)
   console.log()
   for (const task of plan.tasks) {
-    const status = task.status === 'done' ? '✓' : task.status === 'in_progress' ? '→' : task.status === 'blocked' ? '!' : '·'
+    const glyph = TASK_STATUS_GLYPH[task.status] ?? '·'
     const deps = task.dependencies.length > 0 ? ` (after ${task.dependencies.join(', ')})` : ''
-    console.log(`  ${status} ${task.id} [${task.agentRole}] ${task.instruction}${deps}`)
+    console.log(`  ${glyph} ${task.id} [${task.agentRole}] ${task.instruction}${deps}`)
     if (task.successCriteria) console.log(`      success: ${task.successCriteria}`)
     if (task.why) console.log(`      why: ${task.why}`)
+  }
+  console.log()
+}
+
+async function cmdProgress(planId, taskId, flags) {
+  const plan = loadPlan(planId)
+  if (!plan) {
+    console.error(`Plan "${planId}" not found.`)
+    process.exit(1)
+  }
+
+  // Shortcut flags map to the paperclip-style status vocabulary.
+  // --status=X beats the shortcut flags if both are passed.
+  const explicitStatus = flags.find((f) => f.startsWith('--status='))?.split('=')[1]
+  let nextStatus = explicitStatus
+  if (!nextStatus) {
+    if (flags.includes('--start')) nextStatus = 'in_progress'
+    else if (flags.includes('--review')) nextStatus = 'in_review'
+    else if (flags.includes('--done')) nextStatus = 'done'
+    else if (flags.includes('--blocked')) nextStatus = 'blocked'
+    else if (flags.includes('--cancel')) nextStatus = 'cancelled'
+    else if (flags.includes('--todo')) nextStatus = 'todo'
+  }
+
+  if (!nextStatus) {
+    console.error('Usage: npx designteam progress <plan-id> <task-id> --done|--start|--review|--blocked|--cancel|--todo')
+    console.error('       npx designteam progress <plan-id> <task-id> --status=<status>')
+    console.error(`       statuses: ${TASK_STATUSES.join(', ')}`)
+    process.exit(1)
+  }
+
+  let result
+  try {
+    result = setTaskStatus(plan, taskId, normalizeStatus(nextStatus))
+  } catch (err) {
+    console.error(`  ${err.message}`)
+    process.exit(1)
+  }
+
+  savePlan(result.plan)
+
+  console.log()
+  console.log(`  ${result.task.id} → ${result.task.status}  (${result.task.agentRole})`)
+  if (result.unblocked.length > 0) {
+    console.log(`  ${result.unblocked.length} downstream task${result.unblocked.length === 1 ? '' : 's'} unblocked:`)
+    for (const t of result.unblocked) {
+      console.log(`    ${t.id} [${t.agentRole}] ${t.instruction}`)
+    }
+  }
+  if (result.plan.status === 'completed') {
+    console.log()
+    console.log(`  Plan "${result.plan.description}" is complete.`)
   }
   console.log()
 }
