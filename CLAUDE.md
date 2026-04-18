@@ -176,3 +176,72 @@ Flag instantly and fix:
 5. Check if `@pixabots/core` has updates: `/Users/pablostanley/pixabots`
 6. If publishing to npm: bump version in both `package.json` and `packages/core/package.json`, build, publish core first then CLI
 7. Commit and push the ROADMAP update
+
+## Autonomous Loop Workflow
+
+When running in /loop mode (recurring job, no user supervision), follow this
+workflow every cycle. **Always make progress.** Never idle or wait for the user.
+
+### 1. Assess state
+
+Run these in parallel to understand where we are:
+- `gh pr list` in both repos (designteam + efecto) — any open PRs?
+- `git status` — uncommitted work?
+- `git log --oneline -5` — latest merges
+- Read `ROADMAP.md` — find the current priority
+
+### 2. Decide what to do
+
+**If there's an open PR:**
+- Review it (same as /review skill)
+- If issues found → fix them, commit, push. Count as 1 of max 3 review rounds.
+- If NO issues after up-to-3 reviews → merge it
+- **Important:** "no issues" means genuinely clean. Don't rubber-stamp. But don't invent problems either.
+- After merging → update ROADMAP (mark item done with PR #), pick next task
+
+**If no PR is open:**
+- Pick the next `[next priority]` item from ROADMAP
+- Build it end-to-end
+- Open a PR
+- The next cycle will review
+
+**If blocked** (e.g., needs user auth, migration not applied, API key missing):
+- Document in ROADMAP what's blocked and why
+- Pick a different unblocked task
+- Never idle — find something to move forward
+
+### 3. Always update the roadmap
+
+Every cycle should leave the roadmap more accurate:
+- Move completed items to Done
+- Add discovered work as new tickets
+- If assumptions were wrong, write what you learned
+- If a task revealed a bigger problem, note it and scope a follow-up PR
+
+### 4. Each cycle ends with one of these
+
+- A new PR opened
+- An existing PR pushed with review fixes
+- A PR merged and next task started
+- A blocker documented (with a pivot to other work)
+
+### Review rules
+
+- Use the full /review process — three parallel agents (reuse, quality, efficiency)
+- Fix findings directly, don't argue false positives
+- Max 3 review cycles per PR. If still issues after 3, merge what's clean
+  and open a follow-up PR for the rest
+- "No issues" means: builds clean, tests pass, no real concerns from the reviewers
+
+### Commit hygiene
+
+- Every commit has a clear message (what + why)
+- Always push after committing
+- Include `Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>`
+
+### Repos we work on
+
+- **Design Team**: `/Users/pablostanley/Dropbox/designteam` — repo `pablostanley/designteam-app`
+- **Efecto**: `/Users/pablostanley/Dropbox/efecto` — repo `pablostanley/efecto-app`
+
+Efecto integration work (roadmap v0.8) happens in the Efecto repo. Ship each phase as its own PR.

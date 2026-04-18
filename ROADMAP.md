@@ -66,38 +66,109 @@
 
 ## Up Next
 
-### v0.8 — Efecto Integration [next priority]
+### v0.8 — Efecto Integration
 
-Efecto still has its own `lib/agent-builder/` copy (pre-extraction, drifted). Close the loop so every improvement we ship to Design Team flows into Efecto via npm.
+**The goal:** Efecto agents become real tamagotchis — they persist across sessions/devices, remember the brand, know who the user is, grow with use.
 
-**Why first:** Efecto is the product with users. They get zero benefit from v0.5-v0.7 (memory loop, cloud sync, auto-extract, avatars) until we integrate. Higher leverage than more Design Team features on a repo without users.
+**Phase 1A: Safe duplicate removal** (PR #530, merged Apr 18)
+- [x] Replace `team-composition.ts` and `skill-generator.ts` with re-export shims
+- [x] Pin `@designteam/core` to `~0.3.1`
+- [x] MIGRATION.md documents what's left
 
-**Phase 1: Replace Efecto's agent-builder with @designteam/core**
-- [ ] `pnpm add @designteam/core` in Efecto
-- [ ] Delete `lib/agent-builder/*.ts` (17 files)
-- [ ] Replace with re-export shims (`export * from '@designteam/core'`) — same pattern as designteam app
-- [ ] Update any deep imports (e.g., `from '@/lib/agent-builder/types'` → `from '@designteam/core'`)
-- [ ] Verify Efecto main app builds + Efecto MCP builds
+---
 
-**Phase 2: Scale migration at IDB boundary**
-- [ ] Efecto stores personality on 0-10 scale. Core uses -5/+5.
-- [ ] Use `configToCore()` when reading from IDB, `configFromCore()` when writing
-- [ ] Test with an existing saved team to ensure no data loss
+**Phase 1B.1: Cloud Sync in Efecto [next priority]**
 
-**Phase 3: Pixabots avatars in Efecto**
-- [ ] Wire Efecto's agent panel to use `pixabotUrlForRole()` from core
-- [ ] Show per-agent pixabot based on `agent.pixabotId` (if present) or fallback to role
-- [ ] Match designteam.app character consistency
+Today: Efecto stores living state in browser IDB. Close browser = fresh agents.
+Goal: Efecto syncs to Supabase. Agents survive browsers, devices, reinstalls.
 
-**Phase 4: Wire up living state**
-- [ ] Efecto reads/writes agent memories via `@designteam/core` lifecycle functions
-- [ ] Team memory + user profile injected into Efecto's agent prompts
-- [ ] After Efecto swarm tasks complete, auto-extract runs (same as CLI)
+- [ ] Add `syncLivingStateToCloud(team)` — calls `PUT /api/teams/:id/state` on designteam.app
+  - Reads IDB, converts to the API shape (same as CLI sends)
+  - Called after each `extractAndStoreMemories` fires (or debounced)
+- [ ] Add `pullLivingStateFromCloud(team)` — on team load, fetches `/state`, merges into IDB
+  - Conflict resolution: cloud wins if `last_active_at` is newer, otherwise local wins
+- [ ] Store Efecto team's `short_id` so sync knows the remote target
+- [ ] Manual trigger UI: a "Sync" button in the agent team panel
+- [ ] Auto-sync on idle or team-panel close
+- [ ] Handle 401/network errors gracefully
 
-**Phase 5: Cloud sync in Efecto**
-- [ ] Efecto calls `/api/teams/:id/state` for sync/pull (same endpoint as CLI)
-- [ ] Agents from CLI projects show up in Efecto (same team, same memories)
-- [ ] The loop: user uses CLI in Claude Code → state syncs → opens Efecto → same agents, same context
+**Files to touch:**
+- `lib/studio/agent-team-living-state.ts` (add sync wrappers)
+- `lib/studio/agent-team-sync.ts` (already exists — check what it does)
+- `components/studio/agent-team-panel.tsx` (UI trigger)
+- `lib/studio/agent-team-chat-hooks.ts` (fire-and-forget sync after memory extraction)
+
+---
+
+**Phase 1B.2: Team Memory in Efecto**
+
+Today: Efecto has per-agent memory. No shared team knowledge.
+Goal: Agents read shared brand/user/project context before every response.
+
+- [ ] Add team memory storage (separate IDB store or extend existing)
+- [ ] Wire `teamMemoryToPromptFragment()` into system prompt builder
+- [ ] Use auto-extract to route memories: agent bucket vs team bucket
+  - Requires `ANTHROPIC_API_KEY` for AI path, heuristic fallback otherwise
+- [ ] UI: a "Team Memory" tab/section in the agent team panel
+  - Shows grouped memories (brand/project/user/decision/fact)
+  - Manual add button: "Remember this..."
+
+**Files to touch:**
+- `lib/studio/agent-team-living-state.ts` (team memory persistence)
+- `lib/studio/agent-team-prompt-builder.ts` (inject team memory)
+- `lib/studio/agent-team-chat-hooks.ts` (auto-extract routing)
+- `components/studio/agent-team-panel.tsx` (UI)
+
+---
+
+**Phase 1B.3: User Profile in Efecto**
+
+Today: Agents don't know who the user is or what the business does.
+Goal: Every agent prompt includes the user profile.
+
+- [ ] Small form/panel: business, industry, audience, voice, style, brand colors
+- [ ] Stored locally (settings/prefs) + synced to Supabase if logged in
+- [ ] Injected into agent system prompt via `userProfileToPromptFragment()`
+- [ ] One-time onboarding prompt: "Tell your team about you" for new users
+
+**Files to touch:**
+- New: `components/studio/user-profile-panel.tsx`
+- `lib/studio/agent-team-prompt-builder.ts` (inject profile)
+- `lib/settings/` (or equivalent) for storage
+
+---
+
+**Phase 1B.4: Pixabots avatars in Efecto**
+
+Today: Efecto shows static robot PNGs.
+Goal: Pixel-art Pixabots matching designteam.app.
+
+- [ ] Wire agent rendering to `pixabotUrlForRole()` from core
+- [ ] Show per-agent pixabot using `agent.pixabotId` if present
+- [ ] Ensure `unoptimized` + `image-rendering: pixelated` on all pixabot `<Image>`s
+
+**Files to touch:**
+- `components/studio/agent-team-panel.tsx`
+- Wherever else agent avatars render (inspector, chat messages)
+
+---
+
+**Phase 1B.5: Scale migration (cleanup)**
+
+Last because it's pure plumbing — no user-facing value.
+
+- [ ] Replace `types.ts`, `personality-engine.ts`, `role-definitions.ts`, `team-presets.ts` with shims
+- [ ] Add `configToCore()` / `configFromCore()` at IDB boundary
+- [ ] Update the one UI label (`X/25 pts` in agent-team-panel.tsx:530)
+- [ ] Test with existing saved teams for no data loss
+
+---
+
+**Phase 1B.6: Decide on agent-skills-generated.ts**
+
+- [ ] Option A: remove Efecto's generator, use core's 16-role version
+- [ ] Option B: keep generator, accept duplication
+- [ ] Document decision in MIGRATION.md
 
 ### v0.9 — Autonomous Mode (`designteam run`)
 
