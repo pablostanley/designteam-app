@@ -216,8 +216,8 @@ The Paperclip model — agents work while you sleep.
 
 - [x] **Whitelist published files** — shipped in PR #13. `"files": ["cli", "README.md"]` + web-app deps moved to devDependencies. Tarball dropped from 8 MB / 241 files to 17 kB / 4 files (500× smaller).
 - [x] **Package metadata** — shipped in PR #13. Added description, license, author, homepage, repository, keywords.
-- [ ] GitHub Actions CI (test on PR, build check)
-- [ ] Auto-publish on version tag
+- [x] **GitHub Actions CI** — shipped in PR #14. Runs on PR + main push: pnpm test (417 tests), core type-check, full build. pnpm 9 + Node 24.
+- [ ] Auto-publish on version tag (needs `NPM_TOKEN` secret configured first)
 
 ---
 
