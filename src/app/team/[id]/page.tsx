@@ -10,7 +10,8 @@ import { getAvatarSrc } from "@/components/agent-avatars"
 import { AGENT_ROLE_DEFINITIONS } from "@/lib/agent-builder/role-definitions"
 import { CopyButton } from "@/components/copy-button"
 import { UserMenu } from "@/components/user-menu"
-import type { Team, AgentRole, EmotionalState } from "@/lib/agent-builder/types"
+import { AgentDetailSheet } from "@/components/agent-detail-sheet"
+import type { Team, AgentRole, AgentMemoryEntry, EmotionalState } from "@/lib/agent-builder/types"
 import { PERSONALITY_AXES, LEVEL_THRESHOLDS } from "@/lib/agent-builder/types"
 import { getMood, getMoodEmoji } from "@designteam/core"
 
@@ -26,7 +27,7 @@ interface AgentStateRow {
   agent_id: string
   role: string
   emotions: EmotionalState
-  memories?: unknown
+  memories?: AgentMemoryEntry[]
   xp: number
   level: number
   tasks_completed: number
@@ -66,6 +67,7 @@ export default function TeamPage() {
   const [forking, setForking] = useState(false)
   const [states, setStates] = useState<Record<string, AgentStateRow>>({})
   const [memoryEntries, setMemoryEntries] = useState<TeamMemoryRow[]>([])
+  const [detailAgentId, setDetailAgentId] = useState<string | null>(null)
 
   useEffect(() => {
     fetch(`/api/teams/${id}`)
@@ -209,7 +211,11 @@ export default function TeamPage() {
               ? xpProgressInLevel(state.xp, state.level)
               : null
             return (
-              <div key={agent.id} className="space-y-2 rounded-lg border p-4">
+              <button
+                key={agent.id}
+                onClick={() => setDetailAgentId(agent.id)}
+                className="space-y-2 rounded-lg border p-4 text-left transition-colors hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground/30 cursor-pointer"
+              >
                 <div className="relative mx-auto w-20 h-20">
                   <Image
                     src={getAvatarSrc(role?.avatarKey ?? "creative-director", agent.pixabotId)}
@@ -299,7 +305,7 @@ export default function TeamPage() {
                     )}
                   </div>
                 )}
-              </div>
+              </button>
             )
           })}
         </div>
@@ -385,6 +391,13 @@ export default function TeamPage() {
           </div>
         </div>
       </main>
+
+      <AgentDetailSheet
+        agent={detailAgentId ? team.agents?.find((a) => a.id === detailAgentId) ?? null : null}
+        state={detailAgentId ? states[detailAgentId] ?? null : null}
+        open={!!detailAgentId}
+        onOpenChange={(open) => { if (!open) setDetailAgentId(null) }}
+      />
     </div>
   )
 }
