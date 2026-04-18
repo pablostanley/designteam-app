@@ -58,6 +58,27 @@ const MEMORY_CATEGORY_META: Record<MemoryCategory, { label: string; hint: string
 }
 const MEMORY_CATEGORY_ORDER: MemoryCategory[] = ['brand', 'project', 'user', 'decision', 'fact']
 
+type TaskOutcome = 'completed' | 'approved' | 'rejected' | 'praised' | 'handoff' | 'delivered'
+
+interface TaskEventRow {
+  id: string
+  agent_id: string
+  agent_name: string
+  outcome: TaskOutcome
+  content: string | null
+  created_at: string
+}
+
+// Verb-by-outcome so the timeline reads like a sentence: "Nova shipped X".
+const OUTCOME_VERB: Record<TaskOutcome, string> = {
+  completed: 'shipped',
+  approved: 'approved',
+  rejected: 'sent back',
+  praised: 'got praised for',
+  handoff: 'handed off',
+  delivered: 'delivered',
+}
+
 export default function TeamPage() {
   const params = useParams()
   const id = params.id as string
@@ -70,6 +91,7 @@ export default function TeamPage() {
   const [memoryEntries, setMemoryEntries] = useState<TeamMemoryRow[]>([])
   const [detailAgentId, setDetailAgentId] = useState<string | null>(null)
   const [relationships, setRelationships] = useState<AgentRelationship[]>([])
+  const [timeline, setTimeline] = useState<TaskEventRow[]>([])
 
   useEffect(() => {
     fetch(`/api/teams/${id}`)
@@ -115,6 +137,14 @@ export default function TeamPage() {
         if (Array.isArray(data?.entries)) setMemoryEntries(data.entries as TeamMemoryRow[])
       })
       .catch(() => { /* ignore — empty memory is the most common state */ })
+
+    // Project timeline — newest-first activity log (who did what, when).
+    fetch(`/api/teams/${id}/timeline?limit=50`)
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (Array.isArray(data?.events)) setTimeline(data.events as TaskEventRow[])
+      })
+      .catch(() => { /* best-effort — empty is the most common state */ })
   }, [id])
 
   async function handleFork() {
@@ -331,6 +361,44 @@ export default function TeamPage() {
           </section>
         )}
 
+        {timeline.length > 0 && (
+          <section className="mt-10">
+            <header className="mb-3 flex items-baseline justify-between">
+              <h2 className="text-sm font-semibold">Project timeline</h2>
+              <span className="text-xs text-muted-foreground">
+                {timeline.length} event{timeline.length === 1 ? "" : "s"}
+              </span>
+            </header>
+            <ol className="space-y-1.5">
+              {timeline.map((event) => (
+                <li
+                  key={event.id}
+                  className="flex items-start gap-3 rounded-md bg-muted/40 px-3 py-2 text-xs"
+                >
+                  <time
+                    dateTime={event.created_at}
+                    className="shrink-0 w-14 text-[10px] font-mono text-muted-foreground tabular-nums pt-0.5"
+                  >
+                    {formatRelativeDay(event.created_at)}
+                  </time>
+                  <div className="min-w-0 flex-1">
+                    <p className="leading-snug">
+                      <span className="font-semibold">{event.agent_name}</span>{' '}
+                      <span className="text-muted-foreground">{OUTCOME_VERB[event.outcome] ?? event.outcome}</span>
+                      {event.content && (
+                        <>
+                          <span className="text-muted-foreground">: </span>
+                          <span className="break-words">{event.content}</span>
+                        </>
+                      )}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
+
         {memoryEntries.length > 0 && (
           <section className="mt-10">
             <header className="mb-3 flex items-baseline justify-between">
@@ -428,6 +496,25 @@ export default function TeamPage() {
  * level band — 0 at the level threshold, 1 just before the next one.
  * Returns null (not 0) for max-level agents so the bar can be hidden.
  */
+/**
+ * Human-friendly time stamp for the timeline. "2h ago" beats a full
+ * timestamp for activity feeds; falls back to a short date for anything
+ * older than a week so visitors can still see *when* without noise.
+ */
+function formatRelativeDay(iso: string): string {
+  const date = new Date(iso)
+  const now = Date.now()
+  const diffMs = now - date.getTime()
+  const diffMin = Math.round(diffMs / 60_000)
+  if (diffMin < 1) return 'now'
+  if (diffMin < 60) return `${diffMin}m ago`
+  const diffHour = Math.round(diffMin / 60)
+  if (diffHour < 24) return `${diffHour}h ago`
+  const diffDay = Math.round(diffHour / 24)
+  if (diffDay < 7) return `${diffDay}d ago`
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}
+
 function xpProgressInLevel(xp: number, level: number): number | null {
   const current = LEVEL_THRESHOLDS[level - 1] ?? 0
   const next = LEVEL_THRESHOLDS[level]

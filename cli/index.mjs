@@ -801,6 +801,25 @@ async function cmdReport(name, flags) {
   saveAgentState(agent.id, finalResult.state)
   saveRelationships(finalResult.graph)
 
+  // Cloud log — one row per outcome so the timeline shows every XP event,
+  // not a combined "completed + approved" lump. Fire-and-forget; if the
+  // team is local-only (no remoteId) or the network is down, we skip.
+  const remoteId = team.remoteId || team.short_id
+  if (remoteId) {
+    for (const outcomeType of outcomes) {
+      void fetch(`${API_BASE}/api/teams/${remoteId}/timeline`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          agent_id: agent.id,
+          agent_name: agent.name,
+          outcome: outcomeType,
+          content: memoryContent || null,
+        }),
+      }).catch(() => { /* best-effort */ })
+    }
+  }
+
   // Output
   const emoji = MOOD_EMOJI[finalResult.mood] || ''
   console.log()
