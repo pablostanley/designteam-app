@@ -162,13 +162,11 @@ If we ever want to pick this up: `@designteam/core` already exports `configToCor
 
 Make the team work through a project autonomously — one command kicks off research, copy, design, review, ship.
 
-**Phase 1: Planning**
-- [ ] `designteam plan "design a landing page"` — Haiku generates a task graph
-  - Nova (Creative Director) is the planner — uses team memory + user profile
-  - Each task has: agent role, instruction, dependencies, success criteria, "why chain"
-  - Saved to `.designteam/projects/<project-id>.json`
-- [ ] `designteam plans` — list all project plans (active + completed)
-- [ ] `designteam show <project-id>` — view the task graph, status per task
+**Phase 1: Planning (PR #18)**
+- [x] `designteam plan "<description>"` — Haiku generates a dependency-ordered task graph. Injects roster + user profile + team memory into the prompt so plans reflect who the team actually is.
+- [x] Plans saved to `.designteam/projects/<plan-id>.json` with tiny schema (id, description, createdAt, status, tasks[]).
+- [x] `designteam plans` — newest-first list with task counts + progress.
+- [x] `designteam show <plan-id>` — task graph with status glyphs, success criteria, and the "why".
 
 **Phase 2: Execution via Claude Code**
 - [ ] Skill template includes a "Running a project" section
