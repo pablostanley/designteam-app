@@ -128,18 +128,12 @@ Plumbing shipped — every agent now reads an `ABOUT THE USER` block, sourced fr
 
 ---
 
-**Phase 1B.4: Pixabots avatars in Efecto [NEXT PRIORITY]**
+**Phase 1B.4: Pixabots avatars in Efecto (PR #533, merged Apr 18)**
 
-Today: Efecto shows static robot PNGs.
-Goal: Pixel-art Pixabots matching designteam.app.
-
-- [ ] Wire agent rendering to `pixabotUrlForRole()` from core
-- [ ] Show per-agent pixabot using `agent.pixabotId` if present
-- [ ] Ensure `unoptimized` + `image-rendering: pixelated` on all pixabot `<Image>`s
-
-**Files to touch:**
-- `components/studio/agent-team-panel.tsx`
-- Wherever else agent avatars render (inspector, chat messages)
+Custom pixabot pixel art now renders everywhere agents surface.
+- [x] Server `agent_selected` SSE event emits `activeAgent.pixabotId`
+- [x] `AgentInfo` + `TeamAssemblyAgent` carry optional `pixabotId`; propagated through `agent-team-panel.tsx` + `ai-chat-panel.tsx` to `getAvatarSrc(role, pixabotId, size)`
+- [x] All five avatar render sites now set `unoptimized` + `style={{ imageRendering: 'pixelated' }}` so Pixabots URLs don't get blurred by Next/Image optimization at small sizes
 
 ---
 
