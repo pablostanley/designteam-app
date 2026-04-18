@@ -194,9 +194,9 @@ Make the team work through a project autonomously — one command kicks off rese
 
 ### v0.10 — Web App Living State
 
-- [ ] Team page shows mood, XP, memories, level per agent
-- [ ] Agent detail view (full emotion bars, all memories, relationships)
-- [ ] Team memory viewer (brand, project context, user preferences)
+- [x] **Team page shows mood + XP + level per agent** — shipped in PR #9. Mood emoji on avatar, level badge, XP progress bar sized to the current level band, task count underneath. Fetches `/api/teams/:id/state` in parallel with team metadata.
+- [x] **Agent detail view** — shipped in PR #11. Click any agent card to open a right-side sheet with all 5 emotion bars, XP-to-next-level, memories grouped by type with salience dots, personality sliders (−5..+5 centered visualization), traits.
+- [x] **Team memory viewer** — shipped in PR #10. New `GET /api/teams/:id/memory` + grouped section on the team page. Categories (brand/project/user/decision/fact), ordered by salience, source attribution.
 - [ ] Project timeline (task history, who did what, outcomes)
 - [ ] Relationship map visualization
 
