@@ -10,14 +10,29 @@ import { getAvatarSrc } from "@/components/agent-avatars"
 import { AGENT_ROLE_DEFINITIONS } from "@/lib/agent-builder/role-definitions"
 import { CopyButton } from "@/components/copy-button"
 import { UserMenu } from "@/components/user-menu"
-import type { Team, AgentRole } from "@/lib/agent-builder/types"
-import { PERSONALITY_AXES } from "@/lib/agent-builder/types"
+import type { Team, AgentRole, EmotionalState } from "@/lib/agent-builder/types"
+import { PERSONALITY_AXES, LEVEL_THRESHOLDS } from "@/lib/agent-builder/types"
+import { getMood, getMoodEmoji } from "@designteam/core"
 
 interface TeamRow {
   team_data: Team
   name: string
   agent_count: number
   short_id: string
+}
+
+// Shape returned by /api/teams/:id/state (agent_states table row)
+interface AgentStateRow {
+  agent_id: string
+  role: string
+  emotions: EmotionalState
+  memories?: unknown
+  xp: number
+  level: number
+  tasks_completed: number
+  tasks_approved: number
+  last_active_at: string | null
+  updated_at: string | null
 }
 
 export default function TeamPage() {
@@ -28,6 +43,7 @@ export default function TeamPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [forking, setForking] = useState(false)
+  const [states, setStates] = useState<Record<string, AgentStateRow>>({})
 
   useEffect(() => {
     fetch(`/api/teams/${id}`)
@@ -46,6 +62,20 @@ export default function TeamPage() {
         setError("Failed to load team")
         setLoading(false)
       })
+
+    // Living state — mood, XP, level per agent. Best-effort; failure keeps
+    // the page usable (agents just show without the living-state chips).
+    fetch(`/api/teams/${id}/state`)
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (!data?.agent_states) return
+        const next: Record<string, AgentStateRow> = {}
+        for (const row of data.agent_states as AgentStateRow[]) {
+          next[row.agent_id] = row
+        }
+        setStates(next)
+      })
+      .catch(() => { /* ignore — no living state yet is fine */ })
   }, [id])
 
   async function handleFork() {
@@ -141,26 +171,64 @@ export default function TeamPage() {
           {team.agents?.map((agent) => {
             const role =
               AGENT_ROLE_DEFINITIONS[agent.role as AgentRole] ?? null
+            const state = states[agent.id]
+            const mood = state ? getMood(state.emotions) : null
+            const moodEmoji = mood ? getMoodEmoji(mood) : null
+            // XP progress inside current level — clamped to [0, 1].
+            const xpProgress = state
+              ? xpProgressInLevel(state.xp, state.level)
+              : null
             return (
               <div key={agent.id} className="space-y-2 rounded-lg border p-4">
-                <Image
-                  src={getAvatarSrc(role?.avatarKey ?? "creative-director", agent.pixabotId)}
-                  alt={agent.name}
-                  width={80}
-                  height={80}
-                  className="mx-auto object-contain"
-                  unoptimized
-                  style={{ imageRendering: 'pixelated' }}
-                />
+                <div className="relative mx-auto w-20 h-20">
+                  <Image
+                    src={getAvatarSrc(role?.avatarKey ?? "creative-director", agent.pixabotId)}
+                    alt={agent.name}
+                    width={80}
+                    height={80}
+                    className="object-contain"
+                    unoptimized
+                    style={{ imageRendering: 'pixelated' }}
+                  />
+                  {moodEmoji && (
+                    <span
+                      className="absolute -bottom-1 -right-1 text-lg"
+                      title={`Mood: ${mood}`}
+                    >
+                      {moodEmoji}
+                    </span>
+                  )}
+                </div>
                 <h3 className="text-center font-semibold">{agent.name}</h3>
-                <div className="flex justify-center">
+                <div className="flex justify-center items-center gap-1.5">
                   <Badge
                     variant="outline"
                     style={role ? { borderColor: role.color } : undefined}
                   >
                     {role?.displayName ?? agent.role}
                   </Badge>
+                  {state && state.level > 1 && (
+                    <Badge variant="secondary" className="text-[10px]" title={`${state.xp} XP`}>
+                      Lv {state.level}
+                    </Badge>
+                  )}
                 </div>
+                {state && xpProgress !== null && (
+                  <div className="flex flex-col items-center gap-0.5 pt-0.5">
+                    <div
+                      className="h-1 w-16 rounded-full bg-muted overflow-hidden"
+                      title={`${state.xp} XP — ${state.tasks_approved}/${state.tasks_completed} tasks approved`}
+                    >
+                      <div
+                        className="h-full bg-foreground transition-[width] duration-500"
+                        style={{ width: `${Math.round(xpProgress * 100)}%` }}
+                      />
+                    </div>
+                    <span className="text-[9px] text-muted-foreground">
+                      {state.tasks_completed} task{state.tasks_completed === 1 ? "" : "s"}
+                    </span>
+                  </div>
+                )}
                 {agent.traits && agent.traits.length > 0 && (
                   <div className="flex flex-wrap justify-center gap-1">
                     {agent.traits.map((t) => (
@@ -233,4 +301,18 @@ export default function TeamPage() {
       </main>
     </div>
   )
+}
+
+/**
+ * Return the fraction of XP the agent has accumulated inside its current
+ * level band — 0 at the level threshold, 1 just before the next one.
+ * Returns null (not 0) for max-level agents so the bar can be hidden.
+ */
+function xpProgressInLevel(xp: number, level: number): number | null {
+  const current = LEVEL_THRESHOLDS[level - 1] ?? 0
+  const next = LEVEL_THRESHOLDS[level]
+  if (next === undefined) return null
+  const span = next - current
+  if (span <= 0) return null
+  return Math.min(1, Math.max(0, (xp - current) / span))
 }
