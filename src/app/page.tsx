@@ -89,6 +89,30 @@ export default function Home() {
             read the docs
           </Link>
         </p>
+
+        <section className="mt-20 w-full max-w-3xl text-left">
+          <h2 className="mb-8 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Agents that grow with you
+          </h2>
+          <div className="grid gap-6 sm:grid-cols-2">
+            <ValueCard
+              title="They remember your brand"
+              body="Team memory captures brand facts, project context, user preferences, and decisions. Every agent reads it before responding."
+            />
+            <ValueCard
+              title="They level up with use"
+              body="XP and mood track what each agent has done. Experienced agents take more initiative and their system prompts shift accordingly."
+            />
+            <ValueCard
+              title="They bond with each other"
+              body="Collaborations record synergy. Conflicts record friction. The relationship map shows who works well together — and who doesn't."
+            />
+            <ValueCard
+              title="They tell you what happened"
+              body="Every report lands on a project timeline on your team page. Forkable, shareable, auditable — not a black box."
+            />
+          </div>
+        </section>
       </main>
 
       {/* Footer */}
@@ -118,6 +142,15 @@ export default function Home() {
           Docs
         </Link>
       </footer>
+    </div>
+  )
+}
+
+function ValueCard({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="rounded-lg border bg-background p-5">
+      <h3 className="mb-1.5 text-sm font-semibold">{title}</h3>
+      <p className="text-xs leading-relaxed text-muted-foreground">{body}</p>
     </div>
   )
 }
