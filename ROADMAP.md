@@ -143,14 +143,16 @@ Goal: Pixel-art Pixabots matching designteam.app.
 
 ---
 
-**Phase 1B.5: Scale migration (cleanup)**
+**Phase 1B.5: Scale migration (cleanup) [DEFERRED]**
 
-Last because it's pure plumbing — no user-facing value.
+Decision Apr 18: leave as acceptable tech debt. No user-facing value, real risk to saved team data in IDB, and Efecto's local personality engine works correctly with 0-10 today. Core's scale-utils (`configToCore`, `configFromCore`) are ready whenever we revisit.
 
-- [ ] Replace `types.ts`, `personality-engine.ts`, `role-definitions.ts`, `team-presets.ts` with shims
-- [ ] Add `configToCore()` / `configFromCore()` at IDB boundary
-- [ ] Update the one UI label (`X/25 pts` in agent-team-panel.tsx:530)
-- [ ] Test with existing saved teams for no data loss
+- ~~Replace `types.ts`, `personality-engine.ts`, `role-definitions.ts`, `team-presets.ts` with shims~~
+- ~~Add `configToCore()` / `configFromCore()` at IDB boundary~~
+- ~~Update the one UI label (`X/25 pts` in agent-team-panel.tsx:530)~~
+- ~~Test with existing saved teams for no data loss~~
+
+If we ever want to pick this up: `@designteam/core` already exports `configToCore`/`configFromCore`/`scaleToCore`/`scaleFromCore`. The migration would convert at the IDB load/save boundary, replace `lib/agent-builder/{types,personality-engine,role-definitions,team-presets}.ts` with re-export shims, and flip the "X/25 pts" UI label.
 
 ---
 
