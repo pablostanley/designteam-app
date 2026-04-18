@@ -1,6 +1,11 @@
 import { randomPixabotId, ROLE_PIXABOT_IDS, pixabotUrl, pixabotUrlForRole } from '@designteam/core'
 
-/** Legacy fallback — static PNGs (pre-Pixabots teams still use these) */
+/**
+ * Legacy PNG fallback. Only fires when `avatarKey` isn't a known role
+ * (e.g., corrupt/old saved team data passing a renamed or removed role).
+ * Every current role has a pixabot in ROLE_PIXABOT_IDS, so this is dead for
+ * normal use — kept for defensive UX on legacy data.
+ */
 export const AVATAR_MAP: Record<string, string> = {
   'researcher': '/images/robots/researcher.png',
   'copywriter': '/images/robots/copywriter.png',

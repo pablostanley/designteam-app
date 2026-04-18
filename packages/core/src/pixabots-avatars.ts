@@ -2,14 +2,16 @@
  * Pixabots Avatars — single source of truth for per-role pixel-art avatar IDs.
  *
  * Stable pixabotIds per role so the same role always shows the same character
- * across designteam app, Efecto agent panel, CLI, etc. Consumers build the
- * final URL as `${PIXABOTS_API}/${id}?size=<n>`.
+ * across designteam app, Efecto agent panel, CLI, etc.
  */
 
+import type { AgentRole } from './types'
+
+/** Base URL. Use pixabotUrl() instead of concatenating yourself. */
 export const PIXABOTS_API = 'https://pixabots.com/api/pixabot'
 
 /** Stable pixabotIds per role — consistent character identity across all consumers. */
-export const ROLE_PIXABOT_IDS: Record<string, string> = {
+export const ROLE_PIXABOT_IDS: Record<AgentRole, string> = {
   'researcher': '3051',
   'copywriter': 'a241',
   'graphic-designer': '7130',
@@ -33,8 +35,12 @@ export function pixabotUrl(pixabotId: string, size = 240): string {
   return `${PIXABOTS_API}/${pixabotId}?size=${size}`
 }
 
-/** Resolve a Pixabots URL for a role, or null if role has no stable id. */
+/**
+ * Resolve a Pixabots URL for a role, or null if the key isn't a known role.
+ * Accepts a string (not strictly typed as AgentRole) because callers often
+ * pass `avatarKey` from legacy data that may contain unknown values.
+ */
 export function pixabotUrlForRole(avatarKey: string, size = 240): string | null {
-  const id = ROLE_PIXABOT_IDS[avatarKey]
+  const id = ROLE_PIXABOT_IDS[avatarKey as AgentRole]
   return id ? pixabotUrl(id, size) : null
 }
