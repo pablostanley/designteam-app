@@ -49,7 +49,6 @@ next-env.d.ts
 packages/*/dist/
 
 # stale reports
-AGENTS.md
 AUDIT-REPORT.md
 TEST-REPORT.md
 TEST-REPORT-FULL.md
