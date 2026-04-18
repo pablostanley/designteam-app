@@ -161,6 +161,18 @@ The Paperclip model — agents work while you sleep.
 
 ---
 
+## Efecto UI Polish (track alongside v0.8 integration)
+
+Small cosmetic fixes in Efecto that don't block integration but should ship as part of the overall polish pass.
+
+- [ ] **Edge padding** — chrome containers (tools panel, layers list, inspector, topbar, toolkit) currently use `pl-4 pr-4`. Tighten to `p-2` so panels sit closer to the browser edge.
+  - Files: `components/studio/tool-sidebar.tsx`, layers panel, inspector panel, topbar
+- [ ] **Chat message typography inconsistency** — some agent chat messages render `<p>` with larger font than surrounding messages. Normalize to a single text-size class across all message body `<p>` elements.
+  - Example: the handoff message `"Nova → Design"` has the right `text-[10px]` header but the body `<p>` inherits a larger default. Force the body to `text-xs` or whatever the standard chat message size is.
+  - File: `components/studio/ai-chat-panel.tsx` (chat message renderer)
+
+---
+
 ## Future
 
 ### Agent Marketplace
