@@ -198,7 +198,7 @@ Make the team work through a project autonomously — one command kicks off rese
 - [x] **Agent detail view** — shipped in PR #11. Click any agent card to open a right-side sheet with all 5 emotion bars, XP-to-next-level, memories grouped by type with salience dots, personality sliders (−5..+5 centered visualization), traits.
 - [x] **Team memory viewer** — shipped in PR #10. New `GET /api/teams/:id/memory` + grouped section on the team page. Categories (brand/project/user/decision/fact), ordered by salience, source attribution.
 - [ ] Project timeline (task history, who did what, outcomes)
-- [ ] Relationship map visualization
+- [x] **Relationship map visualization** — shipped in PR #12. Circular SVG graph on the team page: agents around a ring, edges colored by bond (foreground positive / muted neutral / red negative) with thickness proportional to collaboration count.
 
 ### v0.11 — Truly Autonomous (Cron-driven)
 
