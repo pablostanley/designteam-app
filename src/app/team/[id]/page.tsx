@@ -11,7 +11,8 @@ import { AGENT_ROLE_DEFINITIONS } from "@/lib/agent-builder/role-definitions"
 import { CopyButton } from "@/components/copy-button"
 import { UserMenu } from "@/components/user-menu"
 import { AgentDetailSheet } from "@/components/agent-detail-sheet"
-import type { Team, AgentRole, AgentMemoryEntry, EmotionalState } from "@/lib/agent-builder/types"
+import { RelationshipMap } from "@/components/relationship-map"
+import type { Team, AgentRole, AgentMemoryEntry, AgentRelationship, EmotionalState } from "@/lib/agent-builder/types"
 import { PERSONALITY_AXES, LEVEL_THRESHOLDS } from "@/lib/agent-builder/types"
 import { getMood, getMoodEmoji } from "@designteam/core"
 
@@ -68,6 +69,7 @@ export default function TeamPage() {
   const [states, setStates] = useState<Record<string, AgentStateRow>>({})
   const [memoryEntries, setMemoryEntries] = useState<TeamMemoryRow[]>([])
   const [detailAgentId, setDetailAgentId] = useState<string | null>(null)
+  const [relationships, setRelationships] = useState<AgentRelationship[]>([])
 
   useEffect(() => {
     fetch(`/api/teams/${id}`)
@@ -92,12 +94,17 @@ export default function TeamPage() {
     fetch(`/api/teams/${id}/state`)
       .then((res) => res.ok ? res.json() : null)
       .then((data) => {
-        if (!data?.agent_states) return
-        const next: Record<string, AgentStateRow> = {}
-        for (const row of data.agent_states as AgentStateRow[]) {
-          next[row.agent_id] = row
+        if (!data) return
+        if (Array.isArray(data.agent_states)) {
+          const next: Record<string, AgentStateRow> = {}
+          for (const row of data.agent_states as AgentStateRow[]) {
+            next[row.agent_id] = row
+          }
+          setStates(next)
         }
-        setStates(next)
+        if (Array.isArray(data.relationships)) {
+          setRelationships(data.relationships as AgentRelationship[])
+        }
       })
       .catch(() => { /* ignore — no living state yet is fine */ })
 
@@ -309,6 +316,20 @@ export default function TeamPage() {
             )
           })}
         </div>
+
+        {relationships.length > 0 && team.agents && team.agents.length >= 2 && (
+          <section className="mt-10">
+            <header className="mb-3 flex items-baseline justify-between">
+              <h2 className="text-sm font-semibold">Relationships</h2>
+              <span className="text-xs text-muted-foreground">
+                {relationships.length} pair{relationships.length === 1 ? "" : "s"}
+              </span>
+            </header>
+            <div className="rounded-lg border p-4">
+              <RelationshipMap agents={team.agents} relationships={relationships} />
+            </div>
+          </section>
+        )}
 
         {memoryEntries.length > 0 && (
           <section className="mt-10">
