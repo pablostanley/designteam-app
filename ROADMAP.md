@@ -214,7 +214,8 @@ The Paperclip model — agents work while you sleep.
 
 ### v0.12 — npm Package Cleanup
 
-- [ ] Add `.npmignore` (ship only `cli/`, `skills/`, `package.json`, `README.md`)
+- [x] **Whitelist published files** — shipped in PR #13. `"files": ["cli", "README.md"]` + web-app deps moved to devDependencies. Tarball dropped from 8 MB / 241 files to 17 kB / 4 files (500× smaller).
+- [x] **Package metadata** — shipped in PR #13. Added description, license, author, homepage, repository, keywords.
 - [ ] GitHub Actions CI (test on PR, build check)
 - [ ] Auto-publish on version tag
 
