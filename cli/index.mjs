@@ -9,6 +9,7 @@ import {
   loadTeamMemory, saveTeamMemory,
   loadUserProfile, saveUserProfile,
 } from './state.mjs'
+import { loadPlan, savePlan, listPlans } from './plans.mjs'
 import {
   AGENT_ROLE_DEFINITIONS, AGENT_NAMES, AGENT_ROLE_LIST,
   TEAM_PRESETS, LEVEL_THRESHOLDS,
@@ -61,6 +62,11 @@ Memory:
 Cloud Sync:
   designteam sync                          Push local state to cloud
   designteam pull                          Pull cloud state to local
+
+Planning (v0.11):
+  designteam plan "<description>"          Generate a task graph with Haiku
+  designteam plans                         List all saved plans
+  designteam show <plan-id>                View a plan's tasks + status
 
 Create & Install:
   designteam create "project description"  Create a team with AI
@@ -266,6 +272,31 @@ Presets:
 
   if (command === 'pull') {
     await cmdPull()
+    return
+  }
+
+  if (command === 'plan') {
+    const description = args.slice(1).join(' ')
+    if (!description) {
+      console.error('Usage: npx designteam plan "design a landing page for a coffee app"')
+      process.exit(1)
+    }
+    await cmdPlan(description)
+    return
+  }
+
+  if (command === 'plans') {
+    await cmdPlans()
+    return
+  }
+
+  if (command === 'show') {
+    const planId = args[1]
+    if (!planId) {
+      console.error('Usage: npx designteam show <plan-id>')
+      process.exit(1)
+    }
+    await cmdShow(planId)
     return
   }
 
@@ -1772,6 +1803,189 @@ function describePersonality(agent) {
     .map(m => m.descriptor)
   if (!parts.length) return 'Balanced personality — no strong biases in any direction.'
   return `**Personality:** ${parts.join(', ')}.`
+}
+
+// ---------------------------------------------------------------------------
+// Plans — Haiku-generated task graphs (v0.11 Phase 1)
+// ---------------------------------------------------------------------------
+
+async function cmdPlan(description) {
+  const team = requireTeam()
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  if (!apiKey) {
+    console.error('ANTHROPIC_API_KEY not set.')
+    console.error('Planning calls Haiku to generate a task graph — get a key at https://console.anthropic.com')
+    process.exit(1)
+  }
+
+  const profile = loadUserProfile() || createEmptyUserProfile()
+  const teamMem = loadTeamMemory() || createEmptyTeamMemory(team.id)
+
+  const roster = team.agents
+    .map((a) => `  - ${a.name} (${a.role}): ${AGENT_ROLE_DEFINITIONS[a.role]?.displayName ?? a.role}`)
+    .join('\n')
+
+  const profileFragment = userProfileToPromptFragment(profile)
+  const memoryFragment = teamMemoryToPromptFragment(teamMem, 10)
+
+  const prompt = `You are the Creative Director for this team. Generate a task graph that completes the project below.
+
+${profileFragment || ''}
+${memoryFragment || ''}
+
+Team roster:
+${roster}
+
+Project:
+${description}
+
+Return ONLY valid JSON, no prose. Each task must name an agent by ROLE (not by name), list the task IDs it depends on, and include a one-sentence success criterion + a one-sentence "why" explaining how it serves the project.
+
+Use 3-8 tasks. Assign the research/strategy tasks first, design tasks that depend on them, then a final review task (assigned to the creative-director role) that depends on everything else.
+
+{"tasks":[{"id":"t1","agentRole":"researcher","instruction":"...","dependencies":[],"successCriteria":"...","why":"..."}]}`
+
+  console.log()
+  console.log(`  Planning "${description}"...`)
+
+  let res
+  try {
+    res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 2048,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    })
+  } catch (err) {
+    console.error(`  Network error: ${err.message}`)
+    process.exit(1)
+  }
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => '')
+    console.error(`  Anthropic API ${res.status}: ${body.slice(0, 200)}`)
+    process.exit(1)
+  }
+
+  const data = await res.json()
+  const text = data.content?.[0]?.text
+  if (typeof text !== 'string') {
+    console.error('  Unexpected response shape from Anthropic API')
+    process.exit(1)
+  }
+
+  // Tolerate light formatting variance — pull the first JSON object out.
+  const match = text.match(/\{[\s\S]*\}/)
+  if (!match) {
+    console.error('  Haiku did not return valid JSON:')
+    console.error(text.slice(0, 300))
+    process.exit(1)
+  }
+
+  let parsed
+  try {
+    parsed = JSON.parse(match[0])
+  } catch {
+    console.error('  Could not parse task graph JSON')
+    process.exit(1)
+  }
+
+  if (!Array.isArray(parsed.tasks) || parsed.tasks.length === 0) {
+    console.error('  Haiku returned no tasks')
+    process.exit(1)
+  }
+
+  const plan = {
+    id: `plan-${uid()}`,
+    description,
+    createdAt: new Date().toISOString(),
+    status: 'planning',
+    tasks: parsed.tasks.map((t, i) => ({
+      id: t.id || `t${i + 1}`,
+      agentRole: t.agentRole || 'creative-director',
+      instruction: t.instruction || '',
+      dependencies: Array.isArray(t.dependencies) ? t.dependencies : [],
+      successCriteria: t.successCriteria || '',
+      why: t.why || '',
+      status: 'pending',
+    })),
+  }
+
+  savePlan(plan)
+
+  console.log()
+  console.log(`  Plan saved: ${plan.id}`)
+  console.log(`  ${plan.tasks.length} tasks across ${new Set(plan.tasks.map((t) => t.agentRole)).size} roles.`)
+  console.log()
+  for (const task of plan.tasks) {
+    const deps = task.dependencies.length > 0 ? ` (after ${task.dependencies.join(', ')})` : ''
+    console.log(`  ${task.id} [${task.agentRole}] ${task.instruction}${deps}`)
+  }
+  console.log()
+  console.log(`  View: npx designteam show ${plan.id}`)
+  console.log(`  List: npx designteam plans`)
+  console.log()
+}
+
+async function cmdPlans() {
+  const plans = listPlans()
+  console.log()
+  if (plans.length === 0) {
+    console.log('  No plans yet.')
+    console.log('  Create one: npx designteam plan "design a landing page"')
+    console.log()
+    return
+  }
+  console.log(`  ${plans.length} plan${plans.length === 1 ? '' : 's'}:`)
+  console.log()
+  for (const plan of plans) {
+    const taskCount = plan.tasks?.length ?? 0
+    const done = plan.tasks?.filter((t) => t.status === 'done').length ?? 0
+    const age = relativeAge(plan.createdAt)
+    console.log(`  ${plan.id}  ${plan.description}`)
+    console.log(`    ${done}/${taskCount} tasks done · ${plan.status} · ${age}`)
+  }
+  console.log()
+}
+
+async function cmdShow(planId) {
+  const plan = loadPlan(planId)
+  if (!plan) {
+    console.error(`Plan "${planId}" not found.`)
+    console.error('Run "npx designteam plans" to see what exists.')
+    process.exit(1)
+  }
+
+  console.log()
+  console.log(`  ${plan.description}`)
+  console.log(`  ${plan.id} · ${plan.status} · created ${relativeAge(plan.createdAt)}`)
+  console.log()
+  for (const task of plan.tasks) {
+    const status = task.status === 'done' ? '✓' : task.status === 'in_progress' ? '→' : task.status === 'blocked' ? '!' : '·'
+    const deps = task.dependencies.length > 0 ? ` (after ${task.dependencies.join(', ')})` : ''
+    console.log(`  ${status} ${task.id} [${task.agentRole}] ${task.instruction}${deps}`)
+    if (task.successCriteria) console.log(`      success: ${task.successCriteria}`)
+    if (task.why) console.log(`      why: ${task.why}`)
+  }
+  console.log()
+}
+
+function relativeAge(iso) {
+  const diffMs = Date.now() - new Date(iso).getTime()
+  const mins = Math.round(diffMs / 60000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return `${mins}m ago`
+  const hours = Math.round(mins / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.round(hours / 24)
+  return `${days}d ago`
 }
 
 main().catch(err => {
