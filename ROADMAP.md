@@ -1,6 +1,6 @@
 # Design Team — Roadmap
 
-**Last updated**: 2026-04-18
+**Last updated**: 2026-04-18 (post-cycle 2)
 
 ---
 
@@ -111,24 +111,24 @@ Shared brand/user/project knowledge now flows into every agent prompt.
 
 ---
 
-**Phase 1B.3: User Profile in Efecto [NEXT PRIORITY]**
+**Phase 1B.3: User Profile in Efecto (PR #532, merged Apr 18)**
 
-Today: Agents don't know who the user is or what the business does.
-Goal: Every agent prompt includes the user profile.
+Plumbing shipped — every agent now reads an `ABOUT THE USER` block, sourced from a local profile store.
+- [x] New `lib/studio/user-profile-store.ts` — IDB-backed singleton using `createIdbStore` + core's `UserProfile` primitives
+- [x] `buildSystemPrompt` gained optional `userProfileContext` param, injected universally (Jules solo AND team mode)
+- [x] Extracted `wrapUntrustedContext()` helper — team/user context blocks now share sanitization logic (net LOC reduction)
+- [x] API route sanitizes + forwards `userProfileContext`, capped at 1500 chars
+- [x] `ai-chat-panel` loads profile in parallel with team context, passes through to the API
+- [x] Build + type check clean; CI green; merged squash
 
-- [ ] Small form/panel: business, industry, audience, voice, style, brand colors
-- [ ] Stored locally (settings/prefs) + synced to Supabase if logged in
-- [ ] Injected into agent system prompt via `userProfileToPromptFragment()`
-- [ ] One-time onboarding prompt: "Tell your team about you" for new users
-
-**Files to touch:**
-- New: `components/studio/user-profile-panel.tsx`
-- `lib/studio/agent-team-prompt-builder.ts` (inject profile)
-- `lib/settings/` (or equivalent) for storage
+**Follow-ups opened from PR review:**
+- [ ] **Profile form UI** — today only programmatic writes to IDB can populate the profile. Need a small panel (business, industry, audience, voice, style, brand colors, notes) accessible from the team panel or a settings entry.
+- [ ] **Swarm runner** — `agent-swarm-runner.ts` fetch sites don't pass `userProfileContext` yet (same gap as team memory noted in Phase 1B.2).
+- [ ] **Cloud sync** — mirror `pushTeamLivingState` so profile follows the user across devices.
 
 ---
 
-**Phase 1B.4: Pixabots avatars in Efecto**
+**Phase 1B.4: Pixabots avatars in Efecto [NEXT PRIORITY]**
 
 Today: Efecto shows static robot PNGs.
 Goal: Pixel-art Pixabots matching designteam.app.
