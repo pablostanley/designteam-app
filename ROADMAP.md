@@ -77,30 +77,24 @@
 
 ---
 
-**Phase 1B.1: Cloud Sync in Efecto [next priority]**
+**Phase 1B.1: Cloud Sync in Efecto [ALREADY SHIPPED — discovered Apr 18]**
 
-Today: Efecto stores living state in browser IDB. Close browser = fresh agents.
-Goal: Efecto syncs to Supabase. Agents survive browsers, devices, reinstalls.
+Found during loop cycle: Efecto already has end-to-end cloud sync for living state.
+- `supabase/migrations/020_agent_living_state.sql` — `agent_living_state` + `agent_relationship_graph` tables
+- `lib/studio/agent-living-state-sync.ts` — `pushAgentState`, `pushRelationshipGraph`, `syncTeamLivingState`, `pushTeamLivingState`
+- `app/design/[id]/[[...slug]]/page.tsx:200` calls `syncTeamLivingState(team)` on team load (pull)
+- `lib/studio/agent-team-chat-hooks.ts:150` calls `pushTeamLivingState(team)` after each chat response (push)
 
-- [ ] Add `syncLivingStateToCloud(team)` — calls `PUT /api/teams/:id/state` on designteam.app
-  - Reads IDB, converts to the API shape (same as CLI sends)
-  - Called after each `extractAndStoreMemories` fires (or debounced)
-- [ ] Add `pullLivingStateFromCloud(team)` — on team load, fetches `/state`, merges into IDB
-  - Conflict resolution: cloud wins if `last_active_at` is newer, otherwise local wins
-- [ ] Store Efecto team's `short_id` so sync knows the remote target
-- [ ] Manual trigger UI: a "Sync" button in the agent team panel
-- [ ] Auto-sync on idle or team-panel close
-- [ ] Handle 401/network errors gracefully
+**Schema divergence discovered:**
+Efecto uses its own table shape (`agent_living_state` keyed by `user_id+agent_id`, state as a single `JSONB` blob) while designteam.app uses the normalized `agent_states` table (from migration 003). Both live in the same Supabase project but can't directly read each other's state.
 
-**Files to touch:**
-- `lib/studio/agent-team-living-state.ts` (add sync wrappers)
-- `lib/studio/agent-team-sync.ts` (already exists — check what it does)
-- `components/studio/agent-team-panel.tsx` (UI trigger)
-- `lib/studio/agent-team-chat-hooks.ts` (fire-and-forget sync after memory extraction)
+**Unification follow-up ticket** (added to Future section below):
+- Decide whether Efecto migrates to designteam's schema, or designteam adopts Efecto's, or a shared view reconciles them
+- Goal: same team works identically in CLI and Efecto without re-syncing
 
 ---
 
-**Phase 1B.2: Team Memory in Efecto**
+**Phase 1B.2: Team Memory in Efecto [NEXT PRIORITY]**
 
 Today: Efecto has per-agent memory. No shared team knowledge.
 Goal: Agents read shared brand/user/project context before every response.
@@ -245,6 +239,12 @@ Small cosmetic fixes in Efecto that don't block integration but should ship as p
 ---
 
 ## Future
+
+### Unify Efecto + designteam.app living-state schemas
+- [ ] Reconcile `agent_living_state` (Efecto) vs `agent_states` (designteam) tables
+- [ ] Decide on canonical schema — prefer normalized (designteam) for queryability
+- [ ] Backfill migration for existing Efecto users
+- [ ] Same team works identically in CLI and Efecto without re-sync
 
 ### Agent Marketplace
 - [ ] Public agent profiles on designteam.app
