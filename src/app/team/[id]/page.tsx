@@ -35,6 +35,27 @@ interface AgentStateRow {
   updated_at: string | null
 }
 
+type MemoryCategory = 'brand' | 'project' | 'user' | 'decision' | 'fact'
+
+interface TeamMemoryRow {
+  id: string
+  category: MemoryCategory
+  content: string
+  salience: number
+  source: string | null
+  created_at: string
+  last_relevant_at: string
+}
+
+const MEMORY_CATEGORY_META: Record<MemoryCategory, { label: string; hint: string }> = {
+  brand: { label: 'Brand', hint: 'Visual identity, voice, tone' },
+  project: { label: 'Project', hint: 'What we’re building right now' },
+  user: { label: 'User', hint: 'Preferences, working style' },
+  decision: { label: 'Decisions', hint: 'Choices the team has made' },
+  fact: { label: 'Facts', hint: 'Everything else worth remembering' },
+}
+const MEMORY_CATEGORY_ORDER: MemoryCategory[] = ['brand', 'project', 'user', 'decision', 'fact']
+
 export default function TeamPage() {
   const params = useParams()
   const id = params.id as string
@@ -44,6 +65,7 @@ export default function TeamPage() {
   const [error, setError] = useState<string | null>(null)
   const [forking, setForking] = useState(false)
   const [states, setStates] = useState<Record<string, AgentStateRow>>({})
+  const [memoryEntries, setMemoryEntries] = useState<TeamMemoryRow[]>([])
 
   useEffect(() => {
     fetch(`/api/teams/${id}`)
@@ -76,6 +98,14 @@ export default function TeamPage() {
         setStates(next)
       })
       .catch(() => { /* ignore — no living state yet is fine */ })
+
+    // Team memory — shared brand/project/user/decision facts.
+    fetch(`/api/teams/${id}/memory`)
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (Array.isArray(data?.entries)) setMemoryEntries(data.entries as TeamMemoryRow[])
+      })
+      .catch(() => { /* ignore — empty memory is the most common state */ })
   }, [id])
 
   async function handleFork() {
@@ -273,6 +303,62 @@ export default function TeamPage() {
             )
           })}
         </div>
+
+        {memoryEntries.length > 0 && (
+          <section className="mt-10">
+            <header className="mb-3 flex items-baseline justify-between">
+              <h2 className="text-sm font-semibold">Team memory</h2>
+              <span className="text-xs text-muted-foreground">
+                {memoryEntries.length} entr{memoryEntries.length === 1 ? "y" : "ies"}
+              </span>
+            </header>
+            <div className="space-y-4">
+              {MEMORY_CATEGORY_ORDER.map((cat) => {
+                const entries = memoryEntries.filter((e) => e.category === cat)
+                if (entries.length === 0) return null
+                const meta = MEMORY_CATEGORY_META[cat]
+                return (
+                  <div key={cat} className="rounded-lg border p-4">
+                    <div className="mb-2 flex items-baseline justify-between">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider">
+                        {meta.label}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">{meta.hint}</span>
+                    </div>
+                    <ul className="space-y-1.5">
+                      {entries.map((entry) => (
+                        <li
+                          key={entry.id}
+                          className="flex items-start gap-2 rounded-md bg-muted/40 px-2.5 py-2"
+                        >
+                          <span
+                            className={
+                              "mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full " +
+                              (entry.salience >= 0.7
+                                ? "bg-foreground"
+                                : entry.salience >= 0.4
+                                  ? "bg-muted-foreground"
+                                  : "bg-muted-foreground/50")
+                            }
+                            aria-hidden
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs leading-snug">{entry.content}</p>
+                            {entry.source && (
+                              <p className="mt-0.5 text-[10px] text-muted-foreground">
+                                via {entry.source}
+                              </p>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+        )}
 
         <div className="mt-8 space-y-3">
           <div className="rounded-lg border bg-muted/50 p-4">
