@@ -154,11 +154,13 @@ Last because it's pure plumbing — no user-facing value.
 
 ---
 
-**Phase 1B.6: Decide on agent-skills-generated.ts**
+**Phase 1B.6: Decide on agent-skills-generated.ts (PR #540, resolved Apr 18)**
 
-- [ ] Option A: remove Efecto's generator, use core's 16-role version
-- [ ] Option B: keep generator, accept duplication
-- [ ] Document decision in MIGRATION.md
+- [x] **Option A chosen** — Efecto's 8-role generator was shipping empty skill content for the 8 roles core adds (brand-strategist, design-engineer, marketing-strategist, motion-designer, print-designer, accessibility-specialist, content-strategist, seo-specialist).
+- [x] `agent-skills-generated.ts` is now a one-line re-export from `@designteam/core`.
+- [x] Deleted 8 `.md` source files (~260 lines) and the agent-builder section of `scripts/build-skills.mjs`.
+- [x] MIGRATION.md updated.
+- [x] Net diff: -587 / +13 — all 16 roles now get skill content.
 
 ### v0.9 — Autonomous Mode (`designteam run`)
 
