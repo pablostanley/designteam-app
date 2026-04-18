@@ -1,28 +1,11 @@
-import { randomPixabotId } from '@designteam/core'
+import { randomPixabotId, ROLE_PIXABOT_IDS, pixabotUrl, pixabotUrlForRole } from '@designteam/core'
 
-const PIXABOTS_API = 'https://pixabots.com/api/pixabot'
-
-/** Stable pixabotIds per role — consistent character identity across the app */
-export const ROLE_PIXABOT_IDS: Record<string, string> = {
-  'researcher': '3051',
-  'copywriter': 'a241',
-  'graphic-designer': '7130',
-  'ux-designer': '1462',
-  'ux-writer': 'b053',
-  'editorial-designer': '5324',
-  'social-media-designer': 'c160',
-  'creative-director': '2515',
-  'design-engineer': '8043',
-  'brand-strategist': '4232',
-  'marketing-strategist': 'd351',
-  'print-designer': '6124',
-  'motion-designer': 'e240',
-  'accessibility-specialist': '0453',
-  'content-strategist': '9132',
-  'seo-specialist': 'f061',
-}
-
-/** Legacy fallback — static PNGs */
+/**
+ * Legacy PNG fallback. Only fires when `avatarKey` isn't a known role
+ * (e.g., corrupt/old saved team data passing a renamed or removed role).
+ * Every current role has a pixabot in ROLE_PIXABOT_IDS, so this is dead for
+ * normal use — kept for defensive UX on legacy data.
+ */
 export const AVATAR_MAP: Record<string, string> = {
   'researcher': '/images/robots/researcher.png',
   'copywriter': '/images/robots/copywriter.png',
@@ -47,19 +30,15 @@ export const AVATAR_MAP: Record<string, string> = {
  * Priority: agent's pixabotId → role's stable pixabotId → legacy PNG fallback.
  */
 export function getAvatarSrc(avatarKey: string, pixabotId?: string): string {
-  if (pixabotId) {
-    return `${PIXABOTS_API}/${pixabotId}?size=240`
-  }
-  const roleId = ROLE_PIXABOT_IDS[avatarKey]
-  if (roleId) {
-    return `${PIXABOTS_API}/${roleId}?size=240`
-  }
+  if (pixabotId) return pixabotUrl(pixabotId)
+  const roleUrl = pixabotUrlForRole(avatarKey)
+  if (roleUrl) return roleUrl
   return AVATAR_MAP[avatarKey] ?? '/images/robots/creative-director.png'
 }
 
 /** Get a random Pixabot URL (for homepage hero, decorative use) */
 export function getRandomPixabotSrc(size = 240): string {
-  return `${PIXABOTS_API}/${randomPixabotId()}?size=${size}`
+  return pixabotUrl(randomPixabotId(), size)
 }
 
-export { randomPixabotId }
+export { randomPixabotId, ROLE_PIXABOT_IDS }
