@@ -137,7 +137,7 @@ Update this list after every publish. Grab the authoritative values from
 | `@designteam/adapter-local-script` | `0.1.0` |
 | `@designteam/adapter-claude-cli` | `0.1.0` |
 | `@designteam/adapter-codex-local` | `0.1.0` |
-| `@designteam/adapter-anthropic-api` | `0.1.0` |
+| `@designteam/adapter-anthropic-api` | `0.1.1` |
 | `@designteam/adapter-efecto` | `0.1.0` |
 | `designteam` | `0.6.0` |
 
