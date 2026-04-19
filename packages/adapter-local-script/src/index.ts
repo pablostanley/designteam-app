@@ -151,26 +151,54 @@ interface RunResult {
 
 function runCommand(args: RunArgs): Promise<RunResult> {
   return new Promise((resolve) => {
+    // `detached: true` makes the child its own process group leader so we
+    // can signal the whole tree (shell + subprocess) with a single
+    // `process.kill(-pid, ...)`. Without this, SIGTERM to the shell
+    // doesn't propagate to long-running subcommands like `sleep` and the
+    // test harness hangs until vitest's default 5s timeout trips.
     const child = spawn(args.command, {
       cwd: args.cwd,
       env: args.env,
       shell: true,
       stdio: ['ignore', 'pipe', 'pipe'],
+      detached: process.platform !== 'win32',
     })
 
     let stdout = ''
     let stderr = ''
     let timedOut = false
     let settled = false
+    let sigkillTimer: NodeJS.Timeout | null = null
+
+    const killTree = (signal: NodeJS.Signals) => {
+      if (child.killed || child.exitCode !== null) return
+      try {
+        // Signal the whole process group on POSIX; fall back to direct
+        // kill on Windows (no detached semantic available for shell:true
+        // the same way).
+        if (process.platform !== 'win32' && typeof child.pid === 'number') {
+          process.kill(-child.pid, signal)
+        } else {
+          child.kill(signal)
+        }
+      } catch {
+        // Child may have exited between the check and the signal — that's fine.
+      }
+    }
+
+    const requestStop = () => {
+      killTree('SIGTERM')
+      // Escalate to SIGKILL if the child is still around after 500ms
+      // (handles subprocesses that trap SIGTERM or otherwise stall).
+      sigkillTimer = setTimeout(() => killTree('SIGKILL'), 500)
+    }
 
     const timeout = setTimeout(() => {
       timedOut = true
-      if (!child.killed) child.kill('SIGTERM')
+      requestStop()
     }, args.timeoutMs)
 
-    const onAbort = () => {
-      if (!child.killed) child.kill('SIGTERM')
-    }
+    const onAbort = () => requestStop()
     args.signal.addEventListener('abort', onAbort, { once: true })
 
     child.stdout.on('data', (chunk) => { stdout += chunk.toString() })
@@ -180,6 +208,7 @@ function runCommand(args: RunArgs): Promise<RunResult> {
       if (settled) return
       settled = true
       clearTimeout(timeout)
+      if (sigkillTimer) clearTimeout(sigkillTimer)
       args.signal.removeEventListener('abort', onAbort)
       resolve({ exitCode, stdout, stderr, timedOut })
     }
