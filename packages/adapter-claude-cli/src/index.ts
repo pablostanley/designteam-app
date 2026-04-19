@@ -20,13 +20,14 @@
 
 import { spawn } from 'node:child_process'
 import {
-  emotionToPromptFragment,
-  memoryToPromptFragment,
-  personalityToPromptFragment,
-  teamMemoryToPromptFragment,
-  userProfileToPromptFragment,
-} from '@designteam/core'
-import type { TaskAdapter, TaskContext, TaskResult } from '@designteam/adapter-utils'
+  buildAgentPrompt,
+  truncate,
+  type TaskAdapter,
+  type TaskContext,
+  type TaskResult,
+} from '@designteam/adapter-utils'
+
+export { buildAgentPrompt as buildPrompt } from '@designteam/adapter-utils'
 
 export interface ClaudeCliAdapterOptions {
   /**
@@ -66,7 +67,7 @@ export function createClaudeCliAdapter(opts: ClaudeCliAdapterOptions = {}): Task
     name: 'Claude CLI',
     version: '0.1.0',
     async executeTask(ctx: TaskContext): Promise<TaskResult> {
-      const prompt = buildPrompt(ctx)
+      const prompt = buildAgentPrompt(ctx)
 
       try {
         const { exitCode, stdout, stderr, timedOut } = await runClaude({
@@ -110,67 +111,6 @@ export function createClaudeCliAdapter(opts: ClaudeCliAdapterOptions = {}): Task
       }
     },
   }
-}
-
-// ---------------------------------------------------------------------------
-// Prompt assembly
-// ---------------------------------------------------------------------------
-
-/**
- * Build the prompt that goes into `claude -p`. Pulls every knob Design
- * Team tracks — agent identity + personality + mood + memory + team
- * memory + user profile — and weaves them into a single brief the LLM
- * can act on without follow-up context.
- *
- * Exported so tests + callers can verify what's being sent.
- */
-export function buildPrompt(ctx: TaskContext): string {
-  const sections: string[] = []
-
-  const meta = ctx.agent as unknown as { personality?: { sliders?: Record<string, number> } }
-  const personality = meta?.personality
-    ? personalityToPromptFragment(meta.personality as never)
-    : ''
-
-  sections.push(
-    `You are ${ctx.agent.name}, a ${ctx.agent.role} on a design team.`,
-  )
-  if (personality) sections.push(personality)
-
-  const state = (ctx as unknown as { agentState?: unknown }).agentState as
-    | { emotions?: never; memory?: never }
-    | undefined
-  if (state?.emotions) {
-    const moodFragment = emotionToPromptFragment(state.emotions)
-    if (moodFragment) sections.push(moodFragment)
-  }
-  if (state?.memory) {
-    const memFragment = memoryToPromptFragment(state.memory, 5)
-    if (memFragment) sections.push(memFragment)
-  }
-
-  if (ctx.userProfile) {
-    const profileFragment = userProfileToPromptFragment(ctx.userProfile)
-    if (profileFragment) sections.push(profileFragment)
-  }
-  if (ctx.teamMemory && ctx.teamMemory.entries?.length > 0) {
-    const teamFragment = teamMemoryToPromptFragment(ctx.teamMemory, 10)
-    if (teamFragment) sections.push(teamFragment)
-  }
-
-  sections.push('')
-  sections.push('## Task')
-  sections.push('')
-  sections.push(ctx.task.instruction)
-  if (ctx.task.successCriteria) {
-    sections.push('')
-    sections.push(`Success criteria: ${ctx.task.successCriteria}`)
-  }
-  if (ctx.task.why) {
-    sections.push(`Why this matters: ${ctx.task.why}`)
-  }
-
-  return sections.filter(Boolean).join('\n\n')
 }
 
 // ---------------------------------------------------------------------------
@@ -248,8 +188,4 @@ function runClaude(args: RunArgs): Promise<RunResult> {
     })
     child.on('close', (code) => finish(code))
   })
-}
-
-function truncate(str: string, max: number): string {
-  return str.length > max ? str.slice(0, max - 1) + '…' : str
 }

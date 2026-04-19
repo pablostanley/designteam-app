@@ -14,11 +14,17 @@
  * another adapter uses it.
  */
 
-import type {
-  Agent,
-  Team,
-  TeamMemory,
-  UserProfile,
+import {
+  emotionToPromptFragment,
+  memoryToPromptFragment,
+  personalityToPromptFragment,
+  teamMemoryToPromptFragment,
+  userProfileToPromptFragment,
+  type Agent,
+  type AgentLivingState,
+  type Team,
+  type TeamMemory,
+  type UserProfile,
 } from '@designteam/core'
 
 // ---------------------------------------------------------------------------
@@ -79,6 +85,8 @@ export interface TaskContext {
   task: PlanTask
   team: Team
   agent: Agent
+  /** Per-agent living state (emotions, memory, XP). Host loads it per run. */
+  agentState?: AgentLivingState
   teamMemory: TeamMemory
   userProfile: UserProfile
 
@@ -185,4 +193,56 @@ export function listAdapters(): TaskAdapter[] {
 /** Convenience for tests + scenarios that need a clean slate. */
 export function clearAdapters(): void {
   REGISTRY.clear()
+}
+
+// ---------------------------------------------------------------------------
+// Prompt assembly — shared by every LLM-backed adapter
+// ---------------------------------------------------------------------------
+
+/**
+ * Builds the standard agent prompt: identity + personality + mood +
+ * memory + team memory + user profile + task brief. LLM adapters call
+ * this so they all present the same Design Team context to the model.
+ */
+export function buildAgentPrompt(ctx: TaskContext): string {
+  const sections: string[] = []
+
+  sections.push(`You are ${ctx.agent.name}, a ${ctx.agent.role} on a design team.`)
+
+  const personality = personalityToPromptFragment(ctx.agent.personality)
+  if (personality) sections.push(personality)
+
+  if (ctx.agentState?.emotions) {
+    const moodFragment = emotionToPromptFragment(ctx.agentState.emotions)
+    if (moodFragment) sections.push(moodFragment)
+  }
+  if (ctx.agentState?.memory) {
+    const memFragment = memoryToPromptFragment(ctx.agentState.memory, 5)
+    if (memFragment) sections.push(memFragment)
+  }
+
+  if (ctx.userProfile) {
+    const profileFragment = userProfileToPromptFragment(ctx.userProfile)
+    if (profileFragment) sections.push(profileFragment)
+  }
+  if (ctx.teamMemory && ctx.teamMemory.entries?.length > 0) {
+    const teamFragment = teamMemoryToPromptFragment(ctx.teamMemory, 10)
+    if (teamFragment) sections.push(teamFragment)
+  }
+
+  sections.push('## Task')
+  sections.push(ctx.task.instruction)
+  if (ctx.task.successCriteria) {
+    sections.push(`Success criteria: ${ctx.task.successCriteria}`)
+  }
+  if (ctx.task.why) {
+    sections.push(`Why this matters: ${ctx.task.why}`)
+  }
+
+  return sections.join('\n\n')
+}
+
+/** Clip long LLM output for display / summary fields. */
+export function truncate(str: string, max: number): string {
+  return str.length > max ? str.slice(0, max - 1) + '…' : str
 }

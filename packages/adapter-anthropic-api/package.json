@@ -1,0 +1,37 @@
+{
+  "name": "@designteam/adapter-anthropic-api",
+  "version": "0.1.0",
+  "description": "Design Team adapter that dispatches tasks directly to the Anthropic Messages API. The autonomous-mode adapter — no Claude Code, no human required. Reports token cost for budget tracking.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "pnpm run build"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.2"
+  },
+  "peerDependencies": {
+    "@designteam/adapter-utils": "workspace:*",
+    "@designteam/core": "workspace:*"
+  }
+}

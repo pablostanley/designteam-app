@@ -2618,7 +2618,8 @@ async function cmdRun(planId, taskId, flags) {
     console.error('  Or:  npx designteam run <plan-id> <task-id> --command="<shell command>"')
     console.error('')
     console.error('Built-in adapters:')
-    console.error('  @designteam/adapter-claude-cli   — wraps the local `claude` CLI')
+    console.error('  @designteam/adapter-claude-cli       — wraps the local `claude` CLI')
+    console.error('  @designteam/adapter-anthropic-api    — calls the API directly (needs ANTHROPIC_API_KEY)')
     console.error('  (local-script available via --command=)')
     process.exit(1)
   }

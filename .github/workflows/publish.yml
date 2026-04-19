@@ -88,6 +88,11 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: ./scripts/publish-if-changed.sh packages/adapter-claude-cli
 
+      - name: Publish @designteam/adapter-anthropic-api
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: ./scripts/publish-if-changed.sh packages/adapter-anthropic-api
+
       # CLI (unscoped) last — depends on everything above.
       - name: Publish designteam (CLI)
         env:

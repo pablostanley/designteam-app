@@ -14,8 +14,9 @@ Two paths:
 | `@designteam/core` | `packages/core` | Engine — personality, emotions, memory, relationships. Every other package peer-depends on it. |
 | `@designteam/adapter-utils` | `packages/adapter-utils` | Types + mutable registry every adapter implements. |
 | `@designteam/adapter-local-script` | `packages/adapter-local-script` | Reference adapter. No LLM. Used as the `--command=` fast path. |
-| `@designteam/adapter-claude-cli` | `packages/adapter-claude-cli` | First LLM-backed adapter. Wraps the local `claude` CLI. |
-| `designteam` | repo root | The CLI. Depends on all four packages above. |
+| `@designteam/adapter-claude-cli` | `packages/adapter-claude-cli` | LLM adapter. Wraps the local `claude` CLI. |
+| `@designteam/adapter-anthropic-api` | `packages/adapter-anthropic-api` | LLM adapter. Calls the Anthropic API directly (needs `ANTHROPIC_API_KEY`). Reports token cost. |
+| `designteam` | repo root | The CLI. Depends on all five packages above. |
 
 ## Publish order matters
 
@@ -28,7 +29,7 @@ first, let workspace re-resolution pick it up, then bump consumers.
 
 1. `@designteam/core`
 2. `@designteam/adapter-utils`
-3. `@designteam/adapter-local-script` and `@designteam/adapter-claude-cli` (parallel; both peer-dep on adapter-utils)
+3. `@designteam/adapter-local-script`, `@designteam/adapter-claude-cli`, and `@designteam/adapter-anthropic-api` (parallel; all peer-dep on adapter-utils)
 4. `designteam` (the CLI — depends on all of the above)
 
 ## Checklist per package
@@ -57,6 +58,9 @@ cd packages/adapter-local-script && npm publish --access public && cd ../..
 
 pnpm --filter @designteam/adapter-claude-cli run build
 cd packages/adapter-claude-cli && npm publish --access public && cd ../..
+
+pnpm --filter @designteam/adapter-anthropic-api run build
+cd packages/adapter-anthropic-api && npm publish --access public && cd ../..
 
 # CLI last (depends on everything above)
 npm publish
@@ -92,4 +96,5 @@ Update this list after every publish. Grab the authoritative values from
 | `@designteam/adapter-utils` | **not yet published** |
 | `@designteam/adapter-local-script` | **not yet published** |
 | `@designteam/adapter-claude-cli` | **not yet published** |
+| `@designteam/adapter-anthropic-api` | **not yet published** |
 | `designteam` | `0.5.1` |

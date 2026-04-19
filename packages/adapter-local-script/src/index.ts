@@ -14,7 +14,7 @@
  */
 
 import { spawn } from 'node:child_process'
-import type { TaskAdapter, TaskContext, TaskResult } from '@designteam/adapter-utils'
+import { truncate, type TaskAdapter, type TaskContext, type TaskResult } from '@designteam/adapter-utils'
 
 export interface LocalScriptAdapterOptions {
   /**
@@ -219,8 +219,4 @@ function runCommand(args: RunArgs): Promise<RunResult> {
     })
     child.on('close', (code) => finish(code))
   })
-}
-
-function truncate(str: string, max: number): string {
-  return str.length > max ? str.slice(0, max - 1) + '…' : str
 }
