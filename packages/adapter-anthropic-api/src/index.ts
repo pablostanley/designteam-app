@@ -204,7 +204,14 @@ export function createAnthropicApiAdapter(opts: AnthropicApiAdapterOptions = {})
           outputTokens: 0,
         }
       }
-      const rate = pricing[usage.model] ?? pricing[DEFAULT_MODEL]
+      // If the usage model isn't in the pricing table, omit usdCents
+      // rather than falling back to DEFAULT_MODEL's rate — "unknown
+      // model" does NOT mean "bill at Sonnet rates." Silently reporting
+      // a cheap-rate number for an expensive model (e.g. Opus when the
+      // caller forgot to override `opts.pricing`) would defeat the
+      // budget hard-stop's whole purpose. Host can estimate or warn
+      // when usdCents comes back undefined.
+      const rate = pricing[usage.model]
       const usdCents = rate
         ? Math.ceil(
             (usage.inputTokens * rate.inputCentsPerMTok) / 1_000_000 +

@@ -69,6 +69,13 @@ createAnthropicApiAdapter({
 })
 ```
 
+**Unknown models:** if the response's model isn't in the pricing table
+(default or override), `reportCost()` returns a report with `usdCents`
+**omitted** rather than falling back to a default rate. An unknown model
+genuinely means "we don't know the rate" — silently billing at e.g.
+Sonnet rates for an Opus-tier model would defeat the budget hard-stop.
+Hosts can detect `usdCents === undefined` and estimate, warn, or refuse.
+
 The Design Team CLI's runner calls `reportCost()` after each successful
 task and appends to `.designteam/budget.jsonl`. Set a cap with
 `designteam budget set --usd=N` and the next `designteam run` refuses
