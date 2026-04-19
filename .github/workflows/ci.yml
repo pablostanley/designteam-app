@@ -27,17 +27,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Build core first — the shim re-exports in src/lib/agent-builder/
-      # import @designteam/core via its dist/ entry, so tests fail to resolve
-      # it until dist exists.
-      - name: Build @designteam/core
-        run: pnpm --filter @designteam/core run build
+      # Build every workspace package first — shim re-exports in
+      # src/lib/agent-builder/ import via dist/, and adapter packages
+      # peer-depend on core. Tests can't resolve imports until dist exists.
+      - name: Build workspace packages
+        run: pnpm -r --filter './packages/*' run build
 
       - name: Run tests
         run: pnpm test
 
-      - name: Type-check core package
-        run: pnpm --filter @designteam/core run lint
+      - name: Type-check packages
+        run: pnpm -r --filter './packages/*' run lint
 
       - name: Run behavioral evals
         run: pnpm eval

@@ -246,8 +246,9 @@ Adopted from `paperclipai/paperclip` (MIT, Apr 2026). Their model is "open-sourc
 
 ### Distribution (v0.11 Phase 4 — proper scope)
 
-- [ ] **`packages/adapters/` monorepo pattern** — one adapter package per runtime: `@designteam/adapter-claude-local`, `@designteam/adapter-codex-local`, `@designteam/adapter-cursor-local`, `@designteam/adapter-gemini-local`, `@designteam/adapter-efecto`. Each adapter implements a shared interface from `@designteam/adapter-utils`. Mutable server registry so third parties can register without rewriting shared schemas. *This is the proper shape for v0.11 Phase 4.*
-- [ ] **`adapter-plugin.md` spec at repo root** — the public interface contract. What an adapter must provide (agent resolver, task executor, cost reporter, heartbeat reporter) and what it gets from the control plane (plan file access, team memory, user profile).
+- [x] **`adapter-plugin.md` spec at repo root** — shipped in PR #27. Public interface contract: `TaskAdapter.executeTask(ctx) → TaskResult` with outcomes mapping to `progress` status transitions; mutable registry for third-party registration; invariants (adapters never mutate plan state directly, must honor checkout locks + `ctx.signal`).
+- [x] **`packages/adapter-utils/` shared interface** — shipped in PR #27. Types (`TaskAdapter`, `TaskContext`, `TaskResult`, `PlanTask`, `CostReport`) + mutable registry (`registerAdapter` / `resolveAdapter` / `listAdapters` / `unregisterAdapter` / `clearAdapters`) + 7 vitest cases. Peer-depends on `@designteam/core`.
+- [ ] **`packages/adapters/` implementations** — one package per runtime: `@designteam/adapter-claude-local`, `@designteam/adapter-codex-local`, `@designteam/adapter-cursor-local`, `@designteam/adapter-gemini-local`, `@designteam/adapter-efecto`. Each implements `TaskAdapter`. Reference adapter comes next.
 
 ### Mapping: control-plane items → Efecto 7-phase roadmap
 
