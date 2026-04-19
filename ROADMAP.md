@@ -250,8 +250,9 @@ Adopted from `paperclipai/paperclip` (MIT, Apr 2026). Their model is "open-sourc
 - [ ] **`packages/adapters/` implementations** — one package per runtime: `@designteam/adapter-claude-local`, `@designteam/adapter-codex-local`, `@designteam/adapter-cursor-local`, `@designteam/adapter-gemini-local`, `@designteam/adapter-efecto`. Each implements `TaskAdapter`.
   - [x] **Reference adapter: `@designteam/adapter-local-script`** — shipped in PR #28. Shells out per task with `DT_*` env vars, maps exit code → outcome, honors `ctx.signal.aborted` + `timeoutMs`. 7 vitest cases cover exit codes, env-var surface, cancellation, construction guards. Proves the contract without an LLM dependency.
   - [x] **`@designteam/adapter-claude-cli`** — shipped in PR #36. Wraps the local `claude` CLI. `buildPrompt(ctx)` stitches agent identity + personality + mood + memory + team memory + user profile + task brief into one `claude -p` invocation. Configurable `claudePath`, `extraArgs`, `timeoutMs`. 7 vitest cases cover prompt assembly + exit-code mapping + signal handling. First LLM-backed adapter and proof that the contract scales beyond shell scripts.
+  - [x] **`@designteam/adapter-anthropic-api`** — shipped in PR #40. Autonomous-mode adapter: hits `api.anthropic.com/v1/messages` directly with the same stitched prompt as claude-cli (agent + personality + mood + memory + team memory + profile + task brief). Reports token usage via `reportCost()` so `budget hard-stop` can enforce. Configurable model/temperature/maxTokens/baseUrl/pricing. Auto-registers in the CLI when `ANTHROPIC_API_KEY` is set. Unlocks v0.11 Phase 3 — agents work with no Claude Code, no human in the loop.
   - [ ] `@designteam/adapter-efecto` — executes against Efecto's design MCP. Agency-shaped adapter.
-  - [ ] Remaining runtimes (cursor, codex, gemini, anthropic-api) — community-ownable now that two reference adapters exist.
+  - [ ] Remaining runtimes (cursor, codex, gemini) — community-ownable now that three reference adapters exist.
 
 ### Mapping: control-plane items → Efecto 7-phase roadmap
 

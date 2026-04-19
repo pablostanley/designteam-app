@@ -17,6 +17,7 @@
 import { registerAdapter, resolveAdapter } from '@designteam/adapter-utils'
 import { createLocalScriptAdapter } from '@designteam/adapter-local-script'
 import { createClaudeCliAdapter } from '@designteam/adapter-claude-cli'
+import { createAnthropicApiAdapter } from '@designteam/adapter-anthropic-api'
 
 let registered = false
 
@@ -29,6 +30,18 @@ export function registerBuiltinAdapters() {
   // error. No point gating registration on a `which claude` probe here.
   if (!resolveAdapter('@designteam/adapter-claude-cli')) {
     registerAdapter(createClaudeCliAdapter())
+  }
+
+  // Anthropic API adapter only registers when an API key is present.
+  // createAnthropicApiAdapter() throws without one — we swallow that
+  // case so the CLI still works for users who haven't set the key.
+  if (process.env.ANTHROPIC_API_KEY && !resolveAdapter('@designteam/adapter-anthropic-api')) {
+    try {
+      registerAdapter(createAnthropicApiAdapter())
+    } catch {
+      // construction failed (missing key despite the check, usually
+      // means the env var is empty string) — skip silently
+    }
   }
 
   // Local-script is deliberately NOT registered by default — it needs a
