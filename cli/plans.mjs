@@ -100,10 +100,56 @@ export function listPlans() {
 }
 
 /**
+ * Claim a task for a specific run. Atomic: succeeds only if the task is
+ * currently unclaimed or already held by the same runId. Mirrors
+ * paperclip's `checkoutRunId` concept — ownership lock separate from
+ * status, so a task in `in_progress` always has a named owner and no
+ * two runners can double-claim.
+ *
+ * Pass `force: true` to steal a stale claim (e.g. the original runner
+ * crashed). Returns the updated task.
+ */
+export function checkoutTask(plan, taskId, runId, { force = false } = {}) {
+  if (!runId || typeof runId !== 'string') {
+    throw new Error('checkoutTask requires a runId string')
+  }
+  const task = plan.tasks.find((t) => t.id === taskId)
+  if (!task) throw new Error(`Task ${taskId} not found in plan ${plan.id}`)
+  if (TERMINAL_TASK_STATUSES.has(task.status)) {
+    throw new Error(`Task ${taskId} is ${task.status} — can't check it out`)
+  }
+  if (task.checkoutId && task.checkoutId !== runId && !force) {
+    throw new Error(`Task ${taskId} already held by run ${task.checkoutId} (pass --force to steal)`)
+  }
+  task.checkoutId = runId
+  task.status = 'in_progress'
+  task.updatedAt = new Date().toISOString()
+  return task
+}
+
+/**
+ * Release a task claim. No-op if not held by runId (callers shouldn't
+ * release someone else's lock). Force-releases when `force: true`.
+ */
+export function releaseTask(plan, taskId, runId, { force = false } = {}) {
+  const task = plan.tasks.find((t) => t.id === taskId)
+  if (!task) throw new Error(`Task ${taskId} not found in plan ${plan.id}`)
+  if (task.checkoutId && task.checkoutId !== runId && !force) {
+    throw new Error(`Task ${taskId} held by ${task.checkoutId}, not ${runId}`)
+  }
+  task.checkoutId = null
+  task.updatedAt = new Date().toISOString()
+  return task
+}
+
+/**
  * Transition one task to a new status, updating `updatedAt` and — when a
  * task moves to `done` — auto-unblocking any downstream task that depended
  * on it and was sitting in `blocked`. This is the "deps resolve ⇒ wake
  * dependents" rule borrowed from paperclip's execution semantics.
+ *
+ * Terminal states (done/cancelled) also auto-release any active checkout
+ * claim on the task — a terminated task has no owner.
  *
  * Returns { plan, task, unblocked[] } so the CLI can report what happened.
  */
@@ -118,6 +164,12 @@ export function setTaskStatus(plan, taskId, nextStatus) {
 
   task.status = status
   task.updatedAt = new Date().toISOString()
+
+  // Terminal transitions auto-release any checkout claim. Keeps the
+  // invariant: only non-terminal tasks can have a live checkoutId.
+  if (TERMINAL_TASK_STATUSES.has(status) && task.checkoutId) {
+    task.checkoutId = null
+  }
 
   const unblocked = []
   if (status === 'done') {

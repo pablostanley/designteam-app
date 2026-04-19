@@ -12,6 +12,7 @@ import {
 import {
   loadPlan, savePlan, listPlans,
   setTaskStatus, normalizeStatus,
+  checkoutTask, releaseTask,
   TASK_STATUSES, TASK_STATUS_GLYPH,
 } from './plans.mjs'
 import {
@@ -78,6 +79,12 @@ Planning (v0.11):
                                                   --status=<status>
                                            Finishing a task auto-unblocks
                                            dependents.
+  designteam checkout <plan-id> <task-id> [--run=<id>] [--force]
+                                           Atomically claim a task for a
+                                           run. Moves it to in_progress.
+                                           Fails if held by a different run.
+  designteam release <plan-id> <task-id> [--run=<id>] [--force]
+                                           Release a claim you hold.
 
 Create & Install:
   designteam create "project description"  Create a team with AI
@@ -319,6 +326,28 @@ Presets:
       process.exit(1)
     }
     await cmdProgress(planId, taskId, args.slice(3))
+    return
+  }
+
+  if (command === 'checkout') {
+    const planId = args[1]
+    const taskId = args[2]
+    if (!planId || !taskId) {
+      console.error('Usage: npx designteam checkout <plan-id> <task-id> [--run=<id>] [--force]')
+      process.exit(1)
+    }
+    await cmdCheckout(planId, taskId, args.slice(3))
+    return
+  }
+
+  if (command === 'release') {
+    const planId = args[1]
+    const taskId = args[2]
+    if (!planId || !taskId) {
+      console.error('Usage: npx designteam release <plan-id> <task-id> [--run=<id>] [--force]')
+      process.exit(1)
+    }
+    await cmdRelease(planId, taskId, args.slice(3))
     return
   }
 
@@ -1992,7 +2021,8 @@ async function cmdShow(planId) {
   for (const task of plan.tasks) {
     const glyph = TASK_STATUS_GLYPH[task.status] ?? '·'
     const deps = task.dependencies.length > 0 ? ` (after ${task.dependencies.join(', ')})` : ''
-    console.log(`  ${glyph} ${task.id} [${task.agentRole}] ${task.instruction}${deps}`)
+    const held = task.checkoutId ? ` · held by ${task.checkoutId}` : ''
+    console.log(`  ${glyph} ${task.id} [${task.agentRole}] ${task.instruction}${deps}${held}`)
     if (task.successCriteria) console.log(`      success: ${task.successCriteria}`)
     if (task.why) console.log(`      why: ${task.why}`)
   }
@@ -2048,6 +2078,60 @@ async function cmdProgress(planId, taskId, flags) {
     console.log()
     console.log(`  Plan "${result.plan.description}" is complete.`)
   }
+  console.log()
+}
+
+async function cmdCheckout(planId, taskId, flags) {
+  const plan = loadPlan(planId)
+  if (!plan) {
+    console.error(`Plan "${planId}" not found.`)
+    process.exit(1)
+  }
+
+  // Default runId = hostname:pid:timestamp-short. Stable enough per invocation,
+  // unique enough across parallel runs. Callers can override with --run=X.
+  const runIdFlag = flags.find((f) => f.startsWith('--run='))?.split('=')[1]
+  const runId = runIdFlag || `local-${process.pid}-${Date.now().toString(36)}`
+  const force = flags.includes('--force')
+
+  let task
+  try {
+    task = checkoutTask(plan, taskId, runId, { force })
+  } catch (err) {
+    console.error(`  ${err.message}`)
+    process.exit(1)
+  }
+  savePlan(plan)
+
+  console.log()
+  console.log(`  Claimed ${task.id} [${task.agentRole}] ${task.instruction}`)
+  console.log(`  run: ${runId}`)
+  console.log(`  Use "npx designteam progress ${planId} ${taskId} --done" when finished.`)
+  console.log()
+}
+
+async function cmdRelease(planId, taskId, flags) {
+  const plan = loadPlan(planId)
+  if (!plan) {
+    console.error(`Plan "${planId}" not found.`)
+    process.exit(1)
+  }
+
+  const runIdFlag = flags.find((f) => f.startsWith('--run='))?.split('=')[1]
+  const runId = runIdFlag || 'local'
+  const force = flags.includes('--force')
+
+  let task
+  try {
+    task = releaseTask(plan, taskId, runId, { force })
+  } catch (err) {
+    console.error(`  ${err.message}`)
+    process.exit(1)
+  }
+  savePlan(plan)
+
+  console.log()
+  console.log(`  Released ${task.id} [${task.agentRole}] ${task.instruction}`)
   console.log()
 }
 
