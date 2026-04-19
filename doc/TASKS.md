@@ -1,7 +1,7 @@
 # Design Team — Task Board
 
-**Last updated**: 2026-04-19
-**Current phase**: v0.13 — Control Plane (paperclip-inspired)
+**Last updated**: 2026-04-19 (v0.13 effectively done — adapter-efecto V1 shipped in PR #43, soft budget warning in PR #41, runSubprocess extraction in PR #44, `designteam adapters` CLI in PR #45; only first-publish dry-run + community runtime adapters remain open)
+**Current phase**: v0.13 finish line → v0.14 scoping
 
 > ROADMAP.md is the source of truth for _what's shipped_. This file is
 > the scratch board for _open work items not yet promoted to a PR_.
@@ -22,11 +22,11 @@
 
 ### v0.13 — Control Plane (finish line)
 
-- [todo] **T-810** `@designteam/adapter-efecto` — agency-shaped adapter that executes tasks against Efecto's design MCP (the 64-tool surface). Accepts a `TaskContext`, drives an LLM tool-use loop with Efecto's MCP exposed as tools, returns `TaskResult` with artifact URIs pointing at the produced design session. Blocks v0.11 Phase 4 ("Design as a Service") and Efecto Phase 7.
-- [todo] **T-812** `@designteam/adapter-codex-local` — wraps the local `codex` CLI the same way adapter-claude-cli wraps `claude`. Community-ownable now that three reference adapters exist.
+- [todo] **T-811** `@designteam/adapter-efecto` V2 — the autonomous LLM+MCP tool-use loop. V1 (session creator) shipped in PR #43. V2 spawns Anthropic API with Efecto's MCP tools in a tool-use loop so assigned tasks actually produce design work without a human. Blocks v0.11 Phase 4 ("Design as a Service") and Efecto Phase 7.
+- [todo] **T-812** `@designteam/adapter-codex-local` — wraps the local `codex` CLI the same way adapter-claude-cli wraps `claude`. With `runSubprocess` hoisted into adapter-utils (PR #44) this is ~30 LOC of spawn config. Community-ownable.
 - [todo] **T-820** `@designteam/adapter-cursor-local` — spawns cursor-agent for a task. Community-ownable.
 - [todo] **T-821** `@designteam/adapter-gemini-local` — Gemini CLI wrapper. Community-ownable.
-- [todo] **T-830** First publish dry-run — push a `v0.13.0-rc` tag after `NPM_TOKEN` is set on the repo. Verify `scripts/publish-if-changed.sh` rewrites `workspace:*` → real versions across all five packages + CLI.
+- [todo] **T-830** First publish dry-run — push a `v0.13.0-rc` tag after `NPM_TOKEN` is set on the repo. Verify `scripts/publish-if-changed.sh` rewrites `workspace:*` → real versions across all six packages + CLI.
 
 ### v0.14 — Efecto Schema Reconciliation
 
