@@ -39,7 +39,8 @@
     "@designteam/adapter-utils": "workspace:*",
     "@designteam/adapter-local-script": "workspace:*",
     "@designteam/adapter-claude-cli": "workspace:*",
-    "@designteam/adapter-anthropic-api": "workspace:*"
+    "@designteam/adapter-anthropic-api": "workspace:*",
+    "@designteam/adapter-efecto": "workspace:*"
   },
   "devDependencies": {
     "@ai-sdk/anthropic": "^3.0.64",
