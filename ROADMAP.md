@@ -239,7 +239,7 @@ Adopted from `paperclipai/paperclip` (MIT, Apr 2026). Their model is "open-sourc
 
 ### Safety + governance (before `designteam run` goes autonomous)
 
-- [ ] **Budget hard-stop** — monthly UTC windows, soft alerts, hard limit auto-pauses work. A single bug in autonomous mode could burn through an API card overnight — this is the safety net we need **before** v0.11 Phase 3 ships.
+- [x] **Budget hard-stop** — shipped in PR #32. `.designteam/budget.json` (cap + period) + `.designteam/budget.jsonl` (append-only spend ledger). `designteam budget show | set --usd=N | reset`. Runner checks `isOverBudget()` before dispatch and refuses with the cap + current spend in the error message; after a successful run it calls `adapter.reportCost()` and appends to the ledger. Monthly UTC period auto-rolls via `resetPeriod()`. Soft alerts (80% warning) still TODO.
 - [ ] **Approval gates** — human checkpoints for governed actions. Maps to Efecto Phase 3 ("The Quality Gate") — Creative Director reviews every deliverable before the user sees it. Also covers: new hire proposals, large token-budget commits, publishing finished work.
 
 ### Distribution (v0.11 Phase 4 — proper scope)

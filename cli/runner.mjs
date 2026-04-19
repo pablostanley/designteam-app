@@ -30,6 +30,7 @@ import {
   loadUserProfile,
 } from './state.mjs'
 import { emitActivity } from './activity.mjs'
+import { isOverBudget, appendSpend, getSpend, loadBudget } from './budget.mjs'
 
 /**
  * Run one task end-to-end: checkout → adapter.executeTask → status transition.
@@ -73,6 +74,20 @@ export async function runOneTask({ planId, taskId, runId, command, adapter, time
   const effectiveRunId = runId || `local-${process.pid}-${Date.now().toString(36)}`
   const effectiveSignal = signal ?? new AbortController().signal
 
+  // --- Budget hard-stop ---
+  // Refuse to dispatch if the operator set a cap and the current period
+  // has reached it. Checking BEFORE checkout so we never strand a task
+  // in_progress because the cap tripped mid-flight. Users can opt out by
+  // not setting a cap.
+  if (isOverBudget()) {
+    const { usdCents } = loadBudget()
+    const spent = getSpend()
+    throw new Error(
+      `Budget cap reached: spent $${(spent / 100).toFixed(2)} of $${(usdCents / 100).toFixed(2)} this period. ` +
+      'Raise the cap with `designteam budget set --usd=<amount>` or reset the period with `designteam budget reset`.',
+    )
+  }
+
   // --- Atomic checkout ---
   checkoutTask(plan, taskId, effectiveRunId)
   savePlan(plan)
@@ -111,6 +126,29 @@ export async function runOneTask({ planId, taskId, runId, command, adapter, time
       outcome: 'error',
       message: err instanceof Error ? err.message : String(err),
       cause: err,
+    }
+  }
+
+  // --- Cost accounting (best-effort) ---
+  // If the adapter reports cost, append it to the budget ledger so the
+  // next run's pre-flight check sees the updated spend. Errors here
+  // are swallowed — budget is observability, not correctness.
+  if (typeof resolvedAdapter.reportCost === 'function' && result.outcome !== 'error') {
+    try {
+      const costReport = await resolvedAdapter.reportCost(ctx, result)
+      if (costReport && Number.isFinite(costReport.usdCents)) {
+        appendSpend(costReport.usdCents, {
+          model: costReport.model,
+          adapter: resolvedAdapter.id,
+          runId: effectiveRunId,
+          planId,
+          taskId,
+          inputTokens: costReport.inputTokens,
+          outputTokens: costReport.outputTokens,
+        })
+      }
+    } catch {
+      // best-effort
     }
   }
 
