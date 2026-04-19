@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@designteam/adapter-local-script':
+        specifier: workspace:*
+        version: link:packages/adapter-local-script
+      '@designteam/adapter-utils':
+        specifier: workspace:*
+        version: link:packages/adapter-utils
       '@designteam/core':
         specifier: workspace:*
         version: link:packages/core

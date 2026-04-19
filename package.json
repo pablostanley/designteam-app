@@ -35,7 +35,9 @@
     "eval": "node evals/index.mjs"
   },
   "dependencies": {
-    "@designteam/core": "workspace:*"
+    "@designteam/core": "workspace:*",
+    "@designteam/adapter-utils": "workspace:*",
+    "@designteam/adapter-local-script": "workspace:*"
   },
   "devDependencies": {
     "@ai-sdk/anthropic": "^3.0.64",
