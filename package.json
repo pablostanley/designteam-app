@@ -28,7 +28,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "pnpm --filter @designteam/core build && next build",
+    "build": "pnpm -r --filter './packages/*' build && next build",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
