@@ -133,6 +133,11 @@ Planning (v0.11):
                                            minutes (default 30) and reset
                                            them to todo. Use --dry-run
                                            to preview without writing.
+  designteam adapters                      List every adapter the CLI can
+                                           resolve via --adapter=<id>.
+                                           Shows built-ins + whatever
+                                           third-party adapters have
+                                           self-registered.
 
 Create & Install:
   designteam create "project description"  Create a team with AI
@@ -467,6 +472,11 @@ Presets:
       process.exit(1)
     }
     await cmdRecover(planId, args.slice(2))
+    return
+  }
+
+  if (command === 'adapters') {
+    await cmdAdapters()
     return
   }
 
@@ -2419,6 +2429,37 @@ async function cmdRecover(planId, flags) {
   savePlan(plan)
 
   console.log(`  Reset ${stranded.length} task${stranded.length === 1 ? '' : 's'} back to todo. Run \`designteam next ${plan.id}\` to pick one up.`)
+  console.log()
+}
+
+async function cmdAdapters() {
+  // Load built-ins the same way `designteam run` does, so the list here
+  // reflects what an actual dispatch would resolve. Third-party adapters
+  // that call registerAdapter() from their own entrypoint won't appear
+  // here unless they're imported — that's intentional; the list is about
+  // "what the CLI knows about", not "what npm could offer you".
+  const { registerBuiltinAdapters } = await import('./builtin-adapters.mjs')
+  const { listAdapters } = await import('@designteam/adapter-utils')
+  registerBuiltinAdapters()
+  const adapters = listAdapters()
+
+  console.log()
+  console.log('  Adapters')
+  console.log()
+
+  if (adapters.length === 0) {
+    console.log('  No adapters registered. Local-script is available via --command=<shell>.')
+    console.log()
+    return
+  }
+
+  for (const a of adapters) {
+    console.log(`  • ${a.id}`)
+    console.log(`    ${a.name} · v${a.version}`)
+  }
+  console.log()
+  console.log('  Dispatch via: `designteam run <plan> <task> --adapter=<id>`')
+  console.log('  Ephemeral local-script also available: --command="<shell>"')
   console.log()
 }
 
