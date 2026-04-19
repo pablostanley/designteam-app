@@ -23,9 +23,8 @@
 ### v0.13 — Control Plane (finish line)
 
 - [todo] **T-811** `@designteam/adapter-efecto` V2 — the autonomous LLM+MCP tool-use loop. V1 (session creator) shipped in PR #43. V2 spawns Anthropic API with Efecto's MCP tools in a tool-use loop so assigned tasks actually produce design work without a human. Blocks v0.11 Phase 4 ("Design as a Service") and Efecto Phase 7.
-- [todo] **T-812** `@designteam/adapter-codex-local` — wraps the local `codex` CLI the same way adapter-claude-cli wraps `claude`. With `runSubprocess` hoisted into adapter-utils (PR #44) this is ~30 LOC of spawn config. Community-ownable.
-- [todo] **T-820** `@designteam/adapter-cursor-local` — spawns cursor-agent for a task. Community-ownable.
-- [todo] **T-821** `@designteam/adapter-gemini-local` — Gemini CLI wrapper. Community-ownable.
+- [todo] **T-820** `@designteam/adapter-cursor-local` — spawns cursor-agent for a task. Community-ownable. Template: copy `packages/adapter-codex-local` (PR #55) and swap the command/args pattern.
+- [todo] **T-821** `@designteam/adapter-gemini-local` — Gemini CLI wrapper. Community-ownable. Same template as T-820.
 - [todo] **T-830** First publish — push a `v0.13.0` tag after `NPM_TOKEN` is set on the repo. The local `pnpm pack` dry-run (documented in `doc/PUBLISHING.md` "Dry-run verification") already confirmed every tarball rewrites `workspace:*` → real versions across all six packages + CLI with clean file lists and expected sizes (verified 2026-04-19). Only remaining step is the token + tag.
 
 ### v0.14 — Efecto Schema Reconciliation
