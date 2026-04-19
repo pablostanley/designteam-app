@@ -16,7 +16,8 @@ Two paths:
 | `@designteam/adapter-local-script` | `packages/adapter-local-script` | Reference adapter. No LLM. Used as the `--command=` fast path. |
 | `@designteam/adapter-claude-cli` | `packages/adapter-claude-cli` | LLM adapter. Wraps the local `claude` CLI. |
 | `@designteam/adapter-anthropic-api` | `packages/adapter-anthropic-api` | LLM adapter. Calls the Anthropic API directly (needs `ANTHROPIC_API_KEY`). Reports token cost. |
-| `designteam` | repo root | The CLI. Depends on all five packages above. |
+| `@designteam/adapter-efecto` | `packages/adapter-efecto` | Agency-shaped adapter. Creates Efecto design sessions per task. |
+| `designteam` | repo root | The CLI. Depends on all six packages above. |
 
 ## Publish order matters
 
@@ -29,7 +30,7 @@ first, let workspace re-resolution pick it up, then bump consumers.
 
 1. `@designteam/core`
 2. `@designteam/adapter-utils`
-3. `@designteam/adapter-local-script`, `@designteam/adapter-claude-cli`, and `@designteam/adapter-anthropic-api` (parallel; all peer-dep on adapter-utils)
+3. `@designteam/adapter-local-script`, `@designteam/adapter-claude-cli`, `@designteam/adapter-anthropic-api`, and `@designteam/adapter-efecto` (parallel; all peer-dep on adapter-utils)
 4. `designteam` (the CLI — depends on all of the above)
 
 ## Checklist per package
@@ -61,6 +62,9 @@ cd packages/adapter-claude-cli && npm publish --access public && cd ../..
 
 pnpm --filter @designteam/adapter-anthropic-api run build
 cd packages/adapter-anthropic-api && npm publish --access public && cd ../..
+
+pnpm --filter @designteam/adapter-efecto run build
+cd packages/adapter-efecto && npm publish --access public && cd ../..
 
 # CLI last (depends on everything above)
 npm publish
@@ -97,4 +101,5 @@ Update this list after every publish. Grab the authoritative values from
 | `@designteam/adapter-local-script` | **not yet published** |
 | `@designteam/adapter-claude-cli` | **not yet published** |
 | `@designteam/adapter-anthropic-api` | **not yet published** |
+| `@designteam/adapter-efecto` | **not yet published** |
 | `designteam` | `0.5.1` |

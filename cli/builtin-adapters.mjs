@@ -1,9 +1,11 @@
 /**
  * Built-in adapter registration.
  *
- * Design Team ships with two adapters out of the box:
+ * Design Team ships with four adapters out of the box:
  *   - @designteam/adapter-local-script (reference, no LLM)
  *   - @designteam/adapter-claude-cli (wraps `claude` on PATH)
+ *   - @designteam/adapter-anthropic-api (registered when ANTHROPIC_API_KEY is set)
+ *   - @designteam/adapter-efecto (registered when EFECTO_API_KEY is set)
  *
  * `registerBuiltinAdapters()` makes them resolvable by id via
  * @designteam/adapter-utils' registry. Called once on CLI startup by
@@ -15,9 +17,9 @@
  */
 
 import { registerAdapter, resolveAdapter } from '@designteam/adapter-utils'
-import { createLocalScriptAdapter } from '@designteam/adapter-local-script'
 import { createClaudeCliAdapter } from '@designteam/adapter-claude-cli'
 import { createAnthropicApiAdapter } from '@designteam/adapter-anthropic-api'
+import { createEfectoAdapter } from '@designteam/adapter-efecto'
 
 let registered = false
 
@@ -42,6 +44,14 @@ export function registerBuiltinAdapters() {
       // construction failed (missing key despite the check, usually
       // means the env var is empty string) — skip silently
     }
+  }
+
+  // Efecto adapter registers when EFECTO_API_KEY is set. Session creation
+  // itself is IP-scoped and doesn't currently need the key, but we gate on
+  // it anyway so users who don't intend to drive Efecto don't accidentally
+  // spin up sessions when they pick the wrong adapter id.
+  if (process.env.EFECTO_API_KEY && !resolveAdapter('@designteam/adapter-efecto')) {
+    registerAdapter(createEfectoAdapter())
   }
 
   // Local-script is deliberately NOT registered by default — it needs a
