@@ -21,7 +21,7 @@ const CLI_PATH = join(HERE, '..', 'cli', 'index.mjs')
  *
  * Exposes a small API to the scenario:
  *   cli(...args)         run the CLI in the sandbox, returns trimmed stdout
- *   cliExpectFail(...args) run the CLI expecting non-zero exit, returns stderr
+ *   cliExpectFail(...args) run the CLI expecting non-zero exit, returns stdout+stderr combined
  *   readJson(rel)        parse a JSON file under .designteam/
  *   readJsonl(rel)       parse a JSONL file under .designteam/, newest-first
  *   sandboxPath          the absolute sandbox path (for debugging)
@@ -53,10 +53,16 @@ export async function withSandbox(scenarioName, fn) {
         })
         throw new Error(`expected CLI to fail but it succeeded:\n${out}`)
       } catch (err) {
-        // execFileSync throws on non-zero exit — return stderr so the
-        // scenario can assert on the message.
+        // execFileSync throws on non-zero exit — return stdout + stderr
+        // combined so scenarios can assert on either. Commands like
+        // `doctor` write their human-readable report to stdout but still
+        // exit 1 when they find a hard failure; scenarios that only
+        // check stderr (e.g. budget-hardstop) still see their content
+        // because we append, not overwrite.
         if (err.status && err.status !== 0) {
-          return (err.stderr ?? '').toString().trim()
+          const out = (err.stdout ?? '').toString()
+          const errText = (err.stderr ?? '').toString()
+          return (out + errText).trim()
         }
         throw err
       }
