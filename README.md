@@ -2,7 +2,7 @@
 
 Your AI design crew that ships. Not just pretty pictures — research, strategy, copy, design, code, review, deploy.
 
-Hire agents with personalities. They remember your brand, learn your taste, bond with each other, and grow with use. Think tamagotchi meets agency.
+Hire agents with personalities. They remember your brand, learn your taste, bond with each other, and grow with use. Think tamagotchi meets agency — now with a paperclip-style control plane so agents can work autonomously on a plan while you sleep.
 
 ## Install
 
@@ -71,17 +71,43 @@ designteam create --preset=full-studio
 designteam create --roles=researcher,copywriter,graphic-designer
 designteam install <id-or-url>
 designteam list                      # browse public teams
+
+# Control plane (v0.13 — paperclip-style autonomous mode)
+designteam plan "<description>"              # Haiku turns it into a DAG of tasks
+designteam plans                             # list projects with progress
+designteam show <plan-id>                    # one plan + tasks, statuses, holders
+designteam next <plan-id>                    # print the first ready task (todo, no blockers)
+designteam run <plan-id> <task-id> --adapter=<id>   # dispatch via a registered adapter
+designteam run <plan-id> <task-id> --command="<shell>"   # ephemeral local-script
+designteam progress <plan-id> <task-id> --done|--review|--block=<reason>
+designteam checkout <plan-id> <task-id>      # atomic lock for the next run
+designteam release <plan-id> <task-id>       # manual release (rare — terminal states auto-release)
+designteam recover <plan-id> [--stale-minutes=N] [--dry-run]   # reset wedged tasks
+designteam activity [--tail=N]               # append-only event log
+designteam adapters                          # list registered adapters (env-gated + third-party)
+designteam approvals                         # list tasks in in_review across all plans
+designteam approve <plan-id> <task-id> [--comment="..."]
+designteam reject  <plan-id> <task-id> [--reason="..."] [--block]
+designteam budget [show|set --usd=N|reset]   # monthly spend cap with soft warning at 80%
 ```
 
-Local state lives in `.designteam/` at the root of your project.
+Local state lives in `.designteam/` at the root of your project — `team.json`, `state/<agent-id>.json`, `relationships.json`, `projects/<plan-id>.json`, `activity.jsonl`, `budget.json`, `budget.jsonl`.
 
 ## Built on
 
-- **[@designteam/core](https://www.npmjs.com/package/@designteam/core)** — the engine (personality, emotions, memory, relationships, swarm). Zero runtime deps, MIT, 417 tests.
+- **[@designteam/core](https://www.npmjs.com/package/@designteam/core)** — the engine (personality, emotions, memory, relationships, swarm). Zero runtime deps, MIT.
+- **[@designteam/adapter-utils](./packages/adapter-utils)** — public `TaskAdapter` contract + shared helpers (`buildAgentPrompt`, `runSubprocess`, `truncate`, mutable registry).
+- **Adapters** — four reference implementations ship in the repo:
+  - `@designteam/adapter-local-script` — shell-out per task, no LLM (great for evals)
+  - `@designteam/adapter-claude-cli` — wraps `claude` on PATH (the default)
+  - `@designteam/adapter-anthropic-api` — hits `api.anthropic.com` directly + reports token cost (autonomous mode)
+  - `@designteam/adapter-efecto` — creates Efecto design sessions per task (agency-shaped)
 - **Supabase** — auth + RLS-protected tables for cloud sync
 - **Next.js 16** + **React 19** — the web app at designteam.app
-- **Claude Haiku** — auto-memory extraction
+- **Claude Haiku** — auto-memory extraction + Haiku-planned task DAGs
 - **[@pixabots/core](https://www.npmjs.com/package/@pixabots/core)** — pixel-art avatars
+
+463 vitest cases + 8 sandbox evals across the monorepo.
 
 ## Documentation
 
