@@ -3,6 +3,13 @@
   "version": "0.1.0",
   "description": "Design Team adapter that runs tasks against Efecto's design session API. Creates a session, returns the design URL as the task artifact. The agency-shaped adapter — binds Design Team's personality/memory engine to real design work.",
   "license": "MIT",
+  "homepage": "https://designteam.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pablostanley/designteam-app.git",
+    "directory": "packages/adapter-efecto"
+  },
+  "bugs": "https://github.com/pablostanley/designteam-app/issues",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

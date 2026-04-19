@@ -3,6 +3,13 @@
   "version": "0.1.0",
   "description": "Design Team adapter that dispatches tasks directly to the Anthropic Messages API. The autonomous-mode adapter — no Claude Code, no human required. Reports token cost for budget tracking.",
   "license": "MIT",
+  "homepage": "https://designteam.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pablostanley/designteam-app.git",
+    "directory": "packages/adapter-anthropic-api"
+  },
+  "bugs": "https://github.com/pablostanley/designteam-app/issues",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

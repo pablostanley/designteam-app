@@ -3,6 +3,13 @@
   "version": "0.1.0",
   "description": "Design Team adapter that dispatches each task to the local `claude` CLI. Builds a prompt from agent personality + team memory + user profile + task brief, captures stdout as the deliverable.",
   "license": "MIT",
+  "homepage": "https://designteam.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pablostanley/designteam-app.git",
+    "directory": "packages/adapter-claude-cli"
+  },
+  "bugs": "https://github.com/pablostanley/designteam-app/issues",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

@@ -3,6 +3,13 @@
   "version": "0.1.0",
   "description": "Design Team adapter that dispatches tasks to the local OpenAI codex CLI. Mirror of adapter-claude-cli built on the shared `runSubprocess` helper — proof that the adapter-utils extraction scales to any CLI-wrapping runtime.",
   "license": "MIT",
+  "homepage": "https://designteam.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pablostanley/designteam-app.git",
+    "directory": "packages/adapter-codex-local"
+  },
+  "bugs": "https://github.com/pablostanley/designteam-app/issues",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

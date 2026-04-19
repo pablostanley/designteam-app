@@ -3,6 +3,13 @@
   "version": "0.1.0",
   "description": "Design Team adapter that executes each task by running a configured local shell script. Useful for testing the adapter contract end-to-end without an LLM dependency, and for workflows where a task boils down to 'run this command'.",
   "license": "MIT",
+  "homepage": "https://designteam.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pablostanley/designteam-app.git",
+    "directory": "packages/adapter-local-script"
+  },
+  "bugs": "https://github.com/pablostanley/designteam-app/issues",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
