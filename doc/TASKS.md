@@ -26,7 +26,7 @@
 - [todo] **T-812** `@designteam/adapter-codex-local` — wraps the local `codex` CLI the same way adapter-claude-cli wraps `claude`. With `runSubprocess` hoisted into adapter-utils (PR #44) this is ~30 LOC of spawn config. Community-ownable.
 - [todo] **T-820** `@designteam/adapter-cursor-local` — spawns cursor-agent for a task. Community-ownable.
 - [todo] **T-821** `@designteam/adapter-gemini-local` — Gemini CLI wrapper. Community-ownable.
-- [todo] **T-830** First publish dry-run — push a `v0.13.0-rc` tag after `NPM_TOKEN` is set on the repo. Verify `scripts/publish-if-changed.sh` rewrites `workspace:*` → real versions across all six packages + CLI.
+- [todo] **T-830** First publish — push a `v0.13.0` tag after `NPM_TOKEN` is set on the repo. The local `pnpm pack` dry-run (documented in `doc/PUBLISHING.md` "Dry-run verification") already confirmed every tarball rewrites `workspace:*` → real versions across all six packages + CLI with clean file lists and expected sizes (verified 2026-04-19). Only remaining step is the token + tag.
 
 ### v0.14 — Efecto Schema Reconciliation
 
