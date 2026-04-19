@@ -248,9 +248,9 @@ Adopted from `paperclipai/paperclip` (MIT, Apr 2026). Their model is "open-sourc
 - [x] **`packages/adapter-utils/` shared interface** — shipped in PR #27. Types (`TaskAdapter`, `TaskContext`, `TaskResult`, `PlanTask`, `CostReport`) + mutable registry (`registerAdapter` / `resolveAdapter` / `listAdapters` / `unregisterAdapter` / `clearAdapters`) + 7 vitest cases. Peer-depends on `@designteam/core`.
 - [ ] **`packages/adapters/` implementations** — one package per runtime: `@designteam/adapter-claude-local`, `@designteam/adapter-codex-local`, `@designteam/adapter-cursor-local`, `@designteam/adapter-gemini-local`, `@designteam/adapter-efecto`. Each implements `TaskAdapter`.
   - [x] **Reference adapter: `@designteam/adapter-local-script`** — shipped in PR #28. Shells out per task with `DT_*` env vars, maps exit code → outcome, honors `ctx.signal.aborted` + `timeoutMs`. 7 vitest cases cover exit codes, env-var surface, cancellation, construction guards. Proves the contract without an LLM dependency.
-  - [ ] `@designteam/adapter-claude-local` — Claude Code consumer. Next.
-  - [ ] `@designteam/adapter-efecto` — executes against Efecto's design MCP.
-  - [ ] Remaining runtimes (cursor, codex, gemini, anthropic-api) — community-ownable once claude-local lands.
+  - [x] **`@designteam/adapter-claude-cli`** — shipped in PR #36. Wraps the local `claude` CLI. `buildPrompt(ctx)` stitches agent identity + personality + mood + memory + team memory + user profile + task brief into one `claude -p` invocation. Configurable `claudePath`, `extraArgs`, `timeoutMs`. 7 vitest cases cover prompt assembly + exit-code mapping + signal handling. First LLM-backed adapter and proof that the contract scales beyond shell scripts.
+  - [ ] `@designteam/adapter-efecto` — executes against Efecto's design MCP. Agency-shaped adapter.
+  - [ ] Remaining runtimes (cursor, codex, gemini, anthropic-api) — community-ownable now that two reference adapters exist.
 
 ### Mapping: control-plane items → Efecto 7-phase roadmap
 
