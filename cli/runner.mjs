@@ -78,7 +78,7 @@ export async function runOneTask({ planId, taskId, runId, command, adapter, adap
     resolvedAdapter = resolveAdapter(adapterId)
     if (!resolvedAdapter) {
       throw new Error(
-        `Unknown adapter "${adapterId}". Built-in: @designteam/adapter-claude-cli. ` +
+        `Unknown adapter "${adapterId}". Run \`designteam adapters\` to see which ids are registered. ` +
         'Third-party adapters register themselves via `registerAdapter()`.',
       )
     }
