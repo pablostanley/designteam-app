@@ -122,3 +122,4 @@ Local state lives in `.designteam/` at the root of your project — `team.json`,
 - **Core package:** [@designteam/core](https://www.npmjs.com/package/@designteam/core)
 - **CLI package:** [designteam](https://www.npmjs.com/package/designteam)
 - **Repo:** [github.com/pablostanley/designteam-app](https://github.com/pablostanley/designteam-app)
+- **Changelog:** [CHANGELOG.md](./CHANGELOG.md)
