@@ -43,8 +43,8 @@ importers:
         specifier: ^2.1.10
         version: 2.1.10(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@pixabots/core':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.3.0
+        version: 0.3.0
       '@supabase/ssr':
         specifier: ^0.9.0
         version: 0.9.0(@supabase/supabase-js@2.100.1)
@@ -226,8 +226,8 @@ importers:
   packages/core:
     dependencies:
       '@pixabots/core':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.3.0
+        version: 0.3.0
     devDependencies:
       tsup:
         specifier: ^8.0.0
@@ -990,8 +990,8 @@ packages:
       react: '>= 16.8'
       react-dom: '>= 16.8'
 
-  '@pixabots/core@0.1.0':
-    resolution: {integrity: sha512-KqylNrgaIRyxzPuN5IFK85EPHpLL3Ep4kwARXKXVD9DP5ylD/445qXBDiwEpAGjSd4DZH4nmSGMtorGc/568YA==}
+  '@pixabots/core@0.3.0':
+    resolution: {integrity: sha512-PRvhNzG9EDBm9M8WKSQMF0bzSBUzsQAi+4huUs/cORzpL50yTKYp7rauFgMS8WkY3SXSdMR8OdwRYssccNBc/Q==}
 
   '@rolldown/binding-android-arm64@1.0.0-rc.12':
     resolution: {integrity: sha512-pv1y2Fv0JybcykuiiD3qBOBdz6RteYojRFY1d+b95WVuzx211CRh+ytI/+9iVyWQ6koTh5dawe4S/yRfOFjgaA==}
@@ -4646,7 +4646,7 @@ snapshots:
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
 
-  '@pixabots/core@0.1.0': {}
+  '@pixabots/core@0.3.0': {}
 
   '@rolldown/binding-android-arm64@1.0.0-rc.12':
     optional: true
