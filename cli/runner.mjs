@@ -15,6 +15,7 @@
  */
 
 import { createDefaultLivingState, createEmptyTeamMemory, createEmptyUserProfile } from '@designteam/core'
+import { resolveAdapter } from '@designteam/adapter-utils'
 import { createLocalScriptAdapter } from '@designteam/adapter-local-script'
 import {
   loadPlan,
@@ -31,6 +32,7 @@ import {
 } from './state.mjs'
 import { emitActivity } from './activity.mjs'
 import { isOverBudget, appendSpend, getSpend, loadBudget } from './budget.mjs'
+import { registerBuiltinAdapters } from './builtin-adapters.mjs'
 
 /**
  * Run one task end-to-end: checkout → adapter.executeTask → status transition.
@@ -41,12 +43,15 @@ import { isOverBudget, appendSpend, getSpend, loadBudget } from './budget.mjs'
  * @param {string} [opts.runId]     override the auto-generated runId
  * @param {string} [opts.command]   shorthand: build an ephemeral
  *                                  @designteam/adapter-local-script on the fly
- * @param {Object} [opts.adapter]   bring-your-own pre-registered adapter
+ * @param {string} [opts.adapterId] resolve a registered adapter by id (e.g.
+ *                                  '@designteam/adapter-claude-cli')
+ * @param {Object} [opts.adapter]   bring-your-own pre-constructed adapter
+ *                                  (takes precedence over adapterId + command)
  * @param {number} [opts.timeoutMs] passed through to the adapter
  * @param {AbortSignal} [opts.signal]
  * @returns {Promise<{ task, result, transition }>}
  */
-export async function runOneTask({ planId, taskId, runId, command, adapter, timeoutMs, signal }) {
+export async function runOneTask({ planId, taskId, runId, command, adapter, adapterId, timeoutMs, signal }) {
   const plan = loadPlan(planId)
   if (!plan) throw new Error(`Plan "${planId}" not found`)
 
@@ -62,13 +67,27 @@ export async function runOneTask({ planId, taskId, runId, command, adapter, time
     throw new Error(`No agent with role "${task.agentRole}" on this team`)
   }
 
-  // Resolve the adapter. Today two paths:
-  //   - explicit opts.adapter (used in tests or when the caller wants BYO)
-  //   - opts.command shortcut → ephemeral local-script adapter
+  // Resolve the adapter. Priority order:
+  //   1. explicit opts.adapter — tests / BYO
+  //   2. --adapter=<id> — lookup in the registry (built-ins auto-registered)
+  //   3. --command=<cmd> — ephemeral local-script adapter
   // Follow-up PR adds .designteam/adapters.json config-file resolution.
-  const resolvedAdapter = adapter ?? (command ? createLocalScriptAdapter({ command, timeoutMs }) : null)
+  registerBuiltinAdapters()
+  let resolvedAdapter = adapter
+  if (!resolvedAdapter && adapterId) {
+    resolvedAdapter = resolveAdapter(adapterId)
+    if (!resolvedAdapter) {
+      throw new Error(
+        `Unknown adapter "${adapterId}". Built-in: @designteam/adapter-claude-cli. ` +
+        'Third-party adapters register themselves via `registerAdapter()`.',
+      )
+    }
+  }
+  if (!resolvedAdapter && command) {
+    resolvedAdapter = createLocalScriptAdapter({ command, timeoutMs })
+  }
   if (!resolvedAdapter) {
-    throw new Error('No adapter resolved. Pass --command=<cmd> for a local-script adapter, or register one programmatically.')
+    throw new Error('No adapter resolved. Pass --adapter=<id> or --command=<cmd>.')
   }
 
   const effectiveRunId = runId || `local-${process.pid}-${Date.now().toString(36)}`
