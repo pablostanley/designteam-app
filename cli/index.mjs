@@ -96,6 +96,14 @@ Planning (v0.11):
                                            terminal). --id-only prints
                                            just the task ID, so it's
                                            shell-scriptable.
+  designteam run <plan-id> <task-id> --command="<shell>"
+                                           Execute one task end-to-end:
+                                           atomic checkout → adapter →
+                                           status transition → activity
+                                           log. --command creates an
+                                           ephemeral local-script adapter.
+                                           Optional: --run=<id>
+                                           --timeout-ms=<n>.
 
 Create & Install:
   designteam create "project description"  Create a team with AI
@@ -376,6 +384,18 @@ Presets:
       process.exit(1)
     }
     await cmdNext(planId, args.slice(2))
+    return
+  }
+
+  if (command === 'run') {
+    const planId = args[1]
+    const taskId = args[2]
+    if (!planId || !taskId) {
+      console.error('Usage: npx designteam run <plan-id> <task-id> --command="<shell command>"')
+      console.error('       Optional: --run=<id> --timeout-ms=<n>')
+      process.exit(1)
+    }
+    await cmdRun(planId, taskId, args.slice(3))
     return
   }
 
@@ -2272,6 +2292,51 @@ async function cmdRelease(planId, taskId, flags) {
 
   console.log()
   console.log(`  Released ${task.id} [${task.agentRole}] ${task.instruction}`)
+  console.log()
+}
+
+async function cmdRun(planId, taskId, flags) {
+  const { runOneTask } = await import('./runner.mjs')
+
+  const getFlag = (prefix) => {
+    const match = flags.find((f) => f.startsWith(prefix))
+    return match ? match.slice(prefix.length) : null
+  }
+
+  const command = getFlag('--command=')
+  const runId = getFlag('--run=') ?? undefined
+  const timeoutMsRaw = getFlag('--timeout-ms=')
+  const timeoutMs = timeoutMsRaw ? parseInt(timeoutMsRaw, 10) : undefined
+
+  if (!command) {
+    console.error('Usage: npx designteam run <plan-id> <task-id> --command="<shell command>"')
+    console.error('       More adapters land via config in a follow-up PR.')
+    process.exit(1)
+  }
+
+  let outcome
+  try {
+    outcome = await runOneTask({ planId, taskId, runId, command, timeoutMs })
+  } catch (err) {
+    console.error(`  ${err instanceof Error ? err.message : String(err)}`)
+    process.exit(1)
+  }
+
+  const { task, result } = outcome
+  console.log()
+  console.log(`  ${task.id} [${task.agentRole}] → ${result.outcome}`)
+  if (result.outcome === 'done' && result.summary) {
+    console.log(`      summary: ${result.summary.split('\n')[0].slice(0, 200)}`)
+  }
+  if (result.outcome === 'error' && result.message) {
+    console.log(`      error: ${result.message.split('\n')[0].slice(0, 200)}`)
+  }
+  if (outcome.transition?.unblocked?.length) {
+    console.log(`      unblocked: ${outcome.transition.unblocked.map((t) => t.id).join(', ')}`)
+  }
+  if (outcome.transition?.plan?.status === 'completed') {
+    console.log(`      plan complete: "${outcome.transition.plan.description}"`)
+  }
   console.log()
 }
 
