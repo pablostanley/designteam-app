@@ -17,6 +17,7 @@ import {
   TASK_STATUSES, TASK_STATUS_GLYPH,
 } from './plans.mjs'
 import { emitActivity, readActivity } from './activity.mjs'
+import { loadBudget, setLimit, resetPeriod, getSpend } from './budget.mjs'
 import {
   AGENT_ROLE_DEFINITIONS, AGENT_NAMES, AGENT_ROLE_LIST,
   TEAM_PRESETS, LEVEL_THRESHOLDS,
@@ -104,6 +105,11 @@ Planning (v0.11):
                                            ephemeral local-script adapter.
                                            Optional: --run=<id>
                                            --timeout-ms=<n>.
+  designteam budget [show|set|reset] [--usd=N]
+                                           Manage the monthly spend cap.
+                                           set --usd=5  → cap at \$5.
+                                           show (default)  → spent vs cap.
+                                           reset  → wipe period, start new.
 
 Create & Install:
   designteam create "project description"  Create a team with AI
@@ -396,6 +402,11 @@ Presets:
       process.exit(1)
     }
     await cmdRun(planId, taskId, args.slice(3))
+    return
+  }
+
+  if (command === 'budget') {
+    await cmdBudget(args.slice(1))
     return
   }
 
@@ -2293,6 +2304,64 @@ async function cmdRelease(planId, taskId, flags) {
   console.log()
   console.log(`  Released ${task.id} [${task.agentRole}] ${task.instruction}`)
   console.log()
+}
+
+async function cmdBudget(args) {
+  const sub = args[0] || 'show'
+
+  if (sub === 'show') {
+    const { usdCents, periodStart } = loadBudget()
+    const spent = getSpend()
+    console.log()
+    console.log('  Budget')
+    console.log()
+    if (usdCents === null || usdCents === undefined) {
+      console.log('  No cap set. `designteam budget set --usd=5` to enable hard-stop at $5.')
+    } else {
+      const spentUsd = (spent / 100).toFixed(2)
+      const capUsd = (usdCents / 100).toFixed(2)
+      const pct = usdCents > 0 ? Math.round((spent / usdCents) * 100) : 0
+      console.log(`  Cap:    $${capUsd}`)
+      console.log(`  Spent:  $${spentUsd}  (${pct}%)`)
+      if (spent >= usdCents) {
+        console.log('  Status: OVER — designteam run will refuse until raised or reset.')
+      } else {
+        console.log(`  Status: OK — $${((usdCents - spent) / 100).toFixed(2)} remaining this period.`)
+      }
+    }
+    console.log(`  Period start: ${periodStart}`)
+    console.log()
+    return
+  }
+
+  if (sub === 'set') {
+    const usdFlag = args.find((a) => a.startsWith('--usd='))?.split('=')[1]
+    if (!usdFlag) {
+      console.error('Usage: designteam budget set --usd=<amount>')
+      process.exit(1)
+    }
+    const usd = parseFloat(usdFlag)
+    if (!Number.isFinite(usd) || usd < 0) {
+      console.error('--usd must be a non-negative number')
+      process.exit(1)
+    }
+    setLimit(Math.round(usd * 100))
+    console.log()
+    console.log(`  Budget cap set to $${usd.toFixed(2)}/period.`)
+    console.log()
+    return
+  }
+
+  if (sub === 'reset') {
+    resetPeriod()
+    console.log()
+    console.log('  Budget period reset. Ledger cleared.')
+    console.log()
+    return
+  }
+
+  console.error('Usage: designteam budget [show|set --usd=<n>|reset]')
+  process.exit(1)
 }
 
 async function cmdRun(planId, taskId, flags) {
