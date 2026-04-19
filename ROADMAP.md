@@ -226,7 +226,7 @@ Adopted from `paperclipai/paperclip` (MIT, Apr 2026). Their model is "open-sourc
 ### Cheap + visible (ship alongside existing work)
 
 - [x] **AGENTS.md at repo root** — contributor orientation (PR #19). Read-order, repo map, engineering rules, invariants, PR checklist.
-- [ ] **`doc/` hierarchy** — split the five root-level strategy docs (`VISION.md`, `DESIGN-TEAM-VISION.md`, `ROADMAP.md`, `TASKS.md`, `CLAUDE.md`) into paperclip's cleaner layout: `doc/GOAL.md`, `doc/PRODUCT.md`, `doc/SPEC.md`, `doc/SPEC-implementation.md`, `doc/DATABASE.md`, `doc/DEVELOPING.md`, `doc/execution-semantics.md`.
+- [x] **`doc/` hierarchy** — shipped in PR #35. Moved strategy docs into `doc/` with paperclip-style names (all via `git mv` so history is preserved): `VISION.md` → `doc/PRODUCT.md`, `DESIGN-TEAM-VISION.md` → `doc/GOAL.md`, `TASKS.md` → `doc/TASKS.md`. Kept at root: `ROADMAP.md` (most-referenced), `AGENTS.md` (contributor entry per paperclip), `adapter-plugin.md` (public spec), `CLAUDE.md` (Claude Code tooling convention auto-loads root), `README.md` (npm/GitHub convention). Further splits (`doc/SPEC.md`, `doc/DEVELOPING.md`, etc.) as they're actually written — not writing them blank.
 - [x] **`evals/` directory** — shipped in PR #25. Sandbox harness + two end-to-end scenarios: `plan-lifecycle` (checkout contention + auto-unblock + plan completion + activity log ordering) and `memory-routing` (categories persist + activity log captures each add). `pnpm eval` runner. LLM-dependent scenarios deferred until CI has `ANTHROPIC_API_KEY`.
 
 ### Execution infrastructure (unblocks the 7-phase Efecto roadmap)

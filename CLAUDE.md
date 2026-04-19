@@ -16,8 +16,11 @@
 ## Key Files — Check Before Working
 
 - **`ROADMAP.md`** — What's done, what's next, what's planned. **Check this first.**
-- **`DESIGN-TEAM-VISION.md`** — The WHY. Product vision, architecture, Paperclip patterns.
-- **`TASKS.md`** — Detailed task board with per-task status.
+- **`AGENTS.md`** — Contributor guide (read-order, engineering rules, invariants). Always updated when the repo shape changes.
+- **`doc/GOAL.md`** — The WHY. Long-horizon thesis (moved from `DESIGN-TEAM-VISION.md` in v0.13).
+- **`doc/PRODUCT.md`** — One-page product north star (moved from `VISION.md` in v0.13).
+- **`doc/TASKS.md`** — Detailed task board with per-task status (moved from root in v0.13).
+- **`adapter-plugin.md`** — Public interface contract for third-party adapters.
 - **`packages/core/`** — `@designteam/core` npm package (engine, single source of truth for agent logic)
 - **`cli/index.mjs`** — CLI commands (roster, status, check, recruit, fire, report, refresh)
 - **`cli/state.mjs`** — Local `.designteam/` persistence
@@ -78,8 +81,12 @@ designteam/
 │   ├── components/        # UI (team builder, personality editor, pixabot editor)
 │   └── lib/agent-builder/ # Re-export shims → @designteam/core
 ├── ROADMAP.md             # What's done, what's next
-├── DESIGN-TEAM-VISION.md  # Product vision
-├── TASKS.md               # Detailed task board
+├── AGENTS.md              # Contributor guide
+├── adapter-plugin.md      # Public adapter contract
+├── doc/
+│   ├── GOAL.md            # Long-horizon thesis (was DESIGN-TEAM-VISION.md)
+│   ├── PRODUCT.md         # Product north star (was VISION.md)
+│   └── TASKS.md           # Detailed task board (moved from root)
 └── CLAUDE.md              # This file
 ```
 
@@ -153,8 +160,9 @@ Flag instantly and fix:
 ## Sources of Truth
 
 - **`ROADMAP.md`** — What's done, what's next, what's planned. **Always check and update after work.**
-- **`DESIGN-TEAM-VISION.md`** — Product vision, architecture, Paperclip patterns
-- **`TASKS.md`** — Detailed task board with per-task status
+- **`doc/GOAL.md`** — Long-horizon thesis (Paperclip-style)
+- **`doc/PRODUCT.md`** — Product north star
+- **`doc/TASKS.md`** — Detailed task board with per-task status
 - **`packages/core/`** — `@designteam/core` engine (types, personality, emotions, memory, lifecycle)
 - **`cli/`** — CLI commands + local state persistence
 - **`skills/`** — 17 installable skills (skills.sh compatible)

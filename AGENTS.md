@@ -11,10 +11,10 @@ Design Team is an AI design crew that ships. Not a prompt pack — a control pla
 Before making changes, read in this order:
 
 1. `ROADMAP.md` — the source of truth for what's shipped and what's next
-2. `VISION.md` — one-page brand + product north star
-3. `DESIGN-TEAM-VISION.md` — long-horizon thesis
+2. `doc/PRODUCT.md` — one-page brand + product north star
+3. `doc/GOAL.md` — long-horizon thesis
 4. `packages/core/README.md` (if working in the engine) — what lives where
-5. `TASKS.md` — open work items not yet promoted to a PR
+5. `doc/TASKS.md` — open work items not yet promoted to a PR
 
 When in doubt, **trust `ROADMAP.md`**. It is updated in the same PR as every feature ship.
 
