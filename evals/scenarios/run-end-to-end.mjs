@@ -100,6 +100,19 @@ export async function run() {
     assertEqual(runEvent.meta.outcome, 'error', 'run event meta should mark outcome=error')
     assert(runEvent.meta.error, 'run event should include the error message')
   })
+
+  // --adapter=<id> resolution path — unknown id should produce a clear error
+  // without claiming the task.
+  await withSandbox(`${slug}-unknown-adapter`, async ({ cliExpectFail, readJson, sandboxPath }) => {
+    seed(sandboxPath)
+    const stderr = cliExpectFail('run', 'plan-run', 't1', '--adapter=does-not-exist')
+    assert(stderr.includes('Unknown adapter'), 'unknown adapter should produce a clear error')
+    assert(stderr.includes('does-not-exist'), 'error message should echo the id the caller asked for')
+
+    const stored = readJson('projects/plan-run.json')
+    assertEqual(stored.tasks[0].status, 'todo', 'unknown-adapter path must not mutate task state')
+    assertEqual(stored.tasks[0].checkoutId ?? null, null, 'unknown-adapter path must not claim the checkout')
+  })
 }
 
 run.slug = slug
