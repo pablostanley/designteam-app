@@ -1,19 +1,25 @@
 # Adapter Plugin Spec
 
-Status: v0.13 draft — the contract third parties implement to teach Design Team how to execute a task against a specific runtime.
+Status: v0.13 shipped — the contract third parties implement to teach Design Team how to execute a task against a specific runtime.
 
 ## Why adapters exist
 
 Design Team has an engine (`@designteam/core`), a planner (`designteam plan`), a task lifecycle (`todo → in_progress → in_review → done`), and an activity log. What it **doesn't** own is how to actually make an agent produce work — that depends on the runtime.
 
-An **adapter** is a thin package that teaches Design Team to invoke one runtime:
+An **adapter** is a thin package that teaches Design Team to invoke one runtime. Four reference implementations ship in the monorepo:
 
-- `@designteam/adapter-claude-local` — Claude Code running locally reads a plan file, executes each task via its own Task tool, calls `designteam progress`.
-- `@designteam/adapter-codex-local` — same shape for Codex.
-- `@designteam/adapter-cursor-local` — same for Cursor.
-- `@designteam/adapter-gemini-local` — same for Gemini CLI.
-- `@designteam/adapter-efecto` — executes tasks against the Efecto design MCP, producing finished artboards. This is the agency-shaped adapter — what the 7-phase Efecto roadmap builds on.
-- `@designteam/adapter-anthropic-api` — calls Anthropic's API directly. The autonomous-mode adapter.
+- `@designteam/adapter-local-script` — shells out per task with `DT_*` env vars. No LLM. The eval-harness default and the simplest possible `TaskAdapter`.
+- `@designteam/adapter-claude-cli` — wraps the local `claude` CLI. Stitches agent identity + personality + mood + memory + team memory + user profile into one `claude -p` invocation.
+- `@designteam/adapter-anthropic-api` — hits `api.anthropic.com/v1/messages` directly. The autonomous-mode adapter. Reports token cost via `reportCost()` so budget hard-stop can enforce.
+- `@designteam/adapter-efecto` — creates an Efecto design session per task and returns the `designUrl` as the artifact. The agency-shaped adapter — what the 7-phase Efecto roadmap builds on. V2 will layer on the LLM+MCP tool-use loop that drives Efecto's 64-tool surface autonomously.
+
+Community-ownable follow-ups:
+
+- `@designteam/adapter-codex-local` — wraps the local `codex` CLI the same way adapter-claude-cli wraps `claude`.
+- `@designteam/adapter-cursor-local` — spawns cursor-agent for a task.
+- `@designteam/adapter-gemini-local` — Gemini CLI wrapper.
+
+All three become ~30 LOC of spawn-config once `runSubprocess` from adapter-utils is imported.
 
 Anyone can publish an adapter. Design Team doesn't need to know about it at build time.
 
@@ -90,13 +96,23 @@ The control plane maps these to task-status transitions:
 
 ## Registration
 
-Design Team discovers adapters the way any Node CLI discovers plugins: `node_modules` + explicit listing.
+Design Team discovers adapters through a mutable, paperclip-style registry. Adapters add themselves at module load; the host resolves by id at dispatch time.
 
-- **CLI config**: a `.designteam/adapters.json` file lists the adapter package names and per-adapter options.
-- **Programmatic**: `import { registerAdapter } from '@designteam/adapter-utils'` + call it from your adapter's entrypoint.
-- **Well-known**: if the package name starts with `@designteam/adapter-` and is present in `node_modules`, we auto-resolve it.
+- **Built-ins**: `cli/builtin-adapters.mjs` in this repo registers the four reference adapters on CLI startup. `adapter-claude-cli` registers unconditionally; `adapter-anthropic-api` registers when `ANTHROPIC_API_KEY` is set; `adapter-efecto` registers when `EFECTO_API_KEY` is set; `adapter-local-script` is built ephemerally per-run when the caller passes `--command=<shell>`.
+- **Programmatic**: any adapter can call `registerAdapter(myAdapter)` from its own entrypoint. The host doesn't need to know about it at build time.
+- **Introspection**: `designteam adapters` prints every adapter currently resolvable by id. `listAdapters()` is the programmatic equivalent.
 
-Third parties don't need a PR on this repo to register — publish their package, list it in `.designteam/adapters.json`, done.
+Third parties don't need a PR on this repo to register — publish the package, call `registerAdapter()` from your entrypoint, done.
+
+## Shared helpers (adapter-utils)
+
+Every adapter of the CLI-wrapping / LLM-backed shape leans on three primitives exported from `@designteam/adapter-utils` — using them keeps Design Team context presentation consistent across adapters:
+
+- **`buildAgentPrompt(ctx)`** — stitches agent identity + personality + mood + memory + team memory + user profile + task brief into one prompt string.
+- **`truncate(str, max)`** — clips long LLM output for `summary` fields, keeping the `…` convention.
+- **`runSubprocess({ command, args, signal, timeoutMs, shell?, cwd?, env? })`** — spawns a child process and wires `ctx.signal` + a wall-clock timeout into a SIGTERM→SIGKILL escalation that kills the whole process group (not just the shell wrapper). Returns `{ exitCode, stdout, stderr, timedOut }`.
+
+Community adapters for codex / cursor / gemini are built by importing these three + pointing at a different CLI binary.
 
 ## Invariants
 
@@ -105,17 +121,33 @@ Third parties don't need a PR on this repo to register — publish their package
 3. **Adapters handle `ctx.signal.aborted`.** If the host cancels the run, the adapter must stop as quickly as it can and return `{ outcome: 'cancelled', ... }`.
 4. **Adapters don't write to `@designteam/core`.** Core is pure and test-only. Adapters that need shared utilities (SSE parsing, prompt assembly, etc.) use `@designteam/adapter-utils`.
 
+## Cost accounting
+
+```ts
+interface CostReport {
+  model: string            // e.g. 'anthropic:claude-sonnet-4-6'
+  inputTokens: number
+  outputTokens: number
+  usdCents?: number        // null if the adapter can't compute — host estimates
+}
+```
+
+Adapters that know their cost return it from `reportCost()`. The host appends to `.designteam/budget.jsonl` after each successful run; `designteam budget show` reads the ledger against the configured cap, and `designteam run`'s pre-flight refuses (`over`) or nags on stderr + emits a `budget.warning` activity (`warn`, ≥80% of cap) based on the current total.
+
+`adapter-anthropic-api` ships with default pricing for Sonnet 4.6 / Opus 4.7 / Haiku 4.5 at April 2026 rates; override via the `pricing` option for contract rates or newer models.
+
 ## What's not yet specified
 
-- **Cost accounting format** — `CostReport` will grow a concrete shape when we ship budget hard-stop (v0.13 safety item).
-- **Heartbeat cadence** — picked per-adapter based on typical run length. Reasonable default is every 15 s.
-- **Artifacts storage** — adapters today pass artifact metadata back inline. A shared object-store will follow once we have >1 adapter that actually produces artifacts (Efecto adapter will be first).
+- **Heartbeat cadence** — picked per-adapter based on typical run length. Reasonable default is every 15 s. The `recover` command today scans `updatedAt` rather than a dedicated heartbeat timestamp; a first-class heartbeat field will land when a long-running adapter needs it.
+- **Artifacts storage** — adapters today pass artifact metadata back inline (URI or inline content). A shared object-store will follow once adapter-efecto V2 starts producing large artifacts.
 
 ## Status
 
-- ✅ `packages/adapter-utils/` — types + registry helpers (this PR).
-- ⏳ `@designteam/adapter-claude-local` — next.
-- ⏳ `@designteam/adapter-efecto` — after that.
-- ⏳ Remaining runtime adapters (cursor, codex, gemini) — community-ownable once one reference adapter exists.
+- ✅ `packages/adapter-utils/` — types + registry + shared helpers (PR #27, PR #44).
+- ✅ `@designteam/adapter-local-script` — reference adapter (PR #28).
+- ✅ `@designteam/adapter-claude-cli` — first LLM-backed adapter (PR #36).
+- ✅ `@designteam/adapter-anthropic-api` — autonomous-mode adapter (PR #40).
+- ✅ `@designteam/adapter-efecto` V1 — session creator (PR #43). V2 with the LLM+MCP tool-use loop is next.
+- ⏳ Community runtime adapters (cursor, codex, gemini) — ownable now that four reference adapters exist.
 
 Contract changes are breaking for every adapter — propose them as a PR on this file + `packages/adapter-utils/` together.
