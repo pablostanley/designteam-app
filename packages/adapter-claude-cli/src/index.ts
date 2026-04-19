@@ -18,9 +18,9 @@
  * See `adapter-plugin.md` at the monorepo root for the full spec.
  */
 
-import { spawn } from 'node:child_process'
 import {
   buildAgentPrompt,
+  runSubprocess,
   truncate,
   type TaskAdapter,
   type TaskContext,
@@ -70,8 +70,8 @@ export function createClaudeCliAdapter(opts: ClaudeCliAdapterOptions = {}): Task
       const prompt = buildAgentPrompt(ctx)
 
       try {
-        const { exitCode, stdout, stderr, timedOut } = await runClaude({
-          claudePath,
+        const { exitCode, stdout, stderr, timedOut } = await runSubprocess({
+          command: claudePath,
           args: ['-p', prompt, ...extraArgs],
           signal: ctx.signal,
           timeoutMs,
@@ -111,81 +111,4 @@ export function createClaudeCliAdapter(opts: ClaudeCliAdapterOptions = {}): Task
       }
     },
   }
-}
-
-// ---------------------------------------------------------------------------
-// Claude subprocess runner
-// ---------------------------------------------------------------------------
-
-interface RunArgs {
-  claudePath: string
-  args: string[]
-  signal: AbortSignal
-  timeoutMs: number
-}
-
-interface RunResult {
-  exitCode: number | null
-  stdout: string
-  stderr: string
-  timedOut: boolean
-}
-
-function runClaude(args: RunArgs): Promise<RunResult> {
-  return new Promise((resolve) => {
-    const child = spawn(args.claudePath, args.args, {
-      stdio: ['ignore', 'pipe', 'pipe'],
-      detached: process.platform !== 'win32',
-    })
-
-    let stdout = ''
-    let stderr = ''
-    let timedOut = false
-    let settled = false
-    let sigkillTimer: NodeJS.Timeout | null = null
-
-    const killTree = (signal: NodeJS.Signals) => {
-      if (child.killed || child.exitCode !== null) return
-      try {
-        if (process.platform !== 'win32' && typeof child.pid === 'number') {
-          process.kill(-child.pid, signal)
-        } else {
-          child.kill(signal)
-        }
-      } catch {
-        // already gone
-      }
-    }
-
-    const requestStop = () => {
-      killTree('SIGTERM')
-      sigkillTimer = setTimeout(() => killTree('SIGKILL'), 500)
-    }
-
-    const timeout = setTimeout(() => {
-      timedOut = true
-      requestStop()
-    }, args.timeoutMs)
-
-    const onAbort = () => requestStop()
-    args.signal.addEventListener('abort', onAbort, { once: true })
-
-    child.stdout.on('data', (chunk) => { stdout += chunk.toString() })
-    child.stderr.on('data', (chunk) => { stderr += chunk.toString() })
-
-    const finish = (exitCode: number | null) => {
-      if (settled) return
-      settled = true
-      clearTimeout(timeout)
-      if (sigkillTimer) clearTimeout(sigkillTimer)
-      args.signal.removeEventListener('abort', onAbort)
-      resolve({ exitCode, stdout, stderr, timedOut })
-    }
-
-    child.on('error', (err) => {
-      stderr += `\n${err.message}`
-      finish(null)
-    })
-    child.on('close', (code) => finish(code))
-  })
 }
