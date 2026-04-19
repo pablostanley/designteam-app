@@ -124,6 +124,52 @@ describe('anthropic-api adapter', () => {
     expect(cost.outputTokens).toBe(0)
   })
 
+  it('omits usdCents when the response model is not in the pricing table', async () => {
+    // Silent fallback to DEFAULT_MODEL rates would defeat budget
+    // enforcement for any model not in DEFAULT_PRICING — cheap-rate
+    // billing on an expensive model (e.g. a new Opus variant) would
+    // let the cap trip only long after the real spend blew through.
+    const fetchImpl = async () =>
+      mockResponse(200, {
+        content: [{ type: 'text', text: 'done' }],
+        usage: { input_tokens: 1000, output_tokens: 500 },
+      })
+    const adapter = createAnthropicApiAdapter({
+      apiKey: 'test-key',
+      model: 'claude-opus-4-99-future-release',
+      fetchImpl: fetchImpl as typeof fetch,
+    })
+    const ctx = makeCtx()
+    await adapter.executeTask(ctx)
+
+    const cost = await adapter.reportCost!(ctx, { outcome: 'done', summary: '' })
+    expect(cost.model).toBe('anthropic:claude-opus-4-99-future-release')
+    expect(cost.inputTokens).toBe(1000)
+    expect(cost.outputTokens).toBe(500)
+    expect(cost.usdCents).toBeUndefined()
+  })
+
+  it('respects a custom pricing override for models not in DEFAULT_PRICING', async () => {
+    const fetchImpl = async () =>
+      mockResponse(200, {
+        content: [{ type: 'text', text: 'done' }],
+        usage: { input_tokens: 1_000_000, output_tokens: 500_000 },
+      })
+    const adapter = createAnthropicApiAdapter({
+      apiKey: 'test-key',
+      model: 'claude-custom-enterprise',
+      // Custom rate: $5 input / $25 output per Mtok
+      pricing: { 'claude-custom-enterprise': { inputCentsPerMTok: 500, outputCentsPerMTok: 2500 } },
+      fetchImpl: fetchImpl as typeof fetch,
+    })
+    const ctx = makeCtx()
+    await adapter.executeTask(ctx)
+
+    const cost = await adapter.reportCost!(ctx, { outcome: 'done', summary: '' })
+    // 1M * 500c / 1M = 500c, 500k * 2500c / 1M = 1250c, total 1750c.
+    expect(cost.usdCents).toBe(1750)
+  })
+
   it('honors ctx.signal.aborted mid-flight', async () => {
     const controller = new AbortController()
     // Fetch hangs until the caller aborts.

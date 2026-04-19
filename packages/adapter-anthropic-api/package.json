@@ -1,6 +1,6 @@
 {
   "name": "@designteam/adapter-anthropic-api",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Design Team adapter that dispatches tasks directly to the Anthropic Messages API. The autonomous-mode adapter — no Claude Code, no human required. Reports token cost for budget tracking.",
   "license": "MIT",
   "homepage": "https://designteam.app",
