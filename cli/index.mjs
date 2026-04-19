@@ -15,6 +15,7 @@ import {
   checkoutTask, releaseTask,
   TASK_STATUSES, TASK_STATUS_GLYPH,
 } from './plans.mjs'
+import { emitActivity, readActivity } from './activity.mjs'
 import {
   AGENT_ROLE_DEFINITIONS, AGENT_NAMES, AGENT_ROLE_LIST,
   TEAM_PRESETS, LEVEL_THRESHOLDS,
@@ -85,6 +86,9 @@ Planning (v0.11):
                                            Fails if held by a different run.
   designteam release <plan-id> <task-id> [--run=<id>] [--force]
                                            Release a claim you hold.
+  designteam activity [--tail=N]           Show the last N activity events
+                                           (default 25). Tails
+                                           .designteam/activity.jsonl.
 
 Create & Install:
   designteam create "project description"  Create a team with AI
@@ -348,6 +352,13 @@ Presets:
       process.exit(1)
     }
     await cmdRelease(planId, taskId, args.slice(3))
+    return
+  }
+
+  if (command === 'activity') {
+    const limitFlag = args.find((a) => a.startsWith('--tail='))?.split('=')[1]
+    const limit = limitFlag ? Math.max(1, parseInt(limitFlag, 10) || 50) : 25
+    await cmdActivity(limit)
     return
   }
 
@@ -1971,6 +1982,17 @@ Use 3-8 tasks. Assign the research/strategy tasks first, design tasks that depen
 
   savePlan(plan)
 
+  emitActivity({
+    action: 'plan.created',
+    teamId: team.id,
+    target: { planId: plan.id },
+    meta: {
+      description,
+      taskCount: plan.tasks.length,
+      roles: [...new Set(plan.tasks.map((t) => t.agentRole))],
+    },
+  })
+
   console.log()
   console.log(`  Plan saved: ${plan.id}`)
   console.log(`  ${plan.tasks.length} tasks across ${new Set(plan.tasks.map((t) => t.agentRole)).size} roles.`)
@@ -2066,6 +2088,18 @@ async function cmdProgress(planId, taskId, flags) {
 
   savePlan(result.plan)
 
+  emitActivity({
+    action: 'task.status_change',
+    teamId: loadTeam()?.id ?? null,
+    target: { planId, taskId: result.task.id },
+    meta: {
+      status: result.task.status,
+      agentRole: result.task.agentRole,
+      unblocked: result.unblocked.map((t) => t.id),
+      planCompleted: result.plan.status === 'completed' || undefined,
+    },
+  })
+
   console.log()
   console.log(`  ${result.task.id} → ${result.task.status}  (${result.task.agentRole})`)
   if (result.unblocked.length > 0) {
@@ -2103,6 +2137,13 @@ async function cmdCheckout(planId, taskId, flags) {
   }
   savePlan(plan)
 
+  emitActivity({
+    action: 'task.checkout',
+    teamId: loadTeam()?.id ?? null,
+    target: { planId, taskId: task.id },
+    meta: { runId, agentRole: task.agentRole, forced: force || undefined },
+  })
+
   console.log()
   console.log(`  Claimed ${task.id} [${task.agentRole}] ${task.instruction}`)
   console.log(`  run: ${runId}`)
@@ -2130,9 +2171,55 @@ async function cmdRelease(planId, taskId, flags) {
   }
   savePlan(plan)
 
+  emitActivity({
+    action: 'task.release',
+    teamId: loadTeam()?.id ?? null,
+    target: { planId, taskId: task.id },
+    meta: { runId, forced: force || undefined },
+  })
+
   console.log()
   console.log(`  Released ${task.id} [${task.agentRole}] ${task.instruction}`)
   console.log()
+}
+
+async function cmdActivity(limit) {
+  const events = readActivity(limit)
+  console.log()
+  if (events.length === 0) {
+    console.log('  No activity yet.')
+    console.log('  Run a command (checkout/progress/plan/...) and it will show up here.')
+    console.log()
+    return
+  }
+  console.log(`  Last ${events.length} event${events.length === 1 ? '' : 's'} (newest first):`)
+  console.log()
+  for (const ev of events) {
+    const age = relativeAge(ev.at)
+    const target = formatActivityTarget(ev)
+    console.log(`  ${age.padEnd(8)} ${ev.action.padEnd(22)} ${target}`)
+  }
+  console.log()
+}
+
+/** One-line summary of what an activity event acted on. */
+function formatActivityTarget(ev) {
+  const t = ev.target ?? {}
+  const parts = []
+  if (t.planId) parts.push(t.planId)
+  if (t.taskId) parts.push(t.taskId)
+  if (t.agentId) parts.push(t.agentId)
+  const meta = ev.meta ?? {}
+  const extras = []
+  if (meta.status) extras.push(meta.status)
+  if (meta.agentRole && !t.agentId) extras.push(meta.agentRole)
+  if (meta.runId) extras.push(`run=${meta.runId}`)
+  if (Array.isArray(meta.unblocked) && meta.unblocked.length > 0) {
+    extras.push(`unblocked=${meta.unblocked.join(',')}`)
+  }
+  if (meta.planCompleted) extras.push('plan-complete')
+  const base = parts.join(' · ')
+  return extras.length > 0 ? `${base}  (${extras.join(', ')})` : base
 }
 
 function relativeAge(iso) {
