@@ -182,8 +182,63 @@ Flag instantly and fix:
 3. Run `cd packages/core && pnpm test` — all tests must pass
 4. Run `pnpm build` — Next.js app must build
 5. Check if `@pixabots/core` has updates: `/Users/pablostanley/pixabots`
-6. If publishing to npm: bump version in both `package.json` and `packages/core/package.json`, build, publish core first then CLI
+6. If publishing to npm: **use the automated workflow** — see "npm publishing" below
 7. Commit and push the ROADMAP update
+
+## npm publishing (automated, as of 2026-04-19)
+
+The `NPM_TOKEN` secret is set on the GitHub repo with access to both the
+`@designteam` scope AND the unscoped `designteam` CLI. First multi-package
+publish landed via `v0.13.0` / `v0.13.1` tags. **Claude can trigger new
+publishes end-to-end — no manual intervention needed.**
+
+**To publish a new version:**
+
+1. Bump `version` in whichever `package.json` files need publishing
+   (`publish-if-changed.sh` compares on-disk vs npm's latest and skips
+   when they match — safe to leave unchanged packages alone)
+2. Commit the bump with a clear release message
+3. Push `main`
+4. Tag a new `v*.*.*` tag at the bump commit and push the tag:
+   `git tag v0.13.2 && git push origin v0.13.2`
+5. `.github/workflows/publish.yml` fires on tag push, builds every
+   workspace package, runs tests + evals + lint, then publishes each
+   package in dependency order (core → adapter-utils → 5 adapters →
+   `designteam` CLI) via `pnpm publish --provenance --no-git-checks`
+6. Watch with `gh run list --workflow=publish.yml --limit=1` and then
+   `gh run view <id> --json jobs` for per-step status
+7. Verify with `npm view <pkg> version` (registry propagation can lag
+   ~30–60s for brand-new scoped names on first publish — poll
+   `https://registry.npmjs.org/<pkg>` HTTP status until it flips 404→200)
+8. Update `doc/PUBLISHING.md` "Current latest published versions" table
+
+**Re-trigger without new tag** (for when a workflow hits transient failure):
+`gh workflow run publish.yml --ref v0.13.1`
+
+**Gotchas discovered during first publish:**
+
+- Every workspace `package.json` needs `repository` with `type` + `url` +
+  `directory` — npm `--provenance` rejects with 422 otherwise. The
+  monorepo was already fixed (see commit `eb434be`).
+- The Automation token's "Packages and scopes" setting **must** include
+  both `@designteam` scope AND `designteam` (unscoped) — otherwise the
+  unscoped CLI publish step 403s even though `@designteam/*` succeeds.
+- The workflow step exit code is green as soon as `+ @designteam/X@Y`
+  prints. Registry queries may 404 for 30–60s after that; that's normal
+  CDN propagation for a first publish and not a publish failure.
+
+**Current versions on npm** (verified 2026-04-19):
+
+| Package | Latest |
+|---|---|
+| `@designteam/core` | `0.3.1` |
+| `@designteam/adapter-utils` | `0.1.0` |
+| `@designteam/adapter-local-script` | `0.1.0` |
+| `@designteam/adapter-claude-cli` | `0.1.0` |
+| `@designteam/adapter-codex-local` | `0.1.0` |
+| `@designteam/adapter-anthropic-api` | `0.1.0` |
+| `@designteam/adapter-efecto` | `0.1.0` |
+| `designteam` (CLI) | `0.6.0` |
 
 ## Autonomous Loop Workflow
 
