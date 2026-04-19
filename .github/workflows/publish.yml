@@ -51,6 +51,18 @@ jobs:
       - name: Build every workspace package
         run: pnpm -r --filter './packages/*' run build
 
+      # Pre-publish gates — cheap insurance that a bad commit tagged in a
+      # hurry doesn't ship broken tarballs. Mirrors the CI workflow's
+      # checks so a tag push has the same bar as a PR merge.
+      - name: Run tests
+        run: pnpm test
+
+      - name: Run behavioral evals
+        run: pnpm eval
+
+      - name: Type-check every package
+        run: pnpm -r --filter './packages/*' run lint
+
       # Publish in dependency order. `publish-if-changed.sh` compares the
       # version in each package.json against what's currently live on npm
       # and skips the publish when they match, so a re-trigger after a
