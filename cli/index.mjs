@@ -110,7 +110,9 @@ Planning (v0.11):
                                            --command: ephemeral local-script
                                              adapter (shell-out per task).
                                            Optional: --run=<id>
-                                           --timeout-ms=<n>.
+                                           --timeout-ms=<n>
+                                           --dry-run (preview without
+                                             dispatch, no state mutation).
   designteam budget [show|set|reset] [--usd=N]
                                            Manage the monthly spend cap.
                                            set --usd=5  → cap at \$5.
@@ -2656,6 +2658,7 @@ async function cmdRun(planId, taskId, flags) {
   const runId = getFlag('--run=') ?? undefined
   const timeoutMsRaw = getFlag('--timeout-ms=')
   const timeoutMs = timeoutMsRaw ? parseInt(timeoutMsRaw, 10) : undefined
+  const dryRun = flags.includes('--dry-run')
 
   if (!command && !adapterId) {
     console.error('Usage: npx designteam run <plan-id> <task-id> --adapter=<id>')
@@ -2666,6 +2669,11 @@ async function cmdRun(planId, taskId, flags) {
     console.error('  @designteam/adapter-anthropic-api    — calls the API directly (needs ANTHROPIC_API_KEY)')
     console.error('  (local-script available via --command=)')
     process.exit(1)
+  }
+
+  if (dryRun) {
+    await cmdRunDryRun({ planId, taskId, command, adapterId, timeoutMs })
+    return
   }
 
   let outcome
@@ -2691,6 +2699,78 @@ async function cmdRun(planId, taskId, flags) {
   if (outcome.transition?.plan?.status === 'completed') {
     console.log(`      plan complete: "${outcome.transition.plan.description}"`)
   }
+  console.log()
+}
+
+async function cmdRunDryRun({ planId, taskId, command, adapterId, timeoutMs }) {
+  // Dry-run preview: resolve everything the real run would resolve, but
+  // stop short of checkout + dispatch + activity mutation. The operator
+  // sees the plan / task / agent / adapter / budget state the real run
+  // would hit, without leaving debris in .designteam/.
+  const plan = loadPlan(planId)
+  if (!plan) {
+    console.error(`  Plan "${planId}" not found.`)
+    process.exit(1)
+  }
+  const team = loadTeam()
+  if (!team) {
+    console.error('  No team installed — run `designteam install <id>` or `designteam create`.')
+    process.exit(1)
+  }
+  const task = plan.tasks.find((t) => t.id === taskId)
+  if (!task) {
+    console.error(`  Task "${taskId}" not in plan "${planId}".`)
+    process.exit(1)
+  }
+  const agent = team.agents.find((a) => a.role === task.agentRole)
+  if (!agent) {
+    console.error(`  No agent with role "${task.agentRole}" on this team.`)
+    process.exit(1)
+  }
+
+  let adapterLabel
+  if (adapterId) {
+    const { registerBuiltinAdapters } = await import('./builtin-adapters.mjs')
+    const { resolveAdapter } = await import('@designteam/adapter-utils')
+    registerBuiltinAdapters()
+    const adapter = resolveAdapter(adapterId)
+    adapterLabel = adapter
+      ? `${adapter.id} (${adapter.name} v${adapter.version})`
+      : `${adapterId} — NOT REGISTERED (the real run would refuse)`
+  } else if (command) {
+    adapterLabel = `ephemeral @designteam/adapter-local-script · command="${command}"`
+  }
+
+  const budget = getBudgetStatus()
+
+  console.log()
+  console.log('  Dry run — no checkout, no dispatch, no state mutation.')
+  console.log()
+  console.log(`  Plan:     ${plan.id}  "${plan.description}"`)
+  console.log(`  Task:     ${task.id}  [${task.agentRole}]  ${task.instruction}`)
+  console.log(`            status=${task.status}` + (task.checkoutId ? ` · held by ${task.checkoutId}` : ''))
+  if (task.blockedByTaskIds?.length) {
+    console.log(`            blockedBy: ${task.blockedByTaskIds.join(', ')}`)
+  }
+  console.log(`  Agent:    ${agent.name} (${agent.role})  id=${agent.id}`)
+  console.log(`  Adapter:  ${adapterLabel}`)
+  if (timeoutMs) console.log(`  Timeout:  ${timeoutMs}ms`)
+
+  if (budget.state !== 'unset') {
+    const spentUsd = (budget.spent / 100).toFixed(2)
+    const capUsd = (budget.limit / 100).toFixed(2)
+    const pct = Math.round(budget.pctUsed * 100)
+    const flag = budget.state === 'over' ? '[OVER — real run would refuse]'
+      : budget.state === 'warn' ? '[WARN — real run would nag + dispatch]'
+      : '[OK]'
+    console.log(`  Budget:   $${spentUsd} / $${capUsd} (${pct}%) ${flag}`)
+  }
+
+  if (task.status !== 'todo' && task.status !== 'blocked') {
+    console.log()
+    console.log(`  Note: task is in "${task.status}" — a real run would fail the atomic checkout guard.`)
+  }
+
   console.log()
 }
 
