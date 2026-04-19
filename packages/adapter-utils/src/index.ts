@@ -246,3 +246,113 @@ export function buildAgentPrompt(ctx: TaskContext): string {
 export function truncate(str: string, max: number): string {
   return str.length > max ? str.slice(0, max - 1) + '…' : str
 }
+
+// ---------------------------------------------------------------------------
+// Subprocess runner — shared by every "shell out to a CLI" adapter
+// ---------------------------------------------------------------------------
+// Adapters that spawn a child process (claude, codex, cursor, etc.) all
+// need the same subtle dance: wire `ctx.signal` + an adapter timeout into
+// a SIGTERM→SIGKILL escalation that kills the whole process group, not
+// just the shell wrapper. Getting it wrong wedges tests and strands
+// runs in_progress, so the pattern lives here once instead of every
+// adapter re-deriving it.
+
+import { spawn } from 'node:child_process'
+
+export interface RunSubprocessOptions {
+  /** Command to invoke. Passed to `child_process.spawn`. */
+  command: string
+  /** Argument list. Ignored when `shell: true` — pass one command string instead. */
+  args?: string[]
+  /** Working directory. Defaults to process.cwd(). */
+  cwd?: string
+  /** Extra env on top of process.env (adapter-specific DT_* vars, API keys, etc.). */
+  env?: NodeJS.ProcessEnv
+  /** Run via shell (`/bin/sh -c` on POSIX). Default false. */
+  shell?: boolean
+  /** Aborted when the host wants the run to stop. Required. */
+  signal: AbortSignal
+  /** Wall-clock limit in ms. Required. */
+  timeoutMs: number
+}
+
+export interface RunSubprocessResult {
+  /** Process exit code, or null when the process was killed / errored. */
+  exitCode: number | null
+  stdout: string
+  stderr: string
+  /** True when `timeoutMs` tripped before the process exited on its own. */
+  timedOut: boolean
+}
+
+export function runSubprocess(opts: RunSubprocessOptions): Promise<RunSubprocessResult> {
+  return new Promise((resolve) => {
+    // `detached: true` makes the child its own process-group leader so
+    // we can signal the whole tree (shell + subprocess) with a single
+    // `process.kill(-pid, …)`. Without this, SIGTERM to the shell
+    // doesn't propagate to long-running subcommands like `sleep` and
+    // the test harness hangs until vitest's default timeout trips.
+    const child = spawn(opts.command, opts.args ?? [], {
+      cwd: opts.cwd ?? process.cwd(),
+      env: opts.env,
+      shell: opts.shell ?? false,
+      stdio: ['ignore', 'pipe', 'pipe'],
+      detached: process.platform !== 'win32',
+    })
+
+    let stdout = ''
+    let stderr = ''
+    let timedOut = false
+    let settled = false
+    let sigkillTimer: NodeJS.Timeout | null = null
+
+    const killTree = (signal: NodeJS.Signals) => {
+      if (child.killed || child.exitCode !== null) return
+      try {
+        // Signal the whole process group on POSIX; fall back to direct
+        // kill on Windows (no detached semantic available for shell:true
+        // the same way).
+        if (process.platform !== 'win32' && typeof child.pid === 'number') {
+          process.kill(-child.pid, signal)
+        } else {
+          child.kill(signal)
+        }
+      } catch {
+        // Child may have exited between the check and the signal — fine.
+      }
+    }
+
+    const requestStop = () => {
+      killTree('SIGTERM')
+      // Escalate to SIGKILL if the child is still around after 500ms
+      // (subprocesses that trap SIGTERM or otherwise stall).
+      sigkillTimer = setTimeout(() => killTree('SIGKILL'), 500)
+    }
+
+    const timer = setTimeout(() => {
+      timedOut = true
+      requestStop()
+    }, opts.timeoutMs)
+
+    const onAbort = () => requestStop()
+    opts.signal.addEventListener('abort', onAbort, { once: true })
+
+    child.stdout?.on('data', (chunk) => { stdout += chunk.toString() })
+    child.stderr?.on('data', (chunk) => { stderr += chunk.toString() })
+
+    const finish = (exitCode: number | null) => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      if (sigkillTimer) clearTimeout(sigkillTimer)
+      opts.signal.removeEventListener('abort', onAbort)
+      resolve({ exitCode, stdout, stderr, timedOut })
+    }
+
+    child.on('error', (err) => {
+      stderr += `\n${err.message}`
+      finish(null)
+    })
+    child.on('close', (code) => finish(code))
+  })
+}

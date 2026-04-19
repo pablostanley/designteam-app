@@ -13,8 +13,13 @@
  * See `adapter-plugin.md` at the monorepo root for the full spec.
  */
 
-import { spawn } from 'node:child_process'
-import { truncate, type TaskAdapter, type TaskContext, type TaskResult } from '@designteam/adapter-utils'
+import {
+  runSubprocess,
+  truncate,
+  type TaskAdapter,
+  type TaskContext,
+  type TaskResult,
+} from '@designteam/adapter-utils'
 
 export interface LocalScriptAdapterOptions {
   /**
@@ -81,10 +86,11 @@ export function createLocalScriptAdapter(opts: LocalScriptAdapterOptions): TaskA
       }
 
       try {
-        const { exitCode, stdout, stderr, timedOut } = await runCommand({
+        const { exitCode, stdout, stderr, timedOut } = await runSubprocess({
           command: opts.command,
           cwd: opts.cwd ?? process.cwd(),
           env,
+          shell: true,
           signal: ctx.signal,
           timeoutMs,
         })
@@ -127,96 +133,4 @@ export function createLocalScriptAdapter(opts: LocalScriptAdapterOptions): TaskA
       }
     },
   }
-}
-
-// ---------------------------------------------------------------------------
-// Command runner — wraps child_process.spawn with abort + timeout semantics
-// so the adapter can honor ctx.signal and its own timeout in one place.
-// ---------------------------------------------------------------------------
-
-interface RunArgs {
-  command: string
-  cwd: string
-  env: NodeJS.ProcessEnv
-  signal: AbortSignal
-  timeoutMs: number
-}
-
-interface RunResult {
-  exitCode: number | null
-  stdout: string
-  stderr: string
-  timedOut: boolean
-}
-
-function runCommand(args: RunArgs): Promise<RunResult> {
-  return new Promise((resolve) => {
-    // `detached: true` makes the child its own process group leader so we
-    // can signal the whole tree (shell + subprocess) with a single
-    // `process.kill(-pid, ...)`. Without this, SIGTERM to the shell
-    // doesn't propagate to long-running subcommands like `sleep` and the
-    // test harness hangs until vitest's default 5s timeout trips.
-    const child = spawn(args.command, {
-      cwd: args.cwd,
-      env: args.env,
-      shell: true,
-      stdio: ['ignore', 'pipe', 'pipe'],
-      detached: process.platform !== 'win32',
-    })
-
-    let stdout = ''
-    let stderr = ''
-    let timedOut = false
-    let settled = false
-    let sigkillTimer: NodeJS.Timeout | null = null
-
-    const killTree = (signal: NodeJS.Signals) => {
-      if (child.killed || child.exitCode !== null) return
-      try {
-        // Signal the whole process group on POSIX; fall back to direct
-        // kill on Windows (no detached semantic available for shell:true
-        // the same way).
-        if (process.platform !== 'win32' && typeof child.pid === 'number') {
-          process.kill(-child.pid, signal)
-        } else {
-          child.kill(signal)
-        }
-      } catch {
-        // Child may have exited between the check and the signal — that's fine.
-      }
-    }
-
-    const requestStop = () => {
-      killTree('SIGTERM')
-      // Escalate to SIGKILL if the child is still around after 500ms
-      // (handles subprocesses that trap SIGTERM or otherwise stall).
-      sigkillTimer = setTimeout(() => killTree('SIGKILL'), 500)
-    }
-
-    const timeout = setTimeout(() => {
-      timedOut = true
-      requestStop()
-    }, args.timeoutMs)
-
-    const onAbort = () => requestStop()
-    args.signal.addEventListener('abort', onAbort, { once: true })
-
-    child.stdout.on('data', (chunk) => { stdout += chunk.toString() })
-    child.stderr.on('data', (chunk) => { stderr += chunk.toString() })
-
-    const finish = (exitCode: number | null) => {
-      if (settled) return
-      settled = true
-      clearTimeout(timeout)
-      if (sigkillTimer) clearTimeout(sigkillTimer)
-      args.signal.removeEventListener('abort', onAbort)
-      resolve({ exitCode, stdout, stderr, timedOut })
-    }
-
-    child.on('error', (err) => {
-      stderr += `\n${err.message}`
-      finish(null)
-    })
-    child.on('close', (code) => finish(code))
-  })
 }

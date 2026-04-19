@@ -54,6 +54,36 @@ listAdapters()                      // every registered adapter
 Also exported: `unregisterAdapter(id)` and `clearAdapters()` (useful in
 tests).
 
+### Prompt + subprocess helpers
+
+LLM-backed adapters tend to need the same three primitives:
+
+- **`buildAgentPrompt(ctx)`** — stitches agent identity + personality +
+  mood + memory + team memory + user profile + task brief into one
+  prompt string. Every LLM adapter should start with this so the model
+  sees Design Team's full context.
+- **`truncate(str, max)`** — clips long LLM output for `summary` fields
+  without losing the ellipsis convention (keeps the last char as `…`).
+- **`runSubprocess({ command, args, signal, timeoutMs, shell? })`** —
+  spawns a child process and wires `ctx.signal` + a wall-clock timeout
+  into a SIGTERM→SIGKILL escalation that kills the whole process group
+  (not just the shell wrapper). Returns `{ exitCode, stdout, stderr,
+  timedOut }`. Use this for any CLI-wrapping adapter (claude, codex,
+  cursor, gemini, …) — otherwise you'll hit the "detached + kill-group"
+  dance on your own and it's easy to get wrong.
+
+```ts
+import { buildAgentPrompt, runSubprocess, truncate } from '@designteam/adapter-utils'
+
+const prompt = buildAgentPrompt(ctx)
+const { exitCode, stdout, stderr, timedOut } = await runSubprocess({
+  command: 'codex',
+  args: ['exec', prompt],
+  signal: ctx.signal,
+  timeoutMs: 15 * 60 * 1000,
+})
+```
+
 ## Writing a new adapter
 
 See `@designteam/adapter-local-script` for the reference implementation
