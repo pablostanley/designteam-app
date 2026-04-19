@@ -1,0 +1,95 @@
+name: Publish to npm
+
+# Triggered by pushing a version tag (e.g. `git tag v0.13.0 && git push origin
+# v0.13.0`). Also callable manually from the Actions tab (`workflow_dispatch`)
+# for one-off re-publishes.
+#
+# Requires `NPM_TOKEN` secret: https://docs.npmjs.com/creating-and-viewing-access-tokens
+# Token scope must be "Automation" (or "Publish") for the @designteam org.
+#
+# Each publish step skips cleanly if the on-disk version is already live on
+# npm — safe to re-trigger after a partial failure without erroring out.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write  # enables `npm publish --provenance`
+
+jobs:
+  publish:
+    name: Build + publish every workspace package
+    runs-on: ubuntu-latest
+    # Stops the matrix from stampeding if two tags push close together.
+    concurrency:
+      group: publish-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Use Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Every package's dist/ must be current before publish. tsup respects
+      # workspace dependency order when invoked through the root build script.
+      - name: Build every workspace package
+        run: pnpm -r --filter './packages/*' run build
+
+      # Pre-publish gates — cheap insurance that a bad commit tagged in a
+      # hurry doesn't ship broken tarballs. Mirrors the CI workflow's
+      # checks so a tag push has the same bar as a PR merge.
+      - name: Run tests
+        run: pnpm test
+
+      - name: Run behavioral evals
+        run: pnpm eval
+
+      - name: Type-check every package
+        run: pnpm -r --filter './packages/*' run lint
+
+      # Publish in dependency order. `publish-if-changed.sh` compares the
+      # version in each package.json against what's currently live on npm
+      # and skips the publish when they match, so a re-trigger after a
+      # half-completed run doesn't error on 403 "cannot publish over
+      # existing version".
+      - name: Publish @designteam/core
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: ./scripts/publish-if-changed.sh packages/core
+
+      - name: Publish @designteam/adapter-utils
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: ./scripts/publish-if-changed.sh packages/adapter-utils
+
+      - name: Publish @designteam/adapter-local-script
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: ./scripts/publish-if-changed.sh packages/adapter-local-script
+
+      - name: Publish @designteam/adapter-claude-cli
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: ./scripts/publish-if-changed.sh packages/adapter-claude-cli
+
+      # CLI (unscoped) last — depends on everything above.
+      - name: Publish designteam (CLI)
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: ./scripts/publish-if-changed.sh .

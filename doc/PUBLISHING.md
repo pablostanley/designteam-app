@@ -1,8 +1,11 @@
 # Publishing
 
-How to publish each npm package in this workspace. Manual for now; a
-GitHub Actions workflow that publishes on tag is still TODO (v0.12 auto-
-publish bullet, blocked on \`NPM_TOKEN\` secret configuration).
+Two paths:
+
+- **Automated (preferred):** push a version tag. `.github/workflows/publish.yml` builds every workspace package and runs `scripts/publish-if-changed.sh` for each in dependency order. See the _Tagging a release_ section below.
+- **Manual (break-glass):** run the commands in the _Publish commands_ section from your own shell. Use this when the workflow is broken or you're iterating locally before bumping the tag.
+
+**Prerequisite for automated publish:** the repo needs an `NPM_TOKEN` secret with "Automation" scope for the `@designteam` org. Without it, the workflow fails at the first `npm publish` step.
 
 ## What's publishable
 
@@ -62,9 +65,18 @@ npm publish
 `--access public` is required for scoped packages on the free npm plan;
 omit it for the unscoped `designteam` CLI.
 
+## Tagging a release
+
+With the GitHub Actions workflow in place, the usual flow is:
+
+1. Bump every package's `version` in `package.json`. Follow dependency order (core → adapter-utils → adapter-local-script / adapter-claude-cli → designteam CLI) so peer-deps can be pinned to the version you just bumped to.
+2. Commit + push.
+3. `git tag v0.13.0 && git push origin v0.13.0` (or whatever the new version is).
+4. The workflow fires, builds everything, and publishes each package whose on-disk version doesn't match npm's latest. Re-triggering on failure is safe — already-published packages skip cleanly.
+5. Update the _Current latest published versions_ table below.
+
 ## After publishing
 
-- [ ] Tag the release: `git tag v0.13.0 && git push origin v0.13.0`.
 - [ ] Update `ROADMAP.md` Notes section with the new latest versions.
 - [ ] Spot-check the install: `npx designteam@latest --help` should render.
 - [ ] If you're on a new machine, `npm cache verify` first; pnpm's lockfile can trip over stale npm cache entries after a version bump.
