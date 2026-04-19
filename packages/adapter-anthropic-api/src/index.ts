@@ -14,21 +14,18 @@
  *
  * Contract conforms to `TaskAdapter` from `@designteam/adapter-utils`.
  * See `adapter-plugin.md` at the monorepo root for the full spec.
- *
- * Prompt builder is currently duplicated with adapter-claude-cli.
- * Consolidation into @designteam/adapter-utils is a follow-up PR — the
- * duplication is small enough that moving it twice is more risk than
- * leaving it for now.
  */
 
 import {
-  emotionToPromptFragment,
-  memoryToPromptFragment,
-  personalityToPromptFragment,
-  teamMemoryToPromptFragment,
-  userProfileToPromptFragment,
-} from '@designteam/core'
-import type { CostReport, TaskAdapter, TaskContext, TaskResult } from '@designteam/adapter-utils'
+  buildAgentPrompt,
+  truncate,
+  type CostReport,
+  type TaskAdapter,
+  type TaskContext,
+  type TaskResult,
+} from '@designteam/adapter-utils'
+
+export { buildAgentPrompt as buildPrompt } from '@designteam/adapter-utils'
 
 export interface AnthropicApiAdapterOptions {
   /**
@@ -114,8 +111,9 @@ export function createAnthropicApiAdapter(opts: AnthropicApiAdapterOptions = {})
   const pricing = { ...DEFAULT_PRICING, ...(opts.pricing ?? {}) }
   const id = opts.id ?? '@designteam/adapter-anthropic-api'
 
-  // Last response cache so reportCost can attribute tokens without
-  // keeping the full message payload around on the adapter surface.
+  // Keyed on TaskContext so reportCost can attribute tokens without
+  // hanging the full response off the adapter surface. Entries fall
+  // off when the host drops the context ref — no cleanup needed.
   const lastUsage = new WeakMap<TaskContext, { inputTokens: number; outputTokens: number; model: string }>()
 
   return {
@@ -123,14 +121,8 @@ export function createAnthropicApiAdapter(opts: AnthropicApiAdapterOptions = {})
     name: 'Anthropic API',
     version: '0.1.0',
     async executeTask(ctx: TaskContext): Promise<TaskResult> {
-      const prompt = buildPrompt(ctx)
-
-      // Host's AbortSignal drives both cancellation and the adapter's
-      // own timeout — we combine them so one controller handles both.
-      const controller = new AbortController()
-      const timer = setTimeout(() => controller.abort(), timeoutMs)
-      const abortPassthrough = () => controller.abort()
-      ctx.signal.addEventListener('abort', abortPassthrough, { once: true })
+      const prompt = buildAgentPrompt(ctx)
+      const signal = AbortSignal.any([ctx.signal, AbortSignal.timeout(timeoutMs)])
 
       try {
         const res = await fetchImpl(`${baseUrl}/v1/messages`, {
@@ -146,7 +138,7 @@ export function createAnthropicApiAdapter(opts: AnthropicApiAdapterOptions = {})
             temperature,
             messages: [{ role: 'user', content: prompt }],
           }),
-          signal: controller.signal,
+          signal,
         })
 
         if (!res.ok) {
@@ -186,7 +178,9 @@ export function createAnthropicApiAdapter(opts: AnthropicApiAdapterOptions = {})
             reason: 'signal.aborted',
           }
         }
-        if ((err as { name?: string } | undefined)?.name === 'AbortError') {
+        // Not host-cancelled — the combined signal must have tripped
+        // on the timeout branch.
+        if (err instanceof DOMException && err.name === 'TimeoutError') {
           return {
             outcome: 'cancelled',
             summary: `Anthropic API call exceeded ${timeoutMs}ms timeout`,
@@ -198,9 +192,6 @@ export function createAnthropicApiAdapter(opts: AnthropicApiAdapterOptions = {})
           message: err instanceof Error ? err.message : String(err),
           cause: err,
         }
-      } finally {
-        clearTimeout(timer)
-        ctx.signal.removeEventListener('abort', abortPassthrough)
       }
     },
 
@@ -231,59 +222,6 @@ export function createAnthropicApiAdapter(opts: AnthropicApiAdapterOptions = {})
 }
 
 // ---------------------------------------------------------------------------
-// Prompt assembly (duplicated with adapter-claude-cli — see file header)
-// ---------------------------------------------------------------------------
-
-export function buildPrompt(ctx: TaskContext): string {
-  const sections: string[] = []
-
-  const agentMeta = ctx.agent as unknown as { personality?: { sliders?: Record<string, number> } }
-  const personality = agentMeta?.personality
-    ? personalityToPromptFragment(agentMeta.personality as never)
-    : ''
-
-  sections.push(
-    `You are ${ctx.agent.name}, a ${ctx.agent.role} on a design team.`,
-  )
-  if (personality) sections.push(personality)
-
-  const state = (ctx as unknown as { agentState?: unknown }).agentState as
-    | { emotions?: never; memory?: never }
-    | undefined
-  if (state?.emotions) {
-    const moodFragment = emotionToPromptFragment(state.emotions)
-    if (moodFragment) sections.push(moodFragment)
-  }
-  if (state?.memory) {
-    const memFragment = memoryToPromptFragment(state.memory, 5)
-    if (memFragment) sections.push(memFragment)
-  }
-
-  if (ctx.userProfile) {
-    const profileFragment = userProfileToPromptFragment(ctx.userProfile)
-    if (profileFragment) sections.push(profileFragment)
-  }
-  if (ctx.teamMemory && ctx.teamMemory.entries?.length > 0) {
-    const teamFragment = teamMemoryToPromptFragment(ctx.teamMemory, 10)
-    if (teamFragment) sections.push(teamFragment)
-  }
-
-  sections.push('')
-  sections.push('## Task')
-  sections.push('')
-  sections.push(ctx.task.instruction)
-  if (ctx.task.successCriteria) {
-    sections.push('')
-    sections.push(`Success criteria: ${ctx.task.successCriteria}`)
-  }
-  if (ctx.task.why) {
-    sections.push(`Why this matters: ${ctx.task.why}`)
-  }
-
-  return sections.filter(Boolean).join('\n\n')
-}
-
-// ---------------------------------------------------------------------------
 // Narrow response shape
 // ---------------------------------------------------------------------------
 
@@ -293,8 +231,4 @@ interface AnthropicMessageResponse {
     input_tokens?: number
     output_tokens?: number
   }
-}
-
-function truncate(str: string, max: number): string {
-  return str.length > max ? str.slice(0, max - 1) + '…' : str
 }
