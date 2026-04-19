@@ -19,6 +19,7 @@ import {
 import { emitActivity, readActivity } from './activity.mjs'
 import { loadBudget, setLimit, resetPeriod, getSpend } from './budget.mjs'
 import { listPendingApprovals } from './approvals.mjs'
+import { findStrandedTasks, recoverTask } from './recovery.mjs'
 import {
   AGENT_ROLE_DEFINITIONS, AGENT_NAMES, AGENT_ROLE_LIST,
   TEAM_PRESETS, LEVEL_THRESHOLDS,
@@ -122,6 +123,12 @@ Planning (v0.11):
                                            Reject a task: in_review → todo
                                            (default, for re-work) or
                                            --block → blocked (external).
+  designteam recover <plan-id> [--stale-minutes=N] [--dry-run]
+                                           Find in_progress tasks whose
+                                           last update is older than N
+                                           minutes (default 30) and reset
+                                           them to todo. Use --dry-run
+                                           to preview without writing.
 
 Create & Install:
   designteam create "project description"  Create a team with AI
@@ -446,6 +453,16 @@ Presets:
       process.exit(1)
     }
     await cmdReject(planId, taskId, args.slice(3))
+    return
+  }
+
+  if (command === 'recover') {
+    const planId = args[1]
+    if (!planId) {
+      console.error('Usage: npx designteam recover <plan-id> [--stale-minutes=N] [--dry-run]')
+      process.exit(1)
+    }
+    await cmdRecover(planId, args.slice(2))
     return
   }
 
@@ -2342,6 +2359,62 @@ async function cmdRelease(planId, taskId, flags) {
 
   console.log()
   console.log(`  Released ${task.id} [${task.agentRole}] ${task.instruction}`)
+  console.log()
+}
+
+async function cmdRecover(planId, flags) {
+  const plan = loadPlan(planId)
+  if (!plan) {
+    console.error(`Plan "${planId}" not found.`)
+    process.exit(1)
+  }
+
+  const minutesFlag = flags.find((f) => f.startsWith('--stale-minutes='))?.split('=')[1]
+  const staleMinutes = minutesFlag ? Math.max(1, parseInt(minutesFlag, 10) || 30) : 30
+  const dryRun = flags.includes('--dry-run')
+  const staleMs = staleMinutes * 60 * 1000
+
+  const stranded = findStrandedTasks(plan, { staleMs })
+
+  console.log()
+  if (stranded.length === 0) {
+    console.log(`  No stranded tasks in "${plan.description}" (${staleMinutes}m threshold).`)
+    console.log()
+    return
+  }
+
+  console.log(`  ${stranded.length} stranded task${stranded.length === 1 ? '' : 's'} (older than ${staleMinutes}m):`)
+  console.log()
+  for (const { task, ageMs } of stranded) {
+    const age = relativeAge(task.updatedAt ?? new Date(Date.now() - ageMs).toISOString())
+    const holder = task.checkoutId ? ` (held by ${task.checkoutId})` : ''
+    console.log(`  ${task.id} [${task.agentRole}] ${task.instruction} · last update ${age}${holder}`)
+  }
+  console.log()
+
+  if (dryRun) {
+    console.log('  --dry-run: no changes written. Re-run without --dry-run to reset.')
+    console.log()
+    return
+  }
+
+  for (const { task } of stranded) {
+    const prevCheckout = task.checkoutId ?? null
+    recoverTask(plan, task.id)
+    emitActivity({
+      action: 'task.recovered',
+      teamId: loadTeam()?.id ?? null,
+      target: { planId, taskId: task.id },
+      meta: {
+        agentRole: task.agentRole,
+        prevCheckoutId: prevCheckout || undefined,
+        staleMinutes,
+      },
+    })
+  }
+  savePlan(plan)
+
+  console.log(`  Reset ${stranded.length} task${stranded.length === 1 ? '' : 's'} back to todo. Run \`designteam next ${plan.id}\` to pick one up.`)
   console.log()
 }
 
