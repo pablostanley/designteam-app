@@ -168,12 +168,8 @@ Make the team work through a project autonomously — one command kicks off rese
 - [x] `designteam plans` — newest-first list with task counts + progress.
 - [x] `designteam show <plan-id>` — task graph with status glyphs, success criteria, and the "why".
 
-**Phase 2: Execution via Claude Code**
-- [ ] Skill template includes a "Running a project" section
-  - Read the plan at `.designteam/projects/<id>.json`
-  - For each ready task (deps done), invoke the matching agent via Task tool
-  - After each task, run `designteam progress <project-id> <task-id> --done`
-  - Auto-extract memories from the task output
+**Phase 2: Execution via Claude Code (PR #31, fully landed)**
+- [x] Skill template includes a "Running a Project (Plan Mode)" section — shipped in PR #31 to `skills/design-team/SKILL.md`. Covers plan generation, the `next → checkout → progress` loop (with shell-friendly `while id=$(designteam next --id-only)` idiom), the `designteam run --command=` shortcut, memory reporting via `designteam report`, and tailing the activity feed. Plus sub-bullets above for the primitives that enable it.
 - [x] `designteam progress` command — shipped in PR #21. Full task lifecycle (`todo | in_progress | in_review | done | blocked | cancelled`), auto-unblock of dependents, plan-complete bubble-up.
 - [x] `designteam next <plan-id>` — shipped in PR #29. Picks the next ready task (todo, no live checkout, blockers terminal). `--id-only` for shell-scriptable output; exits 1 with no stdout when nothing's ready so loops terminate cleanly.
 - [x] `designteam run <plan-id> <task-id>` — shipped in PR #30. Full end-to-end: atomic checkout → adapter dispatch → status transition → activity log emission. `--command=<shell>` shortcut creates an ephemeral `@designteam/adapter-local-script` on the fly. Error outcome releases the lock and leaves the task in_progress for human decision; terminal outcomes auto-release via `setTaskStatus`.
