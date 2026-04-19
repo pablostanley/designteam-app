@@ -31,7 +31,7 @@ import {
   loadUserProfile,
 } from './state.mjs'
 import { emitActivity } from './activity.mjs'
-import { isOverBudget, appendSpend, getSpend, loadBudget } from './budget.mjs'
+import { appendSpend, getBudgetStatus, WARNING_THRESHOLD } from './budget.mjs'
 import { registerBuiltinAdapters } from './builtin-adapters.mjs'
 
 /**
@@ -93,18 +93,37 @@ export async function runOneTask({ planId, taskId, runId, command, adapter, adap
   const effectiveRunId = runId || `local-${process.pid}-${Date.now().toString(36)}`
   const effectiveSignal = signal ?? new AbortController().signal
 
-  // --- Budget hard-stop ---
+  // --- Budget hard-stop + soft warning ---
   // Refuse to dispatch if the operator set a cap and the current period
   // has reached it. Checking BEFORE checkout so we never strand a task
   // in_progress because the cap tripped mid-flight. Users can opt out by
-  // not setting a cap.
-  if (isOverBudget()) {
-    const { usdCents } = loadBudget()
-    const spent = getSpend()
+  // not setting a cap. At WARNING_THRESHOLD we still dispatch but nag
+  // via stderr + activity so the operator sees the runway shrinking.
+  const budgetStatus = getBudgetStatus()
+  if (budgetStatus.state === 'over') {
     throw new Error(
-      `Budget cap reached: spent $${(spent / 100).toFixed(2)} of $${(usdCents / 100).toFixed(2)} this period. ` +
+      `Budget cap reached: spent $${(budgetStatus.spent / 100).toFixed(2)} of $${(budgetStatus.limit / 100).toFixed(2)} this period. ` +
       'Raise the cap with `designteam budget set --usd=<amount>` or reset the period with `designteam budget reset`.',
     )
+  }
+  if (budgetStatus.state === 'warn') {
+    const pct = Math.round(budgetStatus.pctUsed * 100)
+    const spentUsd = (budgetStatus.spent / 100).toFixed(2)
+    const capUsd = (budgetStatus.limit / 100).toFixed(2)
+    process.stderr.write(
+      `⚠️  Budget at ${pct}%: spent $${spentUsd} of $${capUsd}. Raise the cap or reset before it trips.\n`,
+    )
+    emitActivity({
+      action: 'budget.warning',
+      teamId: team.id,
+      target: { planId, taskId },
+      meta: {
+        spentCents: budgetStatus.spent,
+        limitCents: budgetStatus.limit,
+        pctUsed: budgetStatus.pctUsed,
+        threshold: WARNING_THRESHOLD,
+      },
+    })
   }
 
   // --- Atomic checkout ---

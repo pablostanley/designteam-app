@@ -21,6 +21,9 @@ import { getStateDir } from './state.mjs'
 const CONFIG_NAME = 'budget.json'
 const LEDGER_NAME = 'budget.jsonl'
 
+/** Fraction of the cap at which the runner starts nagging (but still runs). */
+export const WARNING_THRESHOLD = 0.8
+
 function configPath() { return join(getStateDir(), CONFIG_NAME) }
 function ledgerPath() { return join(getStateDir(), LEDGER_NAME) }
 
@@ -129,6 +132,25 @@ export function isOverBudget() {
   const { usdCents } = loadBudget()
   if (usdCents === null || usdCents === undefined) return false
   return getSpend() >= usdCents
+}
+
+/**
+ * Evaluate the current budget state: 'ok' | 'warn' | 'over' | 'unset'.
+ * 'warn' kicks in at WARNING_THRESHOLD (80%) so the runner can nag
+ * before it trips. 'unset' distinguishes "no cap" from "zero spend
+ * against a cap" — the runner uses it to skip the warning entirely.
+ */
+export function getBudgetStatus() {
+  const { usdCents } = loadBudget()
+  const spent = getSpend()
+  if (usdCents === null || usdCents === undefined) {
+    return { state: 'unset', spent, limit: null, pctUsed: 0 }
+  }
+  const pctUsed = usdCents > 0 ? spent / usdCents : 0
+  let state = 'ok'
+  if (spent >= usdCents) state = 'over'
+  else if (pctUsed >= WARNING_THRESHOLD) state = 'warn'
+  return { state, spent, limit: usdCents, pctUsed }
 }
 
 function startOfUtcMonth(date) {
