@@ -229,7 +229,7 @@ Adopted from `paperclipai/paperclip` (MIT, Apr 2026). Their model is "open-sourc
 
 - [x] **AGENTS.md at repo root** — contributor orientation (PR #19). Read-order, repo map, engineering rules, invariants, PR checklist.
 - [ ] **`doc/` hierarchy** — split the five root-level strategy docs (`VISION.md`, `DESIGN-TEAM-VISION.md`, `ROADMAP.md`, `TASKS.md`, `CLAUDE.md`) into paperclip's cleaner layout: `doc/GOAL.md`, `doc/PRODUCT.md`, `doc/SPEC.md`, `doc/SPEC-implementation.md`, `doc/DATABASE.md`, `doc/DEVELOPING.md`, `doc/execution-semantics.md`.
-- [ ] **`evals/` directory** — 3-5 scripted scenarios using the CLI + plans to verify agents actually honor voice/personality/brand memory. Catches regressions unit tests miss.
+- [x] **`evals/` directory** — shipped in PR #25. Sandbox harness + two end-to-end scenarios: `plan-lifecycle` (checkout contention + auto-unblock + plan completion + activity log ordering) and `memory-routing` (categories persist + activity log captures each add). `pnpm eval` runner. LLM-dependent scenarios deferred until CI has `ANTHROPIC_API_KEY`.
 
 ### Execution infrastructure (unblocks the 7-phase Efecto roadmap)
 

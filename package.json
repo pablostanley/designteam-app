@@ -31,7 +31,8 @@
     "build": "pnpm --filter @designteam/core build && next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "eval": "node evals/index.mjs"
   },
   "dependencies": {
     "@designteam/core": "workspace:*"
