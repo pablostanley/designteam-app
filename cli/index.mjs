@@ -13,6 +13,7 @@ import {
   loadPlan, savePlan, listPlans,
   setTaskStatus, normalizeStatus,
   checkoutTask, releaseTask,
+  getBlockers,
   TASK_STATUSES, TASK_STATUS_GLYPH,
 } from './plans.mjs'
 import { emitActivity, readActivity } from './activity.mjs'
@@ -1964,11 +1965,11 @@ ${roster}
 Project:
 ${description}
 
-Return ONLY valid JSON, no prose. Each task must name an agent by ROLE (not by name), list the task IDs it depends on, and include a one-sentence success criterion + a one-sentence "why" explaining how it serves the project.
+Return ONLY valid JSON, no prose. Each task must name an agent by ROLE (not by name), list the task IDs that block it from starting in \`blockedByTaskIds\`, and include a one-sentence success criterion + a one-sentence "why" explaining how it serves the project.
 
-Use 3-8 tasks. Assign the research/strategy tasks first, design tasks that depend on them, then a final review task (assigned to the creative-director role) that depends on everything else.
+Use 3-8 tasks. Assign the research/strategy tasks first, design tasks whose blockers are those, then a final review task (assigned to the creative-director role) that is blocked by everything else. Use \`parentTaskId\` only when one task is a literal subtask of another — default to leaving it unset.
 
-{"tasks":[{"id":"t1","agentRole":"researcher","instruction":"...","dependencies":[],"successCriteria":"...","why":"..."}]}`
+{"tasks":[{"id":"t1","agentRole":"researcher","instruction":"...","blockedByTaskIds":[],"successCriteria":"...","why":"..."}]}`
 
   console.log()
   console.log(`  Planning "${description}"...`)
@@ -2032,15 +2033,24 @@ Use 3-8 tasks. Assign the research/strategy tasks first, design tasks that depen
     description,
     createdAt: new Date().toISOString(),
     status: 'planning',
-    tasks: parsed.tasks.map((t, i) => ({
-      id: t.id || `t${i + 1}`,
-      agentRole: t.agentRole || 'creative-director',
-      instruction: t.instruction || '',
-      dependencies: Array.isArray(t.dependencies) ? t.dependencies : [],
-      successCriteria: t.successCriteria || '',
-      why: t.why || '',
-      status: 'todo',
-    })),
+    tasks: parsed.tasks.map((t, i) => {
+      // Accept both the canonical `blockedByTaskIds` and the legacy
+      // `dependencies` field name — Haiku sometimes falls back to the
+      // older vocabulary even with the updated prompt.
+      const blockers = Array.isArray(t.blockedByTaskIds)
+        ? t.blockedByTaskIds
+        : Array.isArray(t.dependencies) ? t.dependencies : []
+      return {
+        id: t.id || `t${i + 1}`,
+        agentRole: t.agentRole || 'creative-director',
+        instruction: t.instruction || '',
+        blockedByTaskIds: blockers,
+        ...(typeof t.parentTaskId === 'string' ? { parentTaskId: t.parentTaskId } : {}),
+        successCriteria: t.successCriteria || '',
+        why: t.why || '',
+        status: 'todo',
+      }
+    }),
   }
 
   savePlan(plan)
@@ -2061,7 +2071,8 @@ Use 3-8 tasks. Assign the research/strategy tasks first, design tasks that depen
   console.log(`  ${plan.tasks.length} tasks across ${new Set(plan.tasks.map((t) => t.agentRole)).size} roles.`)
   console.log()
   for (const task of plan.tasks) {
-    const deps = task.dependencies.length > 0 ? ` (after ${task.dependencies.join(', ')})` : ''
+    const blockers = getBlockers(task)
+    const deps = blockers.length > 0 ? ` (after ${blockers.join(', ')})` : ''
     console.log(`  ${task.id} [${task.agentRole}] ${task.instruction}${deps}`)
   }
   console.log()
@@ -2105,9 +2116,11 @@ async function cmdShow(planId) {
   console.log()
   for (const task of plan.tasks) {
     const glyph = TASK_STATUS_GLYPH[task.status] ?? '·'
-    const deps = task.dependencies.length > 0 ? ` (after ${task.dependencies.join(', ')})` : ''
+    const blockers = getBlockers(task)
+    const deps = blockers.length > 0 ? ` (after ${blockers.join(', ')})` : ''
+    const parent = task.parentTaskId ? ` · child of ${task.parentTaskId}` : ''
     const held = task.checkoutId ? ` · held by ${task.checkoutId}` : ''
-    console.log(`  ${glyph} ${task.id} [${task.agentRole}] ${task.instruction}${deps}${held}`)
+    console.log(`  ${glyph} ${task.id} [${task.agentRole}] ${task.instruction}${deps}${parent}${held}`)
     if (task.successCriteria) console.log(`      success: ${task.successCriteria}`)
     if (task.why) console.log(`      why: ${task.why}`)
   }

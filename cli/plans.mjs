@@ -2,7 +2,7 @@
  * Project plan storage for Design Team CLI.
  *
  * Plans live in `.designteam/projects/<plan-id>.json`. Each plan is a
- * Haiku-generated task graph — agents + instructions + dependencies +
+ * Haiku-generated task graph — agents + instructions + blockers +
  * success criteria — that the team works through sequentially.
  *
  * Plan schema:
@@ -15,13 +15,26 @@
  *     id: string,
  *     agentRole: string,
  *     instruction: string,
- *     dependencies: string[],
+ *     blockedByTaskIds: string[],   // "can't start until these finish"
+ *     parentTaskId?: string,        // "this is a child of that task"
  *     successCriteria: string,
  *     why: string,
  *     status: TaskStatus,
+ *     checkoutId?: string,
  *     updatedAt?: string
  *   }>
  * }
+ *
+ * Blockers vs parent/child (paperclip-inspired):
+ *   - `blockedByTaskIds` is DEPENDENCY: "this task can't continue until
+ *     those tasks reach a terminal state". Drives auto-unblock.
+ *   - `parentTaskId` is STRUCTURE: "this task is a child of that task"
+ *     — used for work breakdown and rollup. Never treat a parent as an
+ *     implicit blocker; if a parent really is waiting on children,
+ *     encode that as blockers.
+ *
+ * Legacy plans stored under the old `dependencies: string[]` field name
+ * (pre-v0.13) are read as `blockedByTaskIds` transparently on load.
  *
  * Task lifecycle (paperclip-inspired, v0.13):
  *   todo → in_progress → in_review → done
@@ -60,6 +73,18 @@ export function normalizeStatus(status) {
   return TASK_STATUSES.includes(status) ? status : 'todo'
 }
 
+/**
+ * Return the task IDs that block this task. Prefers the canonical
+ * `blockedByTaskIds` field; falls back to legacy `dependencies` so
+ * plans authored before v0.13 keep working. Empty array is the
+ * safe default.
+ */
+export function getBlockers(task) {
+  if (Array.isArray(task.blockedByTaskIds)) return task.blockedByTaskIds
+  if (Array.isArray(task.dependencies)) return task.dependencies
+  return []
+}
+
 function plansDir() {
   return join(getStateDir(), PROJECTS_DIR)
 }
@@ -69,9 +94,16 @@ export function loadPlan(planId) {
   if (!existsSync(path)) return null
   try {
     const raw = JSON.parse(readFileSync(path, 'utf8'))
-    // Normalize task statuses on load so legacy plans work with the new lifecycle.
+    // Normalize task statuses + blocker field on load so legacy plans
+    // work with the new lifecycle and blockedByTaskIds naming.
     if (Array.isArray(raw.tasks)) {
-      raw.tasks = raw.tasks.map((t) => ({ ...t, status: normalizeStatus(t.status) }))
+      raw.tasks = raw.tasks.map((t) => {
+        const normalized = { ...t, status: normalizeStatus(t.status) }
+        if (!Array.isArray(normalized.blockedByTaskIds)) {
+          normalized.blockedByTaskIds = Array.isArray(t.dependencies) ? t.dependencies : []
+        }
+        return normalized
+      })
     }
     return raw
   } catch {
@@ -175,10 +207,10 @@ export function setTaskStatus(plan, taskId, nextStatus) {
   if (status === 'done') {
     for (const other of plan.tasks) {
       if (other.status !== 'blocked') continue
-      const deps = other.dependencies ?? []
-      const allResolved = deps.every((depId) => {
-        const dep = plan.tasks.find((t) => t.id === depId)
-        return dep && TERMINAL_TASK_STATUSES.has(dep.status)
+      const blockers = getBlockers(other)
+      const allResolved = blockers.every((blockerId) => {
+        const blocker = plan.tasks.find((t) => t.id === blockerId)
+        return blocker && TERMINAL_TASK_STATUSES.has(blocker.status)
       })
       if (allResolved) {
         other.status = 'todo'
