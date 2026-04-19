@@ -18,6 +18,7 @@ import {
 } from './plans.mjs'
 import { emitActivity, readActivity } from './activity.mjs'
 import { loadBudget, setLimit, resetPeriod, getSpend } from './budget.mjs'
+import { listPendingApprovals } from './approvals.mjs'
 import {
   AGENT_ROLE_DEFINITIONS, AGENT_NAMES, AGENT_ROLE_LIST,
   TEAM_PRESETS, LEVEL_THRESHOLDS,
@@ -110,6 +111,17 @@ Planning (v0.11):
                                            set --usd=5  → cap at \$5.
                                            show (default)  → spent vs cap.
                                            reset  → wipe period, start new.
+  designteam approvals                     List every task currently in
+                                           in_review across all plans
+                                           (oldest first).
+  designteam approve <plan-id> <task-id> [--comment="..."]
+                                           Approve a task: in_review → done,
+                                           auto-unblock dependents, log the
+                                           reviewer's comment.
+  designteam reject <plan-id> <task-id> [--reason="..."] [--block]
+                                           Reject a task: in_review → todo
+                                           (default, for re-work) or
+                                           --block → blocked (external).
 
 Create & Install:
   designteam create "project description"  Create a team with AI
@@ -407,6 +419,33 @@ Presets:
 
   if (command === 'budget') {
     await cmdBudget(args.slice(1))
+    return
+  }
+
+  if (command === 'approvals') {
+    await cmdApprovals()
+    return
+  }
+
+  if (command === 'approve') {
+    const planId = args[1]
+    const taskId = args[2]
+    if (!planId || !taskId) {
+      console.error('Usage: npx designteam approve <plan-id> <task-id> [--comment="..."]')
+      process.exit(1)
+    }
+    await cmdApprove(planId, taskId, args.slice(3))
+    return
+  }
+
+  if (command === 'reject') {
+    const planId = args[1]
+    const taskId = args[2]
+    if (!planId || !taskId) {
+      console.error('Usage: npx designteam reject <plan-id> <task-id> [--reason="..."] [--block]')
+      process.exit(1)
+    }
+    await cmdReject(planId, taskId, args.slice(3))
     return
   }
 
@@ -2303,6 +2342,125 @@ async function cmdRelease(planId, taskId, flags) {
 
   console.log()
   console.log(`  Released ${task.id} [${task.agentRole}] ${task.instruction}`)
+  console.log()
+}
+
+async function cmdApprovals() {
+  const pending = listPendingApprovals()
+  console.log()
+  if (pending.length === 0) {
+    console.log('  No pending approvals.')
+    console.log('  Tasks appear here when they move to in_review (via `progress --review`).')
+    console.log()
+    return
+  }
+  console.log(`  ${pending.length} pending approval${pending.length === 1 ? '' : 's'} (oldest first):`)
+  console.log()
+  for (const p of pending) {
+    const age = p.updatedAt ? ` · waiting ${relativeAge(p.updatedAt)}` : ''
+    console.log(`  ${p.planId}  ${p.taskId} [${p.agentRole}]${age}`)
+    console.log(`    ${p.instruction}`)
+    if (p.successCriteria) console.log(`    success: ${p.successCriteria}`)
+    console.log(`    approve: npx designteam approve ${p.planId} ${p.taskId}`)
+    console.log(`    reject:  npx designteam reject ${p.planId} ${p.taskId} --reason="..."`)
+    console.log()
+  }
+}
+
+async function cmdApprove(planId, taskId, flags) {
+  const plan = loadPlan(planId)
+  if (!plan) {
+    console.error(`Plan "${planId}" not found.`)
+    process.exit(1)
+  }
+  const task = plan.tasks.find((t) => t.id === taskId)
+  if (!task) {
+    console.error(`Task ${taskId} not in plan ${planId}.`)
+    process.exit(1)
+  }
+  if (task.status !== 'in_review') {
+    console.error(`Task ${taskId} is ${task.status}, not in_review — nothing to approve.`)
+    process.exit(1)
+  }
+
+  const comment = flags.find((f) => f.startsWith('--comment='))?.split('=')[1] ?? null
+
+  let result
+  try {
+    result = setTaskStatus(plan, taskId, 'done')
+  } catch (err) {
+    console.error(`  ${err.message}`)
+    process.exit(1)
+  }
+  savePlan(result.plan)
+
+  emitActivity({
+    action: 'task.approved',
+    teamId: loadTeam()?.id ?? null,
+    target: { planId, taskId },
+    meta: {
+      agentRole: result.task.agentRole,
+      comment: comment || undefined,
+      unblocked: result.unblocked.map((t) => t.id),
+      planCompleted: result.plan.status === 'completed' || undefined,
+    },
+  })
+
+  console.log()
+  console.log(`  ✓ ${result.task.id} approved  (${result.task.agentRole})`)
+  if (comment) console.log(`      comment: ${comment}`)
+  if (result.unblocked.length > 0) {
+    console.log(`      unblocked: ${result.unblocked.map((t) => t.id).join(', ')}`)
+  }
+  if (result.plan.status === 'completed') {
+    console.log(`      plan complete: "${result.plan.description}"`)
+  }
+  console.log()
+}
+
+async function cmdReject(planId, taskId, flags) {
+  const plan = loadPlan(planId)
+  if (!plan) {
+    console.error(`Plan "${planId}" not found.`)
+    process.exit(1)
+  }
+  const task = plan.tasks.find((t) => t.id === taskId)
+  if (!task) {
+    console.error(`Task ${taskId} not in plan ${planId}.`)
+    process.exit(1)
+  }
+  if (task.status !== 'in_review') {
+    console.error(`Task ${taskId} is ${task.status}, not in_review — nothing to reject.`)
+    process.exit(1)
+  }
+
+  const reason = flags.find((f) => f.startsWith('--reason='))?.split('=')[1] ?? null
+  const goesToBlocked = flags.includes('--block')
+  const nextStatus = goesToBlocked ? 'blocked' : 'todo'
+
+  let result
+  try {
+    result = setTaskStatus(plan, taskId, nextStatus)
+  } catch (err) {
+    console.error(`  ${err.message}`)
+    process.exit(1)
+  }
+  savePlan(result.plan)
+
+  emitActivity({
+    action: 'task.rejected',
+    teamId: loadTeam()?.id ?? null,
+    target: { planId, taskId },
+    meta: {
+      agentRole: result.task.agentRole,
+      reason: reason || undefined,
+      nextStatus,
+    },
+  })
+
+  console.log()
+  console.log(`  × ${result.task.id} rejected → ${nextStatus}  (${result.task.agentRole})`)
+  if (reason) console.log(`      reason: ${reason}`)
   console.log()
 }
 
