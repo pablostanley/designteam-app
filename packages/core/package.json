@@ -39,6 +39,6 @@
     "vitest": "^4.1.2"
   },
   "dependencies": {
-    "@pixabots/core": "^0.1.0"
+    "@pixabots/core": "^0.3.0"
   }
 }
