@@ -1,6 +1,6 @@
 # Design Team — Roadmap
 
-**Last updated**: 2026-04-18 (control-plane track added)
+**Last updated**: 2026-04-18 (v0.13 execution-infra items shipped: lifecycle + checkout + activity log)
 
 ---
 
@@ -233,10 +233,10 @@ Adopted from `paperclipai/paperclip` (MIT, Apr 2026). Their model is "open-sourc
 
 ### Execution infrastructure (unblocks the 7-phase Efecto roadmap)
 
-- [ ] **Activity log** — one shared `activity_log` table + `emitActivity()` helper. Every mutating action emits an entry so the team page timeline, the autonomous mode auditor, and future Efecto "Team View" (Phase 2) can all read from one source. Extends the `task_events` pattern from PR #15 to every write.
-- [ ] **Atomic checkout on plan tasks** — mirror paperclip's `checkoutRunId` + `executionRunId` split. `checkoutRunId` locks ownership; `executionRunId` tracks the live run. Prevents two agents double-claiming the same task once v0.11 Phase 2 ships. *Prerequisite for any real parallel execution.*
+- [x] **Activity log** — shipped in PR #23 (plan mutations) + PR #24 (extended to `team.recruit`, `team.fire`, `agent.report`, `agent.memory`, `memory.add`, `profile.update`, `cloud.sync`). Append-only `.designteam/activity.jsonl` via `emitActivity()`. `designteam activity [--tail=N]` CLI viewer. Cloud mirror to Supabase is a follow-up.
+- [x] **Atomic checkout on plan tasks** — shipped in PR #22. `checkoutTask(plan, taskId, runId, {force})` / `releaseTask(...)` in `cli/plans.mjs`; `designteam checkout/release` CLI commands. Terminal transitions auto-release. `show` renders `held by <runId>`.
 - [ ] **Blockers vs parent/child** — separate `blockedByTaskIds` (dependency) from future `parentTaskId` (structure). Our current plan `dependencies: []` array conflates both and will confuse sub-task breakdown later.
-- [ ] **Task lifecycle states** — upgrade plan tasks from `pending | in_progress | done | blocked` to paperclip's full set: `backlog | todo | in_progress | blocked | in_review | done | cancelled`. Each status implies ownership + execution expectations, not just a UI label.
+- [x] **Task lifecycle states** — shipped in PR #21. Plan tasks now use `todo | in_progress | in_review | done | blocked | cancelled` (was `pending | in_progress | done | blocked`). Legacy `pending` auto-normalizes to `todo` on load. `designteam progress` command drives transitions with auto-unblock of dependents + plan-complete bubble-up.
 - [ ] **Heartbeats + stranded-work recovery** — agents pulse while running; if the last run dies mid-task, the control plane queues one recovery wake; if that also fails, task auto-moves to `blocked` with a visible comment. *Prerequisite for v0.11 Phase 3 true API execution.*
 
 ### Safety + governance (before `designteam run` goes autonomous)
