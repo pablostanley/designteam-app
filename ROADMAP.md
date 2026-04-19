@@ -240,7 +240,7 @@ Adopted from `paperclipai/paperclip` (MIT, Apr 2026). Their model is "open-sourc
 ### Safety + governance (before `designteam run` goes autonomous)
 
 - [x] **Budget hard-stop** — shipped in PR #32. `.designteam/budget.json` (cap + period) + `.designteam/budget.jsonl` (append-only spend ledger). `designteam budget show | set --usd=N | reset`. Runner checks `isOverBudget()` before dispatch and refuses with the cap + current spend in the error message; after a successful run it calls `adapter.reportCost()` and appends to the ledger. Monthly UTC period auto-rolls via `resetPeriod()`. Soft alerts (80% warning) still TODO.
-- [ ] **Approval gates** — human checkpoints for governed actions. Maps to Efecto Phase 3 ("The Quality Gate") — Creative Director reviews every deliverable before the user sees it. Also covers: new hire proposals, large token-budget commits, publishing finished work.
+- [x] **Approval gates** — shipped in PR #33. Uses the existing `in_review` task status as the queue. `designteam approvals` lists every pending task across all plans (oldest first, with success criteria + ready-made approve/reject commands inline). `designteam approve <plan> <task> --comment="..."` moves it to `done` + logs `task.approved` activity. `designteam reject <plan> <task> --reason="..."` moves it back to `todo` for re-work by default (or `--block` for external-dependency rejections) + logs `task.rejected`. Maps to Efecto Phase 3 "Quality Gate" — every deliverable can park in `in_review` for human sign-off.
 
 ### Distribution (v0.11 Phase 4 — proper scope)
 
