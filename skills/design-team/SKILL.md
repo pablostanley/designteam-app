@@ -35,6 +35,67 @@ This creates a shareable link at designteam.app where the user can preview and e
 
 Available presets: `full-studio`, `landing-page-sprint`, `brand-campaign`, `content-machine`, `product-team`, `full-stack-design`, `marketing-blitz`
 
+## Running a Project (Plan Mode)
+
+Use plan mode when the work spans multiple phases or specialists and you want an audit trail, auto-unblock of dependents, and the ability to resume if the session drops. Skip it for tiny one-off tasks where direct execution is faster.
+
+### 1. Generate the plan
+
+```bash
+npx designteam plan "design a landing page for a coffee subscription app"
+```
+
+This prompts Haiku as the team's Creative Director (using the installed team's roster, user profile, and team memory) and saves a dependency-ordered task graph to `.designteam/projects/<plan-id>.json`. Tasks start at `todo` with `blockedByTaskIds` wired.
+
+Inspect it:
+
+```bash
+npx designteam show <plan-id>
+```
+
+### 2. Work through it, one task at a time
+
+```bash
+while id=$(npx designteam next <plan-id> --id-only); do
+  npx designteam checkout <plan-id> "$id" --run=claude
+  # Do the actual work as the agent — adopt the right specialist mindset,
+  # produce the deliverable, write any files, etc.
+  npx designteam progress <plan-id> "$id" --done
+done
+```
+
+`designteam next` returns the first ready task (todo + no live checkout + all blockers terminal). `--id-only` exits 1 when nothing's ready, so the loop terminates cleanly. `checkout` atomically claims the task. `progress --done` marks it complete and auto-unblocks any downstream tasks whose blockers are now all terminal.
+
+### 3. Or let the runner drive
+
+For tasks that boil down to running a command, skip the manual loop:
+
+```bash
+npx designteam run <plan-id> <task-id> --command='bash scripts/run-task.sh'
+```
+
+`designteam run` does the full checkout → adapter dispatch → status transition → activity log sequence in one invocation. The task context arrives as `DT_TASK_ID`, `DT_TASK_ROLE`, `DT_TASK_INSTRUCTION`, `DT_PLAN_ID`, `DT_AGENT_NAME`, `DT_RUN_ID` env vars.
+
+### 4. Report what you learned
+
+After each task, capture any durable insights so the team remembers them next time:
+
+```bash
+npx designteam report <agent-name> --completed --approved --memory "user prefers dark themes with warm accents"
+```
+
+This ticks the agent's XP + approval counters, routes the memory to the right bucket (agent-scope or team-scope), and logs it in the project timeline.
+
+### 5. Review the activity feed
+
+Anything that mutated durable state is in the log:
+
+```bash
+npx designteam activity --tail=20
+```
+
+Newest-first. Surfaces checkouts, status transitions, memory adds, profile updates, cloud syncs, and plan completions. Useful when the session restarts and you need to know what state you're picking up from.
+
 ## Your 17 Specialists
 
 ### Research & Strategy
