@@ -139,6 +139,8 @@ Update this list after every publish. Grab the authoritative values from
 | `@designteam/adapter-codex-local` | `0.1.0` |
 | `@designteam/adapter-anthropic-api` | `0.1.0` |
 | `@designteam/adapter-efecto` | `0.1.0` |
-| `designteam` | `0.5.1` |
+| `designteam` | `0.6.0` |
 
 First multi-package publish landed **2026-04-19** via tag `v0.13.0` (commit `eb434be`). See GH Actions run [24634092505](https://github.com/pablostanley/designteam-app/actions/runs/24634092505).
+
+CLI bumped to **0.6.0** same day to ship v0.13 control-plane commands (`plan`, `run`, `adapters`, `doctor`, `run --dry-run`, `--version`/`-v`) that 0.5.1 predates. Tag `v0.13.1`.

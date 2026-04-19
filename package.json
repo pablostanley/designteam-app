@@ -1,6 +1,6 @@
 {
   "name": "designteam",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Tamagotchi-style CLI for AI design teams — hire agents with personalities, they remember your brand and grow with use.",
   "license": "MIT",
   "author": "Pablo Stanley",

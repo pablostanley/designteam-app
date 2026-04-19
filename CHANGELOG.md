@@ -8,6 +8,12 @@ Source of truth for what shipped in each version is `ROADMAP.md` at the repo roo
 
 Nothing staged beyond the current `main`.
 
+## [0.6.0] — 2026-04-19 · CLI npm re-release
+
+First user-facing `npx designteam@latest` that ships the v0.13 control plane. 0.5.1 pre-dated `plan` / `run` / `adapters` / `doctor` / `run --dry-run` / `--version`, so `@latest` was stale.
+
+No functional change vs what was in `main` at tag `v0.13.0` — just the CLI version bump so the npm tarball matches the repo.
+
 ## [0.13] — 2026-04-19 · Control Plane (paperclip-inspired)
 
 The execution backbone. Design Team can now plan tasks, atomic-checkout work, enforce budgets, approve deliverables, recover stranded runs, and dispatch to any registered adapter — including three reference LLM adapters that ship in the monorepo.
@@ -126,8 +132,9 @@ First `run` command — ephemeral local-script dispatch before the full adapter 
 - Scale utils (bidirectional -5/+5 ↔ 0-10 conversion for Efecto compat)
 - App re-exports from core via thin shims
 
-[Unreleased]: https://github.com/pablostanley/designteam-app/compare/v0.13...HEAD
-[0.13]: https://github.com/pablostanley/designteam-app/releases/tag/v0.13
+[Unreleased]: https://github.com/pablostanley/designteam-app/compare/v0.13.1...HEAD
+[0.6.0]: https://github.com/pablostanley/designteam-app/releases/tag/v0.13.1
+[0.13]: https://github.com/pablostanley/designteam-app/releases/tag/v0.13.0
 [0.12]: https://github.com/pablostanley/designteam-app/releases/tag/v0.12
 [0.11]: https://github.com/pablostanley/designteam-app/releases/tag/v0.11
 [0.10]: https://github.com/pablostanley/designteam-app/releases/tag/v0.10
