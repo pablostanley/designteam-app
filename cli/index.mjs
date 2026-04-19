@@ -50,9 +50,23 @@ async function main() {
   const args = process.argv.slice(2)
   const command = args[0]
 
+  if (command === '--version' || command === '-v') {
+    const { readFileSync } = await import('node:fs')
+    const { fileURLToPath } = await import('node:url')
+    const { join, dirname } = await import('node:path')
+    const here = dirname(fileURLToPath(import.meta.url))
+    const pkg = JSON.parse(readFileSync(join(here, '..', 'package.json'), 'utf8'))
+    console.log(pkg.version)
+    return
+  }
+
   if (!command || command === '--help' || command === '-h') {
     console.log(`
 Design Team CLI — your AI creative studio
+
+Global flags:
+  --version, -v                            Print CLI version and exit
+  --help, -h                               Print this help and exit
 
 Team Management:
   designteam roster                        Show your team
