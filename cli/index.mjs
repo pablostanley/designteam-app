@@ -17,7 +17,7 @@ import {
   TASK_STATUSES, TASK_STATUS_GLYPH,
 } from './plans.mjs'
 import { emitActivity, readActivity } from './activity.mjs'
-import { loadBudget, setLimit, resetPeriod, getSpend } from './budget.mjs'
+import { loadBudget, setLimit, resetPeriod, getBudgetStatus } from './budget.mjs'
 import { listPendingApprovals } from './approvals.mjs'
 import { findStrandedTasks, recoverTask } from './recovery.mjs'
 import {
@@ -2545,23 +2545,26 @@ async function cmdBudget(args) {
   const sub = args[0] || 'show'
 
   if (sub === 'show') {
-    const { usdCents, periodStart } = loadBudget()
-    const spent = getSpend()
+    const { periodStart } = loadBudget()
+    const status = getBudgetStatus()
     console.log()
     console.log('  Budget')
     console.log()
-    if (usdCents === null || usdCents === undefined) {
+    if (status.state === 'unset') {
       console.log('  No cap set. `designteam budget set --usd=5` to enable hard-stop at $5.')
     } else {
-      const spentUsd = (spent / 100).toFixed(2)
-      const capUsd = (usdCents / 100).toFixed(2)
-      const pct = usdCents > 0 ? Math.round((spent / usdCents) * 100) : 0
+      const spentUsd = (status.spent / 100).toFixed(2)
+      const capUsd = (status.limit / 100).toFixed(2)
+      const pct = Math.round(status.pctUsed * 100)
       console.log(`  Cap:    $${capUsd}`)
       console.log(`  Spent:  $${spentUsd}  (${pct}%)`)
-      if (spent >= usdCents) {
+      if (status.state === 'over') {
         console.log('  Status: OVER — designteam run will refuse until raised or reset.')
+      } else if (status.state === 'warn') {
+        const remaining = ((status.limit - status.spent) / 100).toFixed(2)
+        console.log(`  Status: ⚠️  WARN — only $${remaining} remaining this period.`)
       } else {
-        console.log(`  Status: OK — $${((usdCents - spent) / 100).toFixed(2)} remaining this period.`)
+        console.log(`  Status: OK — $${((status.limit - status.spent) / 100).toFixed(2)} remaining this period.`)
       }
     }
     console.log(`  Period start: ${periodStart}`)

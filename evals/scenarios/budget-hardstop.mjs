@@ -12,7 +12,7 @@
  *   - reset wipes the ledger so a previously tripped cap un-trips
  */
 
-import { writeFileSync, mkdirSync } from 'node:fs'
+import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { withSandbox, assert, assertEqual } from '../harness.mjs'
 
@@ -99,6 +99,28 @@ export async function run() {
     cli('budget', 'reset')
     const afterReset = cli('budget', 'show')
     assert(afterReset.includes('Status: OK'), 'reset should clear spend and restore OK status')
+
+    // --- soft warning at 80%+: status flips to WARN, runner still runs,
+    //     activity log captures a budget.warning event
+    writeFileSync(
+      ledgerPath,
+      JSON.stringify({ at: new Date().toISOString(), usdCents: 85 }) + '\n',
+      'utf8',
+    )
+    const atWarn = cli('budget', 'show')
+    assert(atWarn.includes('WARN'), 'status should flip to WARN at >=80% of cap')
+    assert(atWarn.includes('85%'), 'warn output should include the percentage')
+
+    const runOut = cli('run', 'plan-budget', 't1', '--command=echo warn-path')
+    assert(runOut.includes('warn-path') || runOut.includes('done'), 'runner should still dispatch at warn level')
+
+    const activityPath = join(sandboxPath, '.designteam', 'activity.jsonl')
+    assert(existsSync(activityPath), 'activity log should exist after run')
+    const rows = readFileSync(activityPath, 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l))
+    assert(
+      rows.some((r) => r.action === 'budget.warning'),
+      'activity log must contain a budget.warning event',
+    )
   })
 }
 
