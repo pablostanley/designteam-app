@@ -1,9 +1,10 @@
 /**
  * Built-in adapter registration.
  *
- * Design Team ships with four adapters out of the box:
+ * Design Team ships with five adapters out of the box:
  *   - @designteam/adapter-local-script (reference, no LLM)
  *   - @designteam/adapter-claude-cli (wraps `claude` on PATH)
+ *   - @designteam/adapter-codex-local (wraps `codex` on PATH)
  *   - @designteam/adapter-anthropic-api (registered when ANTHROPIC_API_KEY is set)
  *   - @designteam/adapter-efecto (registered when EFECTO_API_KEY is set)
  *
@@ -18,6 +19,7 @@
 
 import { registerAdapter, resolveAdapter } from '@designteam/adapter-utils'
 import { createClaudeCliAdapter } from '@designteam/adapter-claude-cli'
+import { createCodexCliAdapter } from '@designteam/adapter-codex-local'
 import { createAnthropicApiAdapter } from '@designteam/adapter-anthropic-api'
 import { createEfectoAdapter } from '@designteam/adapter-efecto'
 
@@ -32,6 +34,12 @@ export function registerBuiltinAdapters() {
   // error. No point gating registration on a `which claude` probe here.
   if (!resolveAdapter('@designteam/adapter-claude-cli')) {
     registerAdapter(createClaudeCliAdapter())
+  }
+
+  // Same reasoning for codex — if the binary isn't on PATH the spawn
+  // fails with a descriptive error at the first dispatch.
+  if (!resolveAdapter('@designteam/adapter-codex-local')) {
+    registerAdapter(createCodexCliAdapter())
   }
 
   // Anthropic API adapter only registers when an API key is present.
