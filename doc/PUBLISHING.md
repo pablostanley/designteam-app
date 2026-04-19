@@ -83,6 +83,38 @@ With the GitHub Actions workflow in place, the usual flow is:
 4. The workflow fires, builds everything, and publishes each package whose on-disk version doesn't match npm's latest. Re-triggering on failure is safe — already-published packages skip cleanly.
 5. Update the _Current latest published versions_ table below.
 
+## Dry-run verification (no npm auth needed)
+
+Before setting `NPM_TOKEN` or tagging, you can confirm every tarball is
+well-formed locally. `pnpm pack` runs `prepublishOnly` (which builds
+`dist/`) and rewrites `workspace:*` to real versions without publishing:
+
+```sh
+# Pack every workspace package + the root CLI into /tmp
+mkdir -p /tmp/designteam-pack
+for pkg in packages/core packages/adapter-utils \
+           packages/adapter-local-script packages/adapter-claude-cli \
+           packages/adapter-anthropic-api packages/adapter-efecto; do
+  (cd "$pkg" && pnpm pack --pack-destination /tmp/designteam-pack/)
+done
+pnpm pack --pack-destination /tmp/designteam-pack/
+
+# Inspect each tarball's contents + verify workspace: was rewritten
+for tgz in /tmp/designteam-pack/*.tgz; do
+  echo "=== $(basename "$tgz") ==="
+  tar -tzf "$tgz"                                             # files
+  tar -xOzf "$tgz" 'package/package.json' | grep -E 'workspace:|"@designteam/'
+done
+```
+
+**What to check:**
+
+- **File list** — every tarball is `package/dist/*` + `package.json` + `README.md`, no `node_modules`, no `__tests__`, no stray config. Adapter tarballs are ~4–10 KB; `@designteam/core` is ~250 KB; CLI is 11 files.
+- **`workspace:` residue** — the grep above should never print lines with `workspace:`. Every `@designteam/*` dep must resolve to a concrete semver (`"@designteam/core": "0.3.1"`, `"@designteam/adapter-utils": "0.1.0"`, etc.). `npm publish` ships `package.json` verbatim and would break consumers; `pnpm publish` (what the workflow uses) does this rewrite at pack time, which is why we use it.
+- **Version alignment** — the version inside each tarball's `package.json` matches the one in the source tree. `publish-if-changed.sh` reads that version, not git tags.
+
+This takes ~20 s and catches the vast majority of publish-time surprises.
+
 ## After publishing
 
 - [ ] Update `ROADMAP.md` Notes section with the new latest versions.
