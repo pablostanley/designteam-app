@@ -74,6 +74,31 @@ export function normalizeStatus(status) {
 }
 
 /**
+ * Find the next ready task in a plan. "Ready" means:
+ *   - status is `todo` (not yet claimed, not in progress, not terminal)
+ *   - all blockers are in a terminal state (done/cancelled)
+ *   - no one holds the atomic checkout lock
+ *
+ * Returns the task object or null if nothing's ready. Walks tasks in
+ * plan order so the consumer gets a stable pick when multiple are
+ * eligible — agents that run the same `designteam next` twice in a
+ * row get the same task unless one got claimed in between.
+ */
+export function nextReadyTask(plan) {
+  for (const task of plan.tasks) {
+    if (task.status !== 'todo') continue
+    if (task.checkoutId) continue
+    const blockers = getBlockers(task)
+    const allResolved = blockers.every((id) => {
+      const blocker = plan.tasks.find((t) => t.id === id)
+      return blocker && TERMINAL_TASK_STATUSES.has(blocker.status)
+    })
+    if (allResolved) return task
+  }
+  return null
+}
+
+/**
  * Return the task IDs that block this task. Prefers the canonical
  * `blockedByTaskIds` field; falls back to legacy `dependencies` so
  * plans authored before v0.13 keep working. Empty array is the

@@ -13,7 +13,7 @@ import {
   loadPlan, savePlan, listPlans,
   setTaskStatus, normalizeStatus,
   checkoutTask, releaseTask,
-  getBlockers,
+  getBlockers, nextReadyTask,
   TASK_STATUSES, TASK_STATUS_GLYPH,
 } from './plans.mjs'
 import { emitActivity, readActivity } from './activity.mjs'
@@ -90,6 +90,12 @@ Planning (v0.11):
   designteam activity [--tail=N]           Show the last N activity events
                                            (default 25). Tails
                                            .designteam/activity.jsonl.
+  designteam next <plan-id> [--id-only]    Print the next ready task in the
+                                           plan (todo status, no live
+                                           checkout, all blockers
+                                           terminal). --id-only prints
+                                           just the task ID, so it's
+                                           shell-scriptable.
 
 Create & Install:
   designteam create "project description"  Create a team with AI
@@ -360,6 +366,16 @@ Presets:
     const limitFlag = args.find((a) => a.startsWith('--tail='))?.split('=')[1]
     const limit = limitFlag ? Math.max(1, parseInt(limitFlag, 10) || 50) : 25
     await cmdActivity(limit)
+    return
+  }
+
+  if (command === 'next') {
+    const planId = args[1]
+    if (!planId) {
+      console.error('Usage: npx designteam next <plan-id>')
+      process.exit(1)
+    }
+    await cmdNext(planId, args.slice(2))
     return
   }
 
@@ -2258,6 +2274,60 @@ async function cmdRelease(planId, taskId, flags) {
   console.log(`  Released ${task.id} [${task.agentRole}] ${task.instruction}`)
   console.log()
 }
+
+async function cmdNext(planId, flags) {
+  const plan = loadPlan(planId)
+  if (!plan) {
+    console.error(`Plan "${planId}" not found.`)
+    process.exit(1)
+  }
+
+  const task = nextReadyTask(plan)
+  const idOnly = flags.includes('--id-only')
+
+  if (!task) {
+    if (idOnly) {
+      // --id-only is meant for scripts. Exit 1 with no stdout so a
+      // loop like `while id=$(designteam next $plan --id-only); do ...`
+      // terminates cleanly.
+      process.exit(1)
+    }
+    console.log()
+    console.log(`  No ready tasks in "${plan.description}".`)
+    // Help the caller understand why — are things blocked, or just done?
+    const remaining = plan.tasks.filter((t) => !TERMINAL_IN_PLAN.has(t.status))
+    if (remaining.length === 0) {
+      console.log('  Everything is done or cancelled.')
+    } else {
+      const byStatus = remaining.reduce((acc, t) => {
+        acc[t.status] = (acc[t.status] ?? 0) + 1
+        return acc
+      }, {})
+      const summary = Object.entries(byStatus).map(([s, n]) => `${n} ${s}`).join(', ')
+      console.log(`  Still open: ${summary}.`)
+    }
+    console.log()
+    return
+  }
+
+  if (idOnly) {
+    console.log(task.id)
+    return
+  }
+
+  const glyph = TASK_STATUS_GLYPH[task.status] ?? '·'
+  const blockers = getBlockers(task)
+  const deps = blockers.length > 0 ? ` (was blocked by ${blockers.join(', ')})` : ''
+  console.log()
+  console.log(`  Next: ${glyph} ${task.id} [${task.agentRole}] ${task.instruction}${deps}`)
+  if (task.successCriteria) console.log(`      success: ${task.successCriteria}`)
+  if (task.why) console.log(`      why: ${task.why}`)
+  console.log()
+  console.log(`  Claim: npx designteam checkout ${plan.id} ${task.id}`)
+  console.log()
+}
+
+const TERMINAL_IN_PLAN = new Set(['done', 'cancelled'])
 
 async function cmdActivity(limit) {
   const events = readActivity(limit)

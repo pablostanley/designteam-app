@@ -174,7 +174,8 @@ Make the team work through a project autonomously — one command kicks off rese
   - For each ready task (deps done), invoke the matching agent via Task tool
   - After each task, run `designteam progress <project-id> <task-id> --done`
   - Auto-extract memories from the task output
-- [ ] `designteam progress` command — update task status in the plan file
+- [x] `designteam progress` command — shipped in PR #21. Full task lifecycle (`todo | in_progress | in_review | done | blocked | cancelled`), auto-unblock of dependents, plan-complete bubble-up.
+- [x] `designteam next <plan-id>` — shipped in PR #29. Picks the next ready task (todo, no live checkout, blockers terminal). `--id-only` for shell-scriptable output; exits 1 with no stdout when nothing's ready so loops terminate cleanly. Complements `checkout` + `progress` for the skill template's claim → execute → report loop.
 
 **Phase 3: Execution via API (true autonomy)**
 - [ ] `designteam run <project-id>` — CLI invokes each agent via Anthropic API
