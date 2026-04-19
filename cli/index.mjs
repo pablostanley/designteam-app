@@ -693,6 +693,13 @@ async function cmdRecruit(roleName) {
 
   saveAgentState(newAgent.id, createDefaultLivingState(newAgent.id))
 
+  emitActivity({
+    action: 'team.recruit',
+    teamId: team.id,
+    target: { agentId: newAgent.id },
+    meta: { agentName, role, teamSize: team.agents.length },
+  })
+
   console.log()
   console.log(`  ${agentName} (${meta.displayName}) has joined your team!`)
   console.log()
@@ -710,6 +717,13 @@ async function cmdFire(name) {
   team.agents = team.agents.filter(a => a.id !== agent.id)
   team.updatedAt = new Date().toISOString()
   saveTeam(team)
+
+  emitActivity({
+    action: 'team.fire',
+    teamId: team.id,
+    target: { agentId: agent.id },
+    meta: { agentName: agent.name, role: agent.role, teamSize: team.agents.length },
+  })
 
   console.log()
   console.log(`  ${agent.name} (${displayName(agent.role)}) has left the team.`)
@@ -837,6 +851,17 @@ async function cmdReport(name, flags) {
     saveAgentState(agent.id, memState)
     saveRelationships(memGraph)
 
+    emitActivity({
+      action: 'agent.memory',
+      teamId: team.id,
+      target: { agentId: agent.id },
+      meta: {
+        agentName: agent.name,
+        memoriesApplied: memApplied.length,
+        collabId: collabId || undefined,
+      },
+    })
+
     const mood = getMoodFromState(memState)
     const emoji = MOOD_EMOJI[mood] || ''
     console.log()
@@ -912,6 +937,22 @@ async function cmdReport(name, flags) {
       }).catch(() => { /* best-effort */ })
     }
   }
+
+  emitActivity({
+    action: 'agent.report',
+    teamId: team.id,
+    target: { agentId: agent.id },
+    meta: {
+      agentName: agent.name,
+      outcomes,
+      xpGained: totalXp,
+      leveledUp: finalResult.leveledUp || undefined,
+      newLevel: finalResult.newLevel,
+      mood: finalResult.mood,
+      memoriesApplied: applied.length || undefined,
+      collabId: collabId || undefined,
+    },
+  })
 
   // Output
   const emoji = MOOD_EMOJI[finalResult.mood] || ''
@@ -1280,6 +1321,13 @@ async function cmdRemember(category, content) {
   const updated = addTeamMemory(memory, cat, content, { source: 'user', salience: 0.8 })
   saveTeamMemory(updated)
 
+  emitActivity({
+    action: 'memory.add',
+    teamId: team.id,
+    target: {},
+    meta: { category: cat, entries: updated.entries.length, source: 'user' },
+  })
+
   console.log()
   console.log(`  Team remembers [${cat}]: "${content}"`)
   console.log(`  Total team memories: ${updated.entries.length}`)
@@ -1418,6 +1466,12 @@ async function cmdProfile(args) {
       : value
     const updated = updateUserProfile(profile, { [key]: parsedValue })
     saveUserProfile(updated)
+    emitActivity({
+      action: 'profile.update',
+      teamId: loadTeam()?.id ?? null,
+      target: {},
+      meta: { key },
+    })
     console.log()
     console.log(`  Profile updated: ${key} = ${Array.isArray(parsedValue) ? parsedValue.join(', ') : parsedValue}`)
     console.log()
@@ -1498,6 +1552,15 @@ async function cmdSync() {
     }
 
     const result = await res.json()
+    emitActivity({
+      action: 'cloud.sync',
+      teamId: team.id,
+      target: {},
+      meta: {
+        agentsSynced: result.agents_synced,
+        relationshipsSynced: result.relationships_synced || undefined,
+      },
+    })
     console.log(`  Synced ${result.agents_synced} agents to cloud.`)
     if (result.relationships_synced) {
       console.log(`  Relationships synced.`)
@@ -2208,15 +2271,28 @@ function formatActivityTarget(ev) {
   const parts = []
   if (t.planId) parts.push(t.planId)
   if (t.taskId) parts.push(t.taskId)
-  if (t.agentId) parts.push(t.agentId)
+  // Prefer the human-readable agentName meta over the raw ID when both exist.
+  if (t.agentId) parts.push(ev.meta?.agentName ?? t.agentId)
   const meta = ev.meta ?? {}
   const extras = []
+  if (meta.category) extras.push(meta.category)
+  if (meta.key) extras.push(meta.key)
   if (meta.status) extras.push(meta.status)
+  if (Array.isArray(meta.outcomes) && meta.outcomes.length > 0) {
+    extras.push(meta.outcomes.join('+'))
+  }
+  if (meta.role) extras.push(meta.role)
   if (meta.agentRole && !t.agentId) extras.push(meta.agentRole)
   if (meta.runId) extras.push(`run=${meta.runId}`)
   if (Array.isArray(meta.unblocked) && meta.unblocked.length > 0) {
     extras.push(`unblocked=${meta.unblocked.join(',')}`)
   }
+  if (typeof meta.xpGained === 'number' && meta.xpGained > 0) extras.push(`+${meta.xpGained} XP`)
+  if (meta.leveledUp) extras.push(`lv${meta.newLevel}`)
+  if (typeof meta.memoriesApplied === 'number' && meta.memoriesApplied > 0) {
+    extras.push(`${meta.memoriesApplied} mem`)
+  }
+  if (typeof meta.teamSize === 'number') extras.push(`team=${meta.teamSize}`)
   if (meta.planCompleted) extras.push('plan-complete')
   const base = parts.join(' · ')
   return extras.length > 0 ? `${base}  (${extras.join(', ')})` : base
