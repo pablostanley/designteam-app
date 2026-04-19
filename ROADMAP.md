@@ -214,6 +214,7 @@ The Paperclip model — agents work while you sleep.
 - [x] **Package metadata** — shipped in PR #13. Added description, license, author, homepage, repository, keywords.
 - [x] **GitHub Actions CI** — shipped in PR #14. Runs on PR + main push: pnpm test (417 tests), core type-check, full build. pnpm 9 + Node 24.
 - [ ] Auto-publish on version tag (needs `NPM_TOKEN` secret configured first)
+- [x] **Publish-readiness audit + runbook** — shipped in PR #38. Every workspace package passes `npm pack --dry-run` with only the expected files (dist, README, package.json). `@designteam/adapter-utils` gained a README (was missing). New `doc/PUBLISHING.md` documents the publish order (core → adapter-utils → adapter-local-script + adapter-claude-cli → designteam CLI), per-package checklist, and the exact commands. Three adapter packages ready for their first publish; auto-publish on tag still TODO.
 
 ---
 
