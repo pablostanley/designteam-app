@@ -140,6 +140,12 @@ Planning (v0.11):
                                            Shows built-ins + whatever
                                            third-party adapters have
                                            self-registered.
+  designteam doctor                        One-shot setup / health check.
+                                           Prints ✓/⚠/✗ lines for team,
+                                           .designteam/ writability,
+                                           adapters, API keys, Supabase,
+                                           budget, and stranded tasks.
+                                           Exits 1 on any ✗.
 
 Create & Install:
   designteam create "project description"  Create a team with AI
@@ -479,6 +485,11 @@ Presets:
 
   if (command === 'adapters') {
     await cmdAdapters()
+    return
+  }
+
+  if (command === 'doctor') {
+    await cmdDoctor()
     return
   }
 
@@ -2463,6 +2474,130 @@ async function cmdAdapters() {
   console.log('  Dispatch via: `designteam run <plan> <task> --adapter=<id>`')
   console.log('  Ephemeral local-script also available: --command="<shell>"')
   console.log()
+}
+
+async function cmdDoctor() {
+  // One-shot health check for a designteam setup. Designed to catch
+  // the common "ran into it on day 1" problems: no team installed,
+  // missing API keys, .designteam/ non-writable, stranded tasks from
+  // a crashed prior run. Each line uses ✓ / ⚠ / ✗ so scripts can grep.
+  const findings = []
+
+  const check = (label, status, detail) => findings.push({ label, status, detail })
+
+  // 1. team.json
+  const team = loadTeam()
+  if (team) {
+    check('team.json', '✓', `${team.name} · ${team.agents?.length ?? 0} agents`)
+  } else {
+    check('team.json', '✗', 'no team installed — `designteam install <id>` or `designteam create "<description>"`')
+  }
+
+  // 2. .designteam/ writability — attempt a no-op append so we surface
+  //    EACCES / read-only-FS issues before a real run hits them.
+  try {
+    const { getStateDir } = await import('./state.mjs')
+    const { mkdirSync, appendFileSync, readFileSync, unlinkSync, existsSync } = await import('node:fs')
+    const { join } = await import('node:path')
+    const dir = getStateDir()
+    mkdirSync(dir, { recursive: true })
+    const probe = join(dir, '.doctor-probe')
+    appendFileSync(probe, '')
+    readFileSync(probe, 'utf8')
+    if (existsSync(probe)) unlinkSync(probe)
+    check('.designteam/ writable', '✓', dir)
+  } catch (err) {
+    check('.designteam/ writable', '✗', err instanceof Error ? err.message : String(err))
+  }
+
+  // 3. Adapter registry — which ones resolved? Built-ins self-register
+  //    based on env. "none" is a ⚠ because local-script still works via
+  //    --command=, but it's a setup smell for most users.
+  try {
+    const { registerBuiltinAdapters } = await import('./builtin-adapters.mjs')
+    const { listAdapters } = await import('@designteam/adapter-utils')
+    registerBuiltinAdapters()
+    const adapters = listAdapters()
+    if (adapters.length === 0) {
+      check('adapters registered', '⚠', 'none resolved — --command= still works')
+    } else {
+      check('adapters registered', '✓', adapters.map((a) => a.id).join(', '))
+    }
+  } catch (err) {
+    check('adapters registered', '✗', err instanceof Error ? err.message : String(err))
+  }
+
+  // 4. Env vars that gate specific adapters
+  check(
+    'ANTHROPIC_API_KEY',
+    process.env.ANTHROPIC_API_KEY ? '✓' : '⚠',
+    process.env.ANTHROPIC_API_KEY ? 'set — adapter-anthropic-api registered' : 'unset — adapter-anthropic-api will not register',
+  )
+  check(
+    'EFECTO_API_KEY',
+    process.env.EFECTO_API_KEY ? '✓' : '⚠',
+    process.env.EFECTO_API_KEY ? 'set — adapter-efecto registered' : 'unset — adapter-efecto will not register (session creation still works IP-scoped)',
+  )
+
+  // 5. Supabase (cloud sync is optional — ⚠ not ✗ when unset)
+  const supabaseConfigured = Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  )
+  check(
+    'Supabase (cloud sync)',
+    supabaseConfigured ? '✓' : '⚠',
+    supabaseConfigured ? 'NEXT_PUBLIC_SUPABASE_URL + ANON_KEY set' : 'unset — `designteam sync`/`pull` will be local-only',
+  )
+
+  // 6. Budget
+  const budget = getBudgetStatus()
+  if (budget.state === 'unset') {
+    check('budget cap', '⚠', 'no cap — autonomous runs can spend indefinitely')
+  } else if (budget.state === 'over') {
+    check('budget cap', '✗', `OVER — $${(budget.spent / 100).toFixed(2)} of $${(budget.limit / 100).toFixed(2)} (real run would refuse)`)
+  } else if (budget.state === 'warn') {
+    check('budget cap', '⚠', `WARN — $${(budget.spent / 100).toFixed(2)} of $${(budget.limit / 100).toFixed(2)} (${Math.round(budget.pctUsed * 100)}%)`)
+  } else {
+    check('budget cap', '✓', `$${(budget.spent / 100).toFixed(2)} of $${(budget.limit / 100).toFixed(2)} (${Math.round(budget.pctUsed * 100)}%)`)
+  }
+
+  // 7. Stranded tasks (30-minute threshold — same default as `recover`)
+  try {
+    const stranded = []
+    for (const entry of listPlans()) {
+      const p = loadPlan(entry.id)
+      if (!p) continue
+      for (const { task, ageMs } of findStrandedTasks(p, { staleMs: 30 * 60 * 1000 })) {
+        stranded.push({ planId: p.id, taskId: task.id, ageMinutes: Math.round(ageMs / 60000) })
+      }
+    }
+    if (stranded.length === 0) {
+      check('stranded tasks', '✓', 'none (30m threshold)')
+    } else {
+      check('stranded tasks', '⚠', `${stranded.length} in_progress tasks older than 30m — run \`designteam recover <plan>\` to reset`)
+    }
+  } catch (err) {
+    check('stranded tasks', '✗', err instanceof Error ? err.message : String(err))
+  }
+
+  // Render
+  console.log()
+  console.log('  Design Team — doctor')
+  console.log()
+  const labelPad = Math.max(...findings.map((f) => f.label.length)) + 2
+  for (const f of findings) {
+    const label = f.label.padEnd(labelPad)
+    console.log(`  ${f.status}  ${label}${f.detail}`)
+  }
+  console.log()
+
+  // Exit non-zero on any ✗ so CI / smoke tests can gate on it.
+  const hardFails = findings.filter((f) => f.status === '✗').length
+  if (hardFails > 0) {
+    console.log(`  ${hardFails} hard failure${hardFails === 1 ? '' : 's'} — fix before running.`)
+    console.log()
+    process.exit(1)
+  }
 }
 
 async function cmdApprovals() {
