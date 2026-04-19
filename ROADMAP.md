@@ -1,6 +1,6 @@
 # Design Team — Roadmap
 
-**Last updated**: 2026-04-18 (v0.13 execution-infra items shipped: lifecycle + checkout + activity log)
+**Last updated**: 2026-04-19 (v0.13 effectively complete — all four reference adapters + codex-local shipped, soft budget warning, designteam `adapters`/`doctor`/`run --dry-run`, --version/-v, runSubprocess extraction, CHANGELOG + docs refresh trio)
 
 ---
 

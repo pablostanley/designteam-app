@@ -119,8 +119,13 @@ Planning (v0.11):
                                            status transition → activity
                                            log.
                                            --adapter: resolve a registered
-                                             adapter by id. Built-in:
-                                             @designteam/adapter-claude-cli.
+                                             adapter by id. Built-ins:
+                                             claude-cli (always),
+                                             codex-local (always),
+                                             anthropic-api (needs key),
+                                             efecto (needs key).
+                                             Run "designteam adapters"
+                                             for the live list.
                                            --command: ephemeral local-script
                                              adapter (shell-out per task).
                                            Optional: --run=<id>
@@ -2815,8 +2820,10 @@ async function cmdRun(planId, taskId, flags) {
     console.error('')
     console.error('Built-in adapters:')
     console.error('  @designteam/adapter-claude-cli       — wraps the local `claude` CLI')
+    console.error('  @designteam/adapter-codex-local      — wraps the local `codex` CLI')
     console.error('  @designteam/adapter-anthropic-api    — calls the API directly (needs ANTHROPIC_API_KEY)')
-    console.error('  (local-script available via --command=)')
+    console.error('  @designteam/adapter-efecto           — creates Efecto design sessions (needs EFECTO_API_KEY)')
+    console.error('  (local-script available via --command=; run `designteam adapters` for the live list)')
     process.exit(1)
   }
 
