@@ -248,7 +248,11 @@ Adopted from `paperclipai/paperclip` (MIT, Apr 2026). Their model is "open-sourc
 
 - [x] **`adapter-plugin.md` spec at repo root** — shipped in PR #27. Public interface contract: `TaskAdapter.executeTask(ctx) → TaskResult` with outcomes mapping to `progress` status transitions; mutable registry for third-party registration; invariants (adapters never mutate plan state directly, must honor checkout locks + `ctx.signal`).
 - [x] **`packages/adapter-utils/` shared interface** — shipped in PR #27. Types (`TaskAdapter`, `TaskContext`, `TaskResult`, `PlanTask`, `CostReport`) + mutable registry (`registerAdapter` / `resolveAdapter` / `listAdapters` / `unregisterAdapter` / `clearAdapters`) + 7 vitest cases. Peer-depends on `@designteam/core`.
-- [ ] **`packages/adapters/` implementations** — one package per runtime: `@designteam/adapter-claude-local`, `@designteam/adapter-codex-local`, `@designteam/adapter-cursor-local`, `@designteam/adapter-gemini-local`, `@designteam/adapter-efecto`. Each implements `TaskAdapter`. Reference adapter comes next.
+- [ ] **`packages/adapters/` implementations** — one package per runtime: `@designteam/adapter-claude-local`, `@designteam/adapter-codex-local`, `@designteam/adapter-cursor-local`, `@designteam/adapter-gemini-local`, `@designteam/adapter-efecto`. Each implements `TaskAdapter`.
+  - [x] **Reference adapter: `@designteam/adapter-local-script`** — shipped in PR #28. Shells out per task with `DT_*` env vars, maps exit code → outcome, honors `ctx.signal.aborted` + `timeoutMs`. 7 vitest cases cover exit codes, env-var surface, cancellation, construction guards. Proves the contract without an LLM dependency.
+  - [ ] `@designteam/adapter-claude-local` — Claude Code consumer. Next.
+  - [ ] `@designteam/adapter-efecto` — executes against Efecto's design MCP.
+  - [ ] Remaining runtimes (cursor, codex, gemini, anthropic-api) — community-ownable once claude-local lands.
 
 ### Mapping: control-plane items → Efecto 7-phase roadmap
 

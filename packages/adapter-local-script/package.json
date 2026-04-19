@@ -1,0 +1,36 @@
+{
+  "name": "@designteam/adapter-local-script",
+  "version": "0.1.0",
+  "description": "Design Team adapter that executes each task by running a configured local shell script. Useful for testing the adapter contract end-to-end without an LLM dependency, and for workflows where a task boils down to 'run this command'.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "pnpm run build"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.2"
+  },
+  "peerDependencies": {
+    "@designteam/adapter-utils": "workspace:*"
+  }
+}
