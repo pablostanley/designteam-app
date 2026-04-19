@@ -39,6 +39,9 @@ jobs:
       - name: Type-check core package
         run: pnpm --filter @designteam/core run lint
 
+      - name: Run behavioral evals
+        run: pnpm eval
+
       # Web app (Next.js) build is intentionally handled by Vercel's preview
       # deployment check, which runs on every PR with real Supabase env vars.
       # Duplicating it here would need the env vars as secrets and waste CI
